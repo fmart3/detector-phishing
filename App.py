@@ -3,7 +3,7 @@ import streamlit as st
 from pages.pages_likert import *
 from pages.demographics import *
 
-from utils.scoring import compute_scores
+#rom utils.scoring import compute_scores
 #from utils.mappings import mapping
 from utils.databricks import predict
 
