@@ -39,7 +39,7 @@ from pages.pages_likert import (
     page_fatiga_abandono
 )
 
-#from pages.demographics import page_demographics
+from pages.demographics import page_demographics
 #from utils.databricks import predict
 
 # =========================
@@ -59,7 +59,7 @@ PAGES = {
     11: page_fatiga_emocional,
     12: page_fatiga_cinismo,
     13: page_fatiga_abandono,
-    #14: page_demographics  # última página
+    14: page_demographics
 }
 
 # =========================
