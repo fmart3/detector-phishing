@@ -40,8 +40,7 @@ from pages.pages_likert import (
 )
 
 #from pages.demographics import page_demographics
-
-from utils.databricks import predict
+#from utils.databricks import predict
 
 # =========================
 # Enrutador de páginas
