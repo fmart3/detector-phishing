@@ -1,13 +1,51 @@
 import streamlit as st
 
-from pages.pages_likert import *
-from pages.demographics import *
+# =========================
+# Configuración básica
+# =========================
+st.set_page_config(
+    page_title="Detector de Susceptibilidad a Phishing",
+    layout="centered"
+)
 
-#rom utils.scoring import compute_scores
-#from utils.mappings import mapping
+st.title("🎣 Detector de Susceptibilidad a Phishing")
+st.caption("Basado en personalidad, actitudes y fatiga digital")
+
+# =========================
+# Inicialización de estado
+# =========================
+if "page" not in st.session_state:
+    st.session_state.page = 1
+
+if "responses" not in st.session_state:
+    st.session_state.responses = {}
+
+# =========================
+# Importación de páginas
+# =========================
+from pages.pages_likert import (
+    page_big5_extraversion,
+    page_big5_amabilidad,
+    page_big5_responsabilidad,
+    page_big5_neuroticismo,
+    page_big5_apertura,
+    page_phish_actitud_riesgo,
+    page_phish_awareness,
+    page_phish_riesgo_percibido,
+    page_phish_autoeficacia,
+    page_phish_susceptibilidad,
+    page_fatiga_emocional,
+    page_fatiga_cinismo,
+    page_fatiga_abandono
+)
+
+from pages.demographics import page_demographics
+
 from utils.databricks import predict
 
-
+# =========================
+# Enrutador de páginas
+# =========================
 PAGES = {
     1: page_big5_extraversion,
     2: page_big5_amabilidad,
@@ -21,7 +59,18 @@ PAGES = {
     10: page_phish_susceptibilidad,
     11: page_fatiga_emocional,
     12: page_fatiga_cinismo,
-    13: page_fatiga_abandono
+    13: page_fatiga_abandono,
+    #14: page_demographics  # última página
 }
 
-PAGES[st.session_state.page]()
+# =========================
+# Render de la página actual
+# =========================
+current_page = st.session_state.page
+
+if current_page in PAGES:
+    PAGES[current_page]()
+else:
+    st.error("Página no válida. Reiniciando encuesta.")
+    st.session_state.page = 1
+    st.experimental_rerun()
