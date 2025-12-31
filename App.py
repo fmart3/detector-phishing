@@ -39,7 +39,7 @@ from pages.pages_likert import (
     page_fatiga_abandono
 )
 
-from pages.demographics import page_demographics
+#from pages.demographics import page_demographics
 
 from utils.databricks import predict
 
