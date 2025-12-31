@@ -93,5 +93,5 @@ def render_likert_page(
     # -----------------------------
     # Mensaje de validación
     # -----------------------------
-    if unanswered:
-        st.warning("⚠️ Debe responder todas las preguntas para continuar.")
+    #if unanswered:
+    #    st.warning("⚠️ Debe responder todas las preguntas para continuar.")
