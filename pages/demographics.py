@@ -5,13 +5,11 @@ import streamlit as st
 # -----------------------------
 
 COUNTRIES = {
-    "Chile": 35,
-    "Argentina": 32,
-    "Brasil": 36,
-    "Colombia": 37,
-    "México": 52,
-    "Perú": 51,
-    "Otro": 999
+    "Chile": 1,
+    "Colombia": 2,
+    "Honduras": 3,
+    "México": 4,
+    "Panamá": 5
 }
 
 ORG_TYPE = {
@@ -19,6 +17,27 @@ ORG_TYPE = {
     "Privada": 2,
     "Sin fines de lucro": 3,
     "Otra": 4
+}
+
+INDUSTRY = {
+    "Agricultura": 1,
+    "Bancos o Financiera": 2,
+    "Seguros": 3,
+    "Tecnologia y/o Telecomunicaciones": 4,
+    "Publicidad, Marketing y/o Comunicaciones": 5,
+    "Transporte": 6,
+    "Clinicas o Isapres (Salud)": 7,
+    "Administradora Fondos de Pensiones": 8,
+    "Sector Público": 9,
+    "Energia": 10,
+    "Mineria": 11,
+    "Oil & Gas": 12,
+    "Retail": 13,
+    "Universidades o Educación": 14,
+    "Servicios Profesionales y/o Consultoria": 15,
+    "Construcción": 16,
+    "Manufactura": 17,
+    "Otras": 19
 }
 
 EMPLOYEES = {
@@ -93,8 +112,10 @@ def page_demographics():
     # -----------------------------
     # Industria (texto libre controlado)
     # -----------------------------
-    industry = st.text_input(
-        "Seleccione la industria a la cual pertenece su organización"
+    industry = st.selectbox(
+        "Seleccione la industria a la cual pertenece su organización",
+        options=list(INDUSTRY.keys()),
+        index=None
     )
 
     # -----------------------------
@@ -167,7 +188,7 @@ def page_demographics():
                 st.session_state.responses.update({
                     "COUNTRY": COUNTRIES[country],
                     "ORG_TYPE": ORG_TYPE[org_type],
-                    "INDUSTRY": industry,
+                    "INDUSTRY": INDUSTRY[industry],
                     "EMPLOYEES": EMPLOYEES[employees],
                     "ROLE": ROLE[role],
                     "GENERATION": GENERATION[generation],
