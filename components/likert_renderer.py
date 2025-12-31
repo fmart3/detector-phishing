@@ -6,7 +6,8 @@ def render_likert_page(
     title: str,
     description: str,
     questions: list,
-    next_page: int
+    next_page: int,
+    prev_page: int | None = None
 ):
     """
     Renderiza una página de preguntas tipo Likert (1–5).
@@ -26,41 +27,71 @@ def render_likert_page(
         st.session_state.responses = {}
 
     if "page" not in st.session_state:
-        st.session_state.page = 0
+        st.session_state.page = 1
 
     # -----------------------------
-    # UI
+    # UI - Header
     # -----------------------------
-    st.header(title)
+    st.markdown(f"## {title}")
     st.write(description)
     st.divider()
 
+    unanswered = []
+
+    # -----------------------------
+    # Preguntas
+    # -----------------------------
+    
     for q in questions:
+        st.markdown(
+            f"<div style='font-size:18px; font-weight:500'>{q['text']}</div>",
+            unsafe_allow_html=True
+        )
+
         response_label = st.radio(
-            label=q["text"],
+            label="",
             options=list(LIKERT_5.keys()),
-            index=None,              # fuerza selección explícita
-            horizontal=True,         # estilo Qualtrics
+            index=None,              # obliga selección
+            horizontal=True,
             key=f"{q['code']}_ui"
         )
 
-        if response_label is not None:
+        if response_label is None:
+            unanswered.append(q["code"])
+        else:
             value = LIKERT_5[response_label]
-
             if q.get("reverse", False):
                 value = invert_likert(value)
 
             st.session_state.responses[q["code"]] = value
 
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
 
     # -----------------------------
     # Navegación
     # -----------------------------
-    col1, col2 = st.columns([4, 1])
+    col1, col2, col3 = st.columns([1, 3, 1])
 
-    with col2:
-        st.button(
-            "Siguiente ➡️",
-            on_click=lambda: st.session_state.update(page=next_page)
-        )
+    # ⬅️ Atrás
+    if prev_page is not None:
+        with col1:
+            st.button(
+                "⬅️ Atrás",
+                on_click=lambda: st.session_state.update(page=prev_page)
+            )
+
+    # ➡️ Siguiente (con validación)
+    with col3:
+        if unanswered:
+            st.button("Siguiente ➡️", disabled=True)
+        else:
+            st.button(
+                "Siguiente ➡️",
+                on_click=lambda: st.session_state.update(page=next_page)
+            )
+
+    # -----------------------------
+    # Mensaje de validación
+    # -----------------------------
+    if unanswered:
+        st.warning("⚠️ Debe responder todas las preguntas para continuar.")
