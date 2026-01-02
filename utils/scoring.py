@@ -111,6 +111,7 @@ def compute_scores(responses: dict) -> dict:
         "Demo_Generacion_Edad": responses.get("GENERATION"),
         "Demo_Genero": responses.get("GENDER"),
         "Demo_Nivel_Educacion": responses.get("EDUCATION"),
+        "Demo_Horas": responses.get("HORAS")
     }
 
     return scores

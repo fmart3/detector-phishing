@@ -79,6 +79,14 @@ EDUCATION = {
     "Doctorado": 5
 }
 
+HORAS = {
+    "Menos de 2 horas": 1,
+    "Entre 2 y 5 horas": 2,
+    "Entre 5 y 8 horas": 3,
+    "Entre 8 y 10 horas": 4,
+    "Más de 10 horas": 5
+}
+
 # -----------------------------
 # Página demográfica
 # -----------------------------
@@ -157,6 +165,14 @@ def page_demographics():
         "Seleccione su nivel más alto de educación",
         options=list(EDUCATION.keys())
     )
+    
+    # -----------------------------
+    # Horas en PC
+    # -----------------------------
+    hours = st.radio(
+        "Seleccione las horas que está conectado a su computador de trabajo en el día",
+        options=list(HORAS.keys())
+    )
 
     # -----------------------------
     # Validación
@@ -169,7 +185,8 @@ def page_demographics():
         role,
         generation,
         gender,
-        education
+        education,
+        hours
     ])
 
     st.divider()
@@ -194,5 +211,6 @@ def page_demographics():
                     "GENERATION": GENERATION[generation],
                     "GENDER": GENDER[gender],
                     "EDUCATION": EDUCATION[education],
+                    "HORAS": HORAS[hours]
                 })
                 st.session_state.page = 99
