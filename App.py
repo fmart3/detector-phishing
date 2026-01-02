@@ -19,6 +19,12 @@ if "page" not in st.session_state:
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
+    
+if "scores" not in st.session_state:
+    st.session_state.scores = None
+
+if "prediction" not in st.session_state:
+    st.session_state.prediction = None
 
 # =========================
 # Importación de páginas
@@ -40,7 +46,7 @@ from pages.pages_likert import (
 )
 
 from pages.demographics import page_demographics
-#from utils.databricks import predict
+from pages.results import page_results
 
 # =========================
 # Enrutador de páginas
@@ -59,7 +65,8 @@ PAGES = {
     11: page_fatiga_emocional,
     12: page_fatiga_cinismo,
     13: page_fatiga_abandono,
-    14: page_demographics
+    14: page_demographics,
+    99: page_results
 }
 
 # =========================

@@ -30,11 +30,11 @@ BIG5_RESPONSABILIDAD = [
     {"code": "CO03", "text": "Yo cumplo con mis deberes.", "reverse": False},
     {"code": "CO04", "text": "Yo sigo un horario.", "reverse": False},
     {"code": "CO05", "text": "Yo hago las cosas de inmediato.", "reverse": False},
-    {"code": "CO06", "text": "Yo dejo mis cosas sin terminar.", "reverse": True},
+    {"code": "CO06", "text": "Yo dejo mis cosas sin terminar.", "reverse": False},
     {"code": "CO07", "text": "Yo no sigo un plan.", "reverse": True},
-    {"code": "CO08", "text": "Yo cometo errores por descuido.", "reverse": True},
+    {"code": "CO08", "text": "Yo cometo errores por descuido.", "reverse": False},
     {"code": "CO09", "text": "Yo desperdicio mi tiempo.", "reverse": True},
-    {"code": "CO10", "text": "Yo soy desorganizado.", "reverse": True}
+    {"code": "CO10", "text": "Yo soy desorganizado.", "reverse": False}
 ]
 
 BIG5_NEUROTICISMO = [
@@ -64,66 +64,57 @@ BIG5_APERTURA = [
 ]
 
 PHISH_ACTITUD_RIESGO = [
-    {"code": "ER01", "text": "A veces tomo riesgos en internet sin pensarlo mucho.", "reverse": False},
-    {"code": "ER02", "text": "Me gusta probar enlaces nuevos aunque no esté seguro de su origen.", "reverse": False},
-    {"code": "ER03", "text": "Prefiero la comodidad a la seguridad en línea.", "reverse": False},
+    {"code": "ER01", "text": "A veces tomo riesgos en internet sin pensarlo mucho.", "reverse": True},
+    {"code": "ER02", "text": "Me gusta probar enlaces nuevos aunque no esté seguro de su origen.", "reverse": True},
+    {"code": "ER03", "text": "Prefiero la comodidad a la seguridad en línea.", "reverse": True},
     {"code": "ER04", "text": "No siempre verifico la fuente de los correos electrónicos.", "reverse": False},
     {"code": "ER05", "text": "Asumo que la mayoría de los mensajes que recibo son seguros.", "reverse": False},
-    {"code": "ER06", "text": "Soy muy cuidadoso antes de hacer clic en enlaces.", "reverse": True},
-    {"code": "ER07", "text": "Siempre reviso la autenticidad de los correos.", "reverse": True},
-    {"code": "ER08", "text": "Evito riesgos innecesarios en internet.", "reverse": True},
-    {"code": "ER09", "text": "Prefiero perder tiempo antes que comprometer mi seguridad.", "reverse": True},
-    {"code": "ER10", "text": "Soy muy precavido con la información que comparto.", "reverse": True}
+    {"code": "ER06", "text": "Soy muy cuidadoso antes de hacer clic en enlaces.", "reverse": False},
+    {"code": "ER07", "text": "Siempre reviso la autenticidad de los correos.", "reverse": False},
+    {"code": "ER08", "text": "Evito riesgos innecesarios en internet.", "reverse": False},
+    {"code": "ER09", "text": "Yo tomo riesgos.", "reverse": False},
+    {"code": "ER10", "text": "Yo hago locuras.", "reverse": False}
 ]
 
 PHISH_AWARENESS = [
-    {"code": "AW01", "text": "Conozco qué es el phishing.", "reverse": False},
-    {"code": "AW02", "text": "Puedo reconocer correos sospechosos.", "reverse": False},
-    {"code": "AW03", "text": "Sé identificar enlaces fraudulentos.", "reverse": False},
-    {"code": "AW04", "text": "Entiendo los riesgos del phishing.", "reverse": False},
-    {"code": "AW05", "text": "He recibido capacitación sobre seguridad digital.", "reverse": False},
-    {"code": "AW06", "text": "No estoy familiarizado con amenazas digitales.", "reverse": True},
-    {"code": "AW07", "text": "Me cuesta reconocer correos falsos.", "reverse": True}
+    {"code": "AW01", "text": "En general, soy consciente de la amenazas del Phishing y sus consecuencias negativas.", "reverse": False},
+    {"code": "AW02", "text": "Tengo suficiente conocimiento sobre los riesgos asociados al Phishing", "reverse": False},
+    {"code": "AW03", "text": "Entiendo las preocupaciones con respecto a las amenazas de Phishing y los riesgos que generan", "reverse": False},
 ]
 
 PHISH_RIESGO_PERCIBIDO = [
-    {"code": "PR01", "text": "El phishing representa un riesgo serio para mí.", "reverse": False},
-    {"code": "PR02", "text": "Podría sufrir consecuencias graves si caigo en phishing.", "reverse": False},
-    {"code": "PR03", "text": "Mis datos personales están en riesgo en internet.", "reverse": False},
-    {"code": "PR04", "text": "El phishing puede afectar mi vida personal.", "reverse": False},
-    {"code": "PR05", "text": "Es poco probable que yo sea víctima de phishing.", "reverse": True}
+    {"code": "PR01", "text": "Me preocupa recibir correos electrónicos que sean Phishing", "reverse": False},
+    {"code": "PR02", "text": "Me preocupa que un delincuente pueda robar mis credenciales utilizando un correo de phishing", "reverse": False},
+    {"code": "PR03", "text": "Me preocupa que un delincuente puede robar información asociada a mi tarjeta de crédito por medio de un correo de phishing", "reverse": False},
 ]
 
 PHISH_AUTOEFICACIA = [
-    {"code": "CP01", "text": "Soy capaz de detectar intentos de phishing.", "reverse": False},
-    {"code": "CP02", "text": "Sé qué hacer si recibo un correo sospechoso.", "reverse": False},
-    {"code": "CP03", "text": "Puedo protegerme del phishing.", "reverse": False},
-    {"code": "CP04", "text": "Me siento seguro manejando amenazas digitales.", "reverse": False},
-    {"code": "CP05", "text": "No sabría cómo reaccionar ante un intento de phishing.", "reverse": True}
+    {"code": "CP01", "text": "Me siento seguro de mi capacidad para detectar correos electrónicos de phishing.", "reverse": False},
+    {"code": "CP02", "text": "Puedo detectar correos electrónicos de phishing.", "reverse": False},
+    {"code": "CP03", "text": "No creo que pueda detectar un correo electrónico de phishing por mí mismo.", "reverse": True}
 ]
 
 PHISH_SUSCEPTIBILIDAD = [
-    {"code": "SU01", "text": "Podría hacer clic en un enlace sospechoso.", "reverse": False},
-    {"code": "SU02", "text": "He estado cerca de caer en phishing.", "reverse": False},
-    {"code": "SU03", "text": "Me resulta difícil detectar engaños.", "reverse": False},
-    {"code": "SU04", "text": "A veces confío demasiado en los correos que recibo.", "reverse": False},
-    {"code": "SU05", "text": "Es poco probable que caiga en phishing.", "reverse": True}
+    {"code": "SU01", "text": "Podría hacer clic en un enlace sospechoso.", "reverse": True},
+    {"code": "SU02", "text": "He estado cerca de caer en phishing.", "reverse": True},
+    {"code": "SU03", "text": "Me resulta difícil detectar engaños.", "reverse": True},
+    {"code": "SU04", "text": "A veces confío demasiado en los correos que recibo.", "reverse": True},
 ]
 
 FATIGA_EMOCIONAL = [
-    {"code": "FE01", "text": "Me siento agotado por tantas advertencias de seguridad.", "reverse": False},
-    {"code": "FE02", "text": "La seguridad digital me genera estrés.", "reverse": False},
-    {"code": "FE03", "text": "Me cansa preocuparme por amenazas en línea.", "reverse": False},
-    {"code": "FE04", "text": "Me siento saturado por la información de seguridad.", "reverse": False}
+    {"code": "FE01", "text": "Me siento agotado por tantas advertencias de seguridad.", "reverse": True},
+    {"code": "FE02", "text": "La seguridad digital me genera estrés.", "reverse": True},
+    {"code": "FE03", "text": "Me cansa preocuparme por amenazas en línea.", "reverse": True},
 ]
 
 FATIGA_CINISMO = [
-    {"code": "FC01", "text": "Las advertencias de seguridad son exageradas.", "reverse": False},
-    {"code": "FC02", "text": "La mayoría de los riesgos de seguridad no son reales.", "reverse": False},
-    {"code": "FC03", "text": "La seguridad digital es una pérdida de tiempo.", "reverse": False}
+    {"code": "FC01", "text": "Me he vuelto más cínico sobre si realmente mis esfuerzos en la detección de un phishing contribuyen en algo", "reverse": True},
+    {"code": "FC02", "text": "Me he vuelto menos interesado en los problemas que origina el phishing", "reverse": True},
+    {"code": "FC03", "text": "Me he vuelto menos entusiasta en participar en capacitaciones o charlas de sensibilización de phishing", "reverse": True},
+    {"code": "FC04", "text": "Cada vez más Dudo de la importancia de los ejercicios de simulación de phishing", "reverse": True}
 ]
 
 FATIGA_ABANDONO = [
-    {"code": "DS01", "text": "A veces ignoro las medidas de seguridad.", "reverse": False},
-    {"code": "DS02", "text": "Preferiría no preocuparme por la seguridad digital.", "reverse": False}
+    {"code": "DS01", "text": "Me gustaría dejar de participar en las capacitaciones de Phishing", "reverse": True},
+    {"code": "DS02", "text": "Me gustaría dejar de participar en ejercicios de simulación de phishing", "reverse": True}
 ]

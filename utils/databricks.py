@@ -37,7 +37,6 @@ def predict(features: dict):
 
     pred = model.predict(df)
 
-    # Compatibilidad con modelos sklearn
     if hasattr(model, "predict_proba"):
         proba = model.predict_proba(df)[0][1]
     else:

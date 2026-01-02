@@ -10,8 +10,6 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    Renderiza una página de preguntas tipo Likert (1–5).
-
     questions: lista de dicts:
     {
         "code": "AE01",
@@ -37,6 +35,9 @@ def render_likert_page(
     st.divider()
 
     unanswered = []
+    
+    likert_labels = list(LIKERT_5.keys())
+    value_to_label = {v: k for k, v in LIKERT_5.items()}
 
     # -----------------------------
     # Preguntas
@@ -48,10 +49,19 @@ def render_likert_page(
             unsafe_allow_html=True
         )
 
+        # 🔁 recuperar respuesta previa
+        saved_value = st.session_state.responses.get(q["code"])
+        saved_label = None
+
+        if saved_value is not None:
+            if q.get("reverse", False):
+                saved_value = invert_likert(saved_value)
+            saved_label = value_to_label[saved_value]
+
         response_label = st.radio(
             label="",
-            options=list(LIKERT_5.keys()),
-            index=None,              # obliga selección
+            options=likert_labels,
+            index=likert_labels.index(saved_label) if saved_label else None,
             horizontal=True,
             key=f"{q['code']}_ui"
         )
@@ -67,6 +77,7 @@ def render_likert_page(
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+
     # -----------------------------
     # Navegación
     # -----------------------------
@@ -80,18 +91,10 @@ def render_likert_page(
                 on_click=lambda: st.session_state.update(page=prev_page)
             )
 
-    # ➡️ Siguiente (con validación)
+    # Siguiente ➡️
     with col3:
-        if unanswered:
-            st.button("Siguiente ➡️", disabled=True)
-        else:
-            st.button(
-                "Siguiente ➡️",
-                on_click=lambda: st.session_state.update(page=next_page)
-            )
-
-    # -----------------------------
-    # Mensaje de validación
-    # -----------------------------
-    #if unanswered:
-    #    st.warning("⚠️ Debe responder todas las preguntas para continuar.")
+        st.button(
+            "Siguiente ➡️",
+            disabled=bool(unanswered),
+            on_click=lambda: st.session_state.update(page=next_page)
+        )
