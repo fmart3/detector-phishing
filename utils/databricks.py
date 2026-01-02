@@ -2,17 +2,22 @@ import mlflow
 import mlflow.pyfunc
 import pandas as pd
 import streamlit as st
+import os
 
 def setup_mlflow():
     """
     Configura la conexión a Databricks usando secrets de Streamlit
     """
-    mlflow.set_tracking_uri("databricks")
-
-    # Estas variables deben existir en .streamlit/secrets.toml
-    import os
-    os.environ["DATABRICKS_HOST"] = st.secrets["DATABRICKS_HOST"]
-    os.environ["DATABRICKS_TOKEN"] = st.secrets["DATABRICKS_TOKEN"]
+    try:
+        os.environ["DATABRICKS_HOST"] = st.secrets["DATABRICKS_HOST"]
+        os.environ["DATABRICKS_TOKEN"] = st.secrets["DATABRICKS_TOKEN"]
+        mlflow.set_tracking_uri("databricks")
+    except KeyError:
+        st.error(
+            "❌ No se encontraron las credenciales de Databricks.\n\n"
+            "Configure DATABRICKS_HOST y DATABRICKS_TOKEN en Streamlit Secrets."
+        )
+        st.stop()
 
 @st.cache_resource
 def load_model():
