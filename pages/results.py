@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.scoring import compute_scores
-from utils.databricks import predict
+from utils.databricks import predict, prepare_features
 
 def page_results():
 
@@ -19,7 +19,13 @@ def page_results():
     if st.session_state.scores is None:
         st.session_state.scores = compute_scores(responses)
 
-    scores = st.session_state.scores
+    scores = compute_scores(st.session_state.responses)
+    
+    try:
+        model_features = prepare_features(scores)
+    except ValueError as e:
+        st.error(str(e))
+        st.stop()
 
     # =========================
     # 2️⃣ Predicción (una sola vez)
@@ -27,7 +33,7 @@ def page_results():
     if st.session_state.prediction is None:
         st.session_state.prediction = predict(scores)
 
-    result = st.session_state.prediction
+    result = predict(model_features)
     prediction = result["prediction"]
     probability = result["probability"]
 
@@ -36,7 +42,7 @@ def page_results():
     # =========================
     st.divider()
 
-    if prediction == 1:
+    if result["prediction"] == 1:
         st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
     else:
         st.success("✅ Riesgo BAJO de susceptibilidad a phishing")

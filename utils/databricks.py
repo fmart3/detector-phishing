@@ -1,53 +1,103 @@
-import mlflow
-import mlflow.pyfunc
+import requests
 import pandas as pd
 import streamlit as st
-import os
 
-def setup_mlflow():
+# =====================================================
+# Configuración del endpoint Databricks
+# =====================================================
+
+DATABRICKS_ENDPOINT = "api_phishing"
+
+def get_headers():
     """
-    Configura la conexión a Databricks usando secrets de Streamlit
+    Construye headers de autorización usando Streamlit Secrets
     """
     try:
-        os.environ["DATABRICKS_HOST"] = st.secrets["DATABRICKS_HOST"]
-        os.environ["DATABRICKS_TOKEN"] = st.secrets["DATABRICKS_TOKEN"]
-        mlflow.set_tracking_uri("databricks")
+        return {
+            "Authorization": f"Bearer {st.secrets['DATABRICKS_TOKEN']}",
+            "Content-Type": "application/json"
+        }
     except KeyError:
         st.error(
-            "❌ No se encontraron las credenciales de Databricks.\n\n"
-            "Configure DATABRICKS_HOST y DATABRICKS_TOKEN en Streamlit Secrets."
+            "❌ Falta DATABRICKS_TOKEN en Streamlit Secrets.\n\n"
+            "Configúralo en Settings → Secrets."
         )
         st.stop()
 
-@st.cache_resource
-def load_model():
+
+def get_endpoint_url():
     """
-    Carga el modelo registrado en Databricks MLflow
+    Construye la URL completa del endpoint
     """
-    setup_mlflow()
+    try:
+        host = st.secrets["DATABRICKS_HOST"].rstrip("/")
+        return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
+    except KeyError:
+        st.error(
+            "❌ Falta DATABRICKS_HOST en Streamlit Secrets.\n\n"
+            "Ejemplo: https://adb-xxxx.azuredatabricks.net"
+        )
+        st.stop()
 
-    model_uri = "models:/Phishing_Model/Production"
-    model = mlflow.pyfunc.load_model(model_uri)
 
-    return model
+# =====================================================
+# Predicción
+# =====================================================
 
-def predict(features: dict):
+MODEL_FEATURES = [
+    "Fatiga_Global_Score",
+    "Big5_Responsabilidad",
+    "Big5_Apertura",
+    "Demo_Generacion_Edad",
+    "Demo_Rol_Trabajo",
+    "Demo_Horas",
+]
+
+def prepare_features(scores: dict) -> dict:
     """
-    Recibe un diccionario de features ya procesadas
-    Retorna predicción y probabilidad
+    Filtra y valida las features que el modelo espera
     """
-    model = load_model()
 
-    df = pd.DataFrame([features])
-
-    pred = model.predict(df)
-
-    if hasattr(model, "predict_proba"):
-        proba = model.predict_proba(df)[0][1]
-    else:
-        proba = None
+    missing = [f for f in MODEL_FEATURES if f not in scores]
+    if missing:
+        raise ValueError(f"❌ Faltan features requeridas por el modelo: {missing}")
 
     return {
-        "prediction": int(pred[0]),
-        "probability": proba
+        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
+        "Big5_Responsabilidad": float(scores["Big5_Responsabilidad"]),
+        "Big5_Apertura": float(scores["Big5_Apertura"]),
+        "Demo_Generacion_Edad": int(scores["Demo_Generacion_Edad"]),
+        "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
+        "Demo_Horas": int(scores["Demo_Horas"]),
+    }
+
+
+def predict(features: dict) -> dict:
+    """
+    Envía features al endpoint de Databricks
+    Retorna predicción y probabilidad (si existe)
+    """
+
+    url = get_endpoint_url()
+    headers = get_headers()
+
+    payload = {
+        "dataframe_records": [features]
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        st.error("❌ Error al consultar el endpoint de Databricks")
+        st.code(response.text)
+        st.stop()
+
+    result = response.json()
+
+    # Formato típico Databricks
+    prediction = result["predictions"][0]
+
+    return {
+        "prediction": int(prediction),
+        "raw_response": result
     }
