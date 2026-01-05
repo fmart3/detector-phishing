@@ -9,7 +9,7 @@ MODEL_FEATURES = [
     "Big5_Apertura",
     "Demo_Generacion_Edad",
     "Demo_Rol_Trabajo",
-    "Demo_Horas",
+    "Demo_Horas"
 ]
 
 
