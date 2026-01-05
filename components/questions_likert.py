@@ -12,42 +12,42 @@ BIG5_EXTRAVERSION = [
 ]
 
 BIG5_AMABILIDAD = [
-    {"code": "AM01", "text": "Yo me intereso por los demás.", "reverse": False},
-    {"code": "AM02", "text": "Yo simpatizo con los sentimientos de los demás.", "reverse": False},
-    {"code": "AM03", "text": "Yo tengo un corazón blando.", "reverse": False},
-    {"code": "AM04", "text": "Yo me tomo tiempo para los demás.", "reverse": False},
-    {"code": "AM05", "text": "Yo siento las emociones de los demás.", "reverse": False},
-    {"code": "AM06", "text": "Yo no me intereso mucho por los problemas de otros.", "reverse": True},
-    {"code": "AM07", "text": "Yo insulto a la gente.", "reverse": True},
-    {"code": "AM08", "text": "Yo soy indiferente a los sentimientos de los demás.", "reverse": True},
-    {"code": "AM09", "text": "Yo hago que la gente se sienta incómoda.", "reverse": True},
-    {"code": "AM10", "text": "Yo soy frío y distante.", "reverse": True}
+    {"code": "AM01", "text": "Yo Tengo una buena palabra para todos.", "reverse": False},
+    {"code": "AM02", "text": "Yo creo que otros tienen buenas intenciones.", "reverse": False},
+    {"code": "AM03", "text": "Yo respeto a los demás.", "reverse": False},
+    {"code": "AM04", "text": "Yo acepto a las personas tal como son.", "reverse": False},
+    {"code": "AM05", "text": "Yo hago que la gente se sienta a gusto.", "reverse": False},
+    {"code": "AM06", "text": "Yo tengo una lengua puntiaguda.", "reverse": True},
+    {"code": "AM07", "text": "Yo destrozo a otros en pedazos.", "reverse": True},
+    {"code": "AM08", "text": "Yo sospecho que hay motivos ocultos en otros.", "reverse": True},
+    {"code": "AM09", "text": "Yo vuelvo a los demás.", "reverse": True},
+    {"code": "AM10", "text": "Yo insulto a la gente.", "reverse": True}
 ]
 
 BIG5_RESPONSABILIDAD = [
     {"code": "CO01", "text": "Yo siempre estoy preparado.", "reverse": False},
     {"code": "CO02", "text": "Yo presto atención a los detalles.", "reverse": False},
-    {"code": "CO03", "text": "Yo cumplo con mis deberes.", "reverse": False},
-    {"code": "CO04", "text": "Yo sigo un horario.", "reverse": False},
-    {"code": "CO05", "text": "Yo hago las cosas de inmediato.", "reverse": False},
-    {"code": "CO06", "text": "Yo dejo mis cosas sin terminar.", "reverse": False},
-    {"code": "CO07", "text": "Yo no sigo un plan.", "reverse": True},
-    {"code": "CO08", "text": "Yo cometo errores por descuido.", "reverse": False},
-    {"code": "CO09", "text": "Yo desperdicio mi tiempo.", "reverse": True},
-    {"code": "CO10", "text": "Yo soy desorganizado.", "reverse": False}
+    {"code": "CO03", "text": "Yo hago las tareas o actividades de inmediato.", "reverse": False},
+    {"code": "CO04", "text": "Yo llevo a cabo mis planes.", "reverse": False},
+    {"code": "CO05", "text": "Yo hago planes y me atengo a ellos.", "reverse": False},
+    {"code": "CO06", "text": "Yo no pierdo el tiempo.", "reverse": False},
+    {"code": "CO07", "text": "A mi me cuesta ponerme a trabajar.", "reverse": True},
+    {"code": "CO08", "text": "Yo hago el trabajo necesario para salir bien.", "reverse": False},
+    {"code": "CO09", "text": "Yo no veo cosas por debajo", "reverse": True},
+    {"code": "CO10", "text": "Yo no eludo mis deberes", "reverse": False}
 ]
 
 BIG5_NEUROTICISMO = [
-    {"code": "NE01", "text": "Yo me estreso con facilidad.", "reverse": False},
-    {"code": "NE02", "text": "Yo me preocupo por muchas cosas.", "reverse": False},
-    {"code": "NE03", "text": "Yo me altero con facilidad.", "reverse": False},
-    {"code": "NE04", "text": "Yo tengo cambios de ánimo frecuentes.", "reverse": False},
-    {"code": "NE05", "text": "Yo me siento ansioso con facilidad.", "reverse": False},
-    {"code": "NE06", "text": "Yo me siento relajado la mayor parte del tiempo.", "reverse": True},
-    {"code": "NE07", "text": "Yo rara vez me siento triste.", "reverse": True},
-    {"code": "NE08", "text": "Yo mantengo la calma bajo presión.", "reverse": True},
-    {"code": "NE09", "text": "Yo controlo bien mis emociones.", "reverse": True},
-    {"code": "NE10", "text": "Yo soy emocionalmente estable.", "reverse": True}
+    {"code": "NE01", "text": "A menudo me siento triste", "reverse": False},
+    {"code": "NE02", "text": "Estoy disgustado conmigo", "reverse": False},
+    {"code": "NE03", "text": "A menudo estoy convertido en basura", "reverse": False},
+    {"code": "NE04", "text": "Yo tengo cambios de humor frecuentemente.", "reverse": False},
+    {"code": "NE05", "text": "Yo entro en pánico fácilmente.", "reverse": False},
+    {"code": "NE06", "text": "Yo rara vez me irrito.", "reverse": True},
+    {"code": "NE07", "text": "Yo rara vez me siento triste", "reverse": True},
+    {"code": "NE08", "text": "Yo me siento cómodo conmigo mismo.", "reverse": True},
+    {"code": "NE09", "text": "A mí las cosas no me molestan fácilmente.", "reverse": True},
+    {"code": "NE10", "text": "Yo estoy muy satisfecho conmigo mismo", "reverse": True}
 ]
 
 BIG5_APERTURA = [
@@ -64,7 +64,7 @@ BIG5_APERTURA = [
 ]
 
 PHISH_ACTITUD_RIESGO = [
-    {"code": "ER01", "text": "A veces tomo riesgos en internet sin pensarlo mucho.", "reverse": True},
+    {"code": "ER01", "text": "Yo nunca realizaría alas delta o saltaría en bungee", "reverse": True},
     {"code": "ER02", "text": "Me gusta probar enlaces nuevos aunque no esté seguro de su origen.", "reverse": True},
     {"code": "ER03", "text": "Prefiero la comodidad a la seguridad en línea.", "reverse": True},
     {"code": "ER04", "text": "No siempre verifico la fuente de los correos electrónicos.", "reverse": False},
@@ -95,26 +95,26 @@ PHISH_AUTOEFICACIA = [
 ]
 
 PHISH_SUSCEPTIBILIDAD = [
-    {"code": "SU01", "text": "Podría hacer clic en un enlace sospechoso.", "reverse": True},
-    {"code": "SU02", "text": "He estado cerca de caer en phishing.", "reverse": True},
-    {"code": "SU03", "text": "Me resulta difícil detectar engaños.", "reverse": True},
-    {"code": "SU04", "text": "A veces confío demasiado en los correos que recibo.", "reverse": True},
+    {"code": "SU01", "text": "Podría hacer clic en un enlace sospechoso.", "reverse": False},
+    {"code": "SU02", "text": "He estado cerca de caer en phishing.", "reverse": False},
+    {"code": "SU03", "text": "Me resulta difícil detectar engaños.", "reverse": False},
+    {"code": "SU04", "text": "A veces confío demasiado en los correos que recibo.", "reverse": False},
 ]
 
 FATIGA_EMOCIONAL = [
-    {"code": "FE01", "text": "Me siento agotado por tantas advertencias de seguridad.", "reverse": True},
-    {"code": "FE02", "text": "La seguridad digital me genera estrés.", "reverse": True},
-    {"code": "FE03", "text": "Me cansa preocuparme por amenazas en línea.", "reverse": True},
+    {"code": "FE01", "text": "Me siento agotado por tantas advertencias de seguridad.", "reverse": False},
+    {"code": "FE02", "text": "La seguridad digital me genera estrés.", "reverse": False},
+    {"code": "FE03", "text": "Me cansa preocuparme por amenazas en línea.", "reverse": False},
 ]
 
 FATIGA_CINISMO = [
-    {"code": "FC01", "text": "Me he vuelto más cínico sobre si realmente mis esfuerzos en la detección de un phishing contribuyen en algo", "reverse": True},
-    {"code": "FC02", "text": "Me he vuelto menos interesado en los problemas que origina el phishing", "reverse": True},
-    {"code": "FC03", "text": "Me he vuelto menos entusiasta en participar en capacitaciones o charlas de sensibilización de phishing", "reverse": True},
-    {"code": "FC04", "text": "Cada vez más Dudo de la importancia de los ejercicios de simulación de phishing", "reverse": True}
+    {"code": "FC01", "text": "Me he vuelto más cínico sobre si realmente mis esfuerzos en la detección de un phishing contribuyen en algo", "reverse": False},
+    {"code": "FC02", "text": "Me he vuelto menos interesado en los problemas que origina el phishing", "reverse": False},
+    {"code": "FC03", "text": "Me he vuelto menos entusiasta en participar en capacitaciones o charlas de sensibilización de phishing", "reverse": False},
+    {"code": "FC04", "text": "Cada vez más Dudo de la importancia de los ejercicios de simulación de phishing", "reverse": False}
 ]
 
 FATIGA_ABANDONO = [
-    {"code": "DS01", "text": "Me gustaría dejar de participar en las capacitaciones de Phishing", "reverse": True},
-    {"code": "DS02", "text": "Me gustaría dejar de participar en ejercicios de simulación de phishing", "reverse": True}
+    {"code": "DS01", "text": "Me gustaría dejar de participar en las capacitaciones de Phishing", "reverse": False},
+    {"code": "DS02", "text": "Me gustaría dejar de participar en ejercicios de simulación de phishing", "reverse": False}
 ]

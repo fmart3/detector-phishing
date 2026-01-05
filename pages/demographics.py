@@ -37,7 +37,7 @@ INDUSTRY = {
     "Servicios Profesionales y/o Consultoria": 15,
     "Construcción": 16,
     "Manufactura": 17,
-    "Otras": 19
+    "Otras": 18
 }
 
 EMPLOYEES = {

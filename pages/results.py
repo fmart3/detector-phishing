@@ -42,7 +42,7 @@ def page_results():
     # =========================
     st.divider()
 
-    if result["prediction"] == 1:
+    if prediction == 1:
         st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
     else:
         st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
