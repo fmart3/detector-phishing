@@ -190,4 +190,5 @@ if st.button("🚀 Ejecutar predicción"):
 
     except Exception as e:
         st.error("❌ Error al ejecutar la predicción")
+        st.write("Secrets disponibles:", list(st.secrets.keys()))
         st.exception(e)

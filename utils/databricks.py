@@ -1,6 +1,10 @@
 import requests
 import streamlit as st
 
+# =====================================================
+# Configuración
+# =====================================================
+
 DATABRICKS_ENDPOINT = "api_phishing"
 
 MODEL_FEATURES = [
@@ -12,34 +16,78 @@ MODEL_FEATURES = [
     "Demo_Horas"
 ]
 
+# =====================================================
+# Helpers
+# =====================================================
 
 def get_headers():
-    try:
-        return {
-            "Authorization": f"Bearer {st.secrets['DATABRICKS_TOKEN']}",
-            "Content-Type": "application/json"
-        }
-    except KeyError:
+    if "DATABRICKS_TOKEN" not in st.secrets:
         st.error("❌ Falta DATABRICKS_TOKEN en Streamlit Secrets")
         st.stop()
 
+    return {
+        "Authorization": f"Bearer {st.secrets['DATABRICKS_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+
+
+def get_databricks_host():
+    """
+    Intenta obtener el host desde distintos nombres comunes
+    """
+    possible_keys = [
+        "DATABRICKS_HOST",
+        "DATABRICKS_WORKSPACE_URL",
+        "DATABRICKS_INSTANCE"
+    ]
+
+    for key in possible_keys:
+        if key in st.secrets:
+            host = st.secrets[key].rstrip("/")
+            if not host.startswith("http"):
+                st.error(f"❌ {key} debe comenzar con https://")
+                st.stop()
+            return host
+
+    st.error(
+        "❌ No se encontró el HOST de Databricks.\n\n"
+        "Configura uno de los siguientes en Streamlit Secrets:\n"
+        "- DATABRICKS_HOST\n"
+        "- DATABRICKS_WORKSPACE_URL\n"
+        "- DATABRICKS_INSTANCE\n\n"
+        "Ejemplo:\n"
+        "https://adb-123456789012.3.azuredatabricks.net"
+    )
+    st.stop()
+
 
 def get_endpoint_url():
-    try:
-        host = st.secrets["DATABRICKS_HOST"].rstrip("/")
-        return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
-    except KeyError:
-        st.error("❌ Falta DATABRICKS_HOST en Streamlit Secrets")
-        st.stop()
+    host = get_databricks_host()
+    return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
 
+
+# =====================================================
+# Features
+# =====================================================
 
 def prepare_features(scores: dict) -> dict:
     missing = [f for f in MODEL_FEATURES if f not in scores]
     if missing:
         raise ValueError(f"❌ Faltan features requeridas por el modelo: {missing}")
 
-    return {k: scores[k] for k in MODEL_FEATURES}
+    return {
+        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
+        "Big5_Responsabilidad": float(scores["Big5_Responsabilidad"]),
+        "Big5_Apertura": float(scores["Big5_Apertura"]),
+        "Demo_Generacion_Edad": int(scores["Demo_Generacion_Edad"]),
+        "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
+        "Demo_Horas": int(scores["Demo_Horas"]),
+    }
 
+
+# =====================================================
+# Predicción
+# =====================================================
 
 def predict(scores: dict) -> dict:
     url = get_endpoint_url()
@@ -61,5 +109,5 @@ def predict(scores: dict) -> dict:
 
     return {
         "prediction": int(result["predictions"][0]),
-        "raw": result
+        "raw_response": result
     }
