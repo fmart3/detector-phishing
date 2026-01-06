@@ -1,4 +1,3 @@
-"""""
 import streamlit as st
 
 # =========================
@@ -83,8 +82,6 @@ else:
     st.experimental_rerun()
 
 """""
-
-
 ### TEST CONEXIÓN MODELO DATBRICKS ###
 import streamlit as st
 from utils.databricks import predict, prepare_features
@@ -193,3 +190,5 @@ if st.button("🚀 Ejecutar predicción"):
         st.error("❌ Error al ejecutar la predicción")
         st.write("Secrets disponibles:", list(st.secrets.keys()))
         st.exception(e)
+        
+"""""
