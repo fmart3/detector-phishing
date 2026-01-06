@@ -144,11 +144,16 @@ Demo_Rol_Trabajo = st.selectbox(
     format_func=lambda x: x[0]
 )[1]
 
-Demo_Horas = st.number_input(
+Demo_Horas = st.selectbox(
     "Horas diarias frente al computador",
-    min_value=1,
-    max_value=16,
-    value=8
+    options={
+        "Menos de 2 horas": 1,
+        "Entre 2 y 5 horas": 2,
+        "Entre 5 y 8 horas": 3,
+        "Entre 8 y 10 horas": 4,
+        "Más de 10 horas": 5
+    }.items(),
+    format_func=lambda x: x[0]
 )
 
 st.divider()
