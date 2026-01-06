@@ -154,7 +154,7 @@ Demo_Horas = st.selectbox(
         "Más de 10 horas": 5
     }.items(),
     format_func=lambda x: x[0]
-)
+)[1]
 
 st.divider()
 
