@@ -1,4 +1,5 @@
-""""import streamlit as st
+"""""
+import streamlit as st
 
 # =========================
 # Configuración básica
@@ -80,11 +81,11 @@ else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = 1
     st.experimental_rerun()
-    
+
 """""
 
-# APP PRUEBA RAPIDA
 
+### TEST CONEXIÓN MODELO DATBRICKS ###
 import streamlit as st
 from utils.databricks import predict, prepare_features
 

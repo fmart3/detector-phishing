@@ -2,12 +2,13 @@ import streamlit as st
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 
+
 def page_results():
 
     st.markdown("## 📊 Resultado de la Evaluación")
     st.write("Este resultado se basa en sus respuestas.")
 
-    responses = st.session_state.get("responses", {})
+    responses = st.session_state.get("responses")
 
     if not responses:
         st.error("No hay respuestas registradas.")
@@ -16,26 +17,27 @@ def page_results():
     # =========================
     # 1️⃣ Calcular scores (una sola vez)
     # =========================
-    if st.session_state.scores is None:
+    if st.session_state.get("scores") is None:
         st.session_state.scores = compute_scores(responses)
 
-    scores = compute_scores(st.session_state.responses)
-    
+    scores = st.session_state.scores
+
     try:
         model_features = prepare_features(scores)
     except ValueError as e:
         st.error(str(e))
-        st.stop()
+        return
 
     # =========================
     # 2️⃣ Predicción (una sola vez)
     # =========================
-    if st.session_state.prediction is None:
-        st.session_state.prediction = predict(scores)
+    if st.session_state.get("prediction") is None:
+        st.session_state.prediction = predict(model_features)
 
-    result = predict(model_features)
+    result = st.session_state.prediction
+
     prediction = result["prediction"]
-    probability = result["probability"]
+    probability = result.get("probability")  # puede ser None
 
     # =========================
     # 3️⃣ Mostrar resultado
@@ -48,13 +50,20 @@ def page_results():
         st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
 
     if probability is not None:
-        st.caption(f"Probabilidad estimada de riesgo: **{probability:.2%}**")
+        st.markdown(
+            f"### 📈 Susceptibilidad estimada: **{probability * 100:.1f}%**"
+        )
+    else:
+        st.caption("Probabilidad no disponible para este modelo.")
 
     # =========================
     # Debug / académico
     # =========================
     with st.expander("🔍 Ver scores calculados"):
         st.json(scores)
+
+    with st.expander("📦 Respuesta cruda del modelo"):
+        st.json(result)
 
     # =========================
     # Reinicio

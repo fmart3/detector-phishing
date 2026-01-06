@@ -5,7 +5,7 @@ import streamlit as st
 # Configuración
 # =====================================================
 
-DATABRICKS_ENDPOINT = "api_phishing"
+DATABRICKS_ENDPOINT = "phishing-endpoint"
 
 MODEL_FEATURES = [
     "Fatiga_Global_Score",
@@ -94,10 +94,7 @@ def predict(scores: dict) -> dict:
     headers = get_headers()
     features = prepare_features(scores)
 
-    payload = {
-        "dataframe_records": [features]
-    }
-
+    payload = {"dataframe_records": [features]}
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code != 200:
@@ -107,7 +104,15 @@ def predict(scores: dict) -> dict:
 
     result = response.json()
 
+    prediction = int(result["predictions"][0])
+
+    probability = None
+    if "probabilities" in result:
+        probability = float(result["probabilities"][0][1])
+
     return {
-        "prediction": int(result["predictions"][0]),
+        "prediction": prediction,
+        "probability": probability,
         "raw_response": result
     }
+
