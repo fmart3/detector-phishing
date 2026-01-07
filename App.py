@@ -84,7 +84,7 @@ PAGESAUX = {
 # =========================
 current_page = st.session_state.page
 
-if current_page in PAGES:
+if current_page in PAGESAUX:
     PAGESAUX[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")

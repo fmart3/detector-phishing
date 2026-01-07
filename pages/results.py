@@ -2,7 +2,6 @@ import streamlit as st
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 
-
 def page_results():
 
     st.markdown("## 📊 Resultado de la Evaluación")
