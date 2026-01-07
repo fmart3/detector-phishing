@@ -59,7 +59,7 @@ from pages.results import page_results
 # =========================
 # Enrutador de páginas
 # =========================
-#PAGES = {
+# PAGES = {
 #    1: page_big5_extraversion,
 #    2: page_big5_amabilidad,
 #    3: page_big5_responsabilidad,
@@ -75,7 +75,7 @@ from pages.results import page_results
 #    13: page_fatiga_abandono,
 #    14: page_demographics,
 #    99: page_results
-#}
+# }
 
 PAGESAUX = {
     1: page_big5_responsabilidad,
