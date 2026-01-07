@@ -97,4 +97,4 @@ if current_page in PAGESAUX:
 else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = 1
-    st.experimental_rerun()
+    st.rerun()

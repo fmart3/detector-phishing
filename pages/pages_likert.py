@@ -1,5 +1,4 @@
-from components.likert_renderer import render_likert_page
-
+# from components.likert_renderer import render_likert_page
 # from components.questions_likert import (
 #     BIG5_EXTRAVERSION,
 #     BIG5_AMABILIDAD,
@@ -145,7 +144,7 @@ from components.likert_renderer import render_likert_page
 #         prev_page=12,
 #         next_page=14
 #     )
-
+from components.likert_renderer import render_likert_page
 from components.questions_likert import (
     BIG5_RESPONSABILIDAD,
     BIG5_APERTURA,
