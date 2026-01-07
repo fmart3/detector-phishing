@@ -69,13 +69,23 @@ PAGES = {
     99: page_results
 }
 
+PAGESAUX = {
+    1: page_big5_responsabilidad,
+    2: page_big5_apertura,
+    3: page_fatiga_emocional,
+    4: page_fatiga_cinismo,
+    5: page_fatiga_abandono,
+    6: page_demographics,
+    99: page_results
+}
+
 # =========================
 # Render de la página actual
 # =========================
 current_page = st.session_state.page
 
 if current_page in PAGES:
-    PAGES[current_page]()
+    PAGESAUX[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = 1
