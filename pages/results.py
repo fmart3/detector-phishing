@@ -1,6 +1,9 @@
 import streamlit as st
+import os
+import pandas as pd
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
+from utils.logging import log_prediction
 
 def page_results():
 
@@ -33,10 +36,11 @@ def page_results():
     if st.session_state.get("prediction") is None:
         st.session_state.prediction = predict(model_features)
 
-    result = st.session_state.prediction
-
+    result = predict(model_features)
+    log_prediction(model_features, result) # Log para Evidently AI
     prediction = result["prediction"]
     probability = result.get("probability")  # puede ser None
+
 
     # =========================
     # 3️⃣ Mostrar resultado
@@ -73,3 +77,7 @@ def page_results():
             st.session_state.pop(k, None)
         st.session_state.page = 1
         st.experimental_rerun()
+
+with st.expander("🧾 Últimas predicciones registradas"):
+    if os.path.exists("production_predictions.csv"):
+        st.dataframe(pd.read_csv("production_predictions.csv").tail(10))
