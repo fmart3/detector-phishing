@@ -38,6 +38,16 @@ def page_results():
 
     result = predict(model_features)
     log_prediction(model_features, result) # Log para Evidently AI
+    
+    st.write("📂 Directorio actual:", os.getcwd())
+    st.write("📄 Archivos en este directorio:", os.listdir("."))
+
+    if os.path.exists("production_predictions.csv"):
+        st.success("✅ CSV encontrado")
+        st.dataframe(pd.read_csv("production_predictions.csv").tail())
+    else:
+        st.error("❌ CSV NO encontrado")
+    
     prediction = result["prediction"]
     probability = result.get("probability")  # puede ser None
 
@@ -77,7 +87,3 @@ def page_results():
             st.session_state.pop(k, None)
         st.session_state.page = 1
         st.experimental_rerun()
-
-with st.expander("🧾 Últimas predicciones registradas"):
-    if os.path.exists("production_predictions.csv"):
-        st.dataframe(pd.read_csv("production_predictions.csv").tail(10))
