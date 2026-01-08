@@ -118,7 +118,8 @@ def page_results():
             st.session_state.pop(k, None)
         st.session_state.page = 1
         st.experimental_rerun()
-    
+
+    st.divider()    
     if st.button("📈 Generar reporte de monitoreo"):
         generate_evidently_report()
         st.success("Reporte Evidently generado")
