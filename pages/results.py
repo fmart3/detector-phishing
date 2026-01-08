@@ -91,3 +91,10 @@ def page_results():
     with st.expander("🧾 Últimas predicciones registradas"):
         if os.path.exists("production_predictions.csv"):
             st.dataframe(pd.read_csv("production_predictions.csv").tail(10))
+            with open("production_predictions.csv", "rb") as f:
+                st.download_button(
+                    label="📥 Descargar predicciones",
+                    data=f,
+                    file_name="production_predictions.csv",
+                    mime="text/csv"
+                )
