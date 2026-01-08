@@ -87,3 +87,7 @@ def page_results():
             st.session_state.pop(k, None)
         st.session_state.page = 1
         st.experimental_rerun()
+    
+    with st.expander("🧾 Últimas predicciones registradas"):
+        if os.path.exists("production_predictions.csv"):
+            st.dataframe(pd.read_csv("production_predictions.csv").tail(10))
