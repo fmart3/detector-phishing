@@ -9,7 +9,7 @@ def log_prediction(features: dict, result: dict):
         "timestamp": datetime.utcnow(),
         **features,
         "prediction": result["prediction"],
-        "probability": result.get("probability")
+        #"probability": result.get("probability")
     }
 
     df = pd.DataFrame([row])

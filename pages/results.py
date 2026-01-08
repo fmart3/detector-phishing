@@ -1,9 +1,47 @@
 import streamlit as st
 import os
 import pandas as pd
+
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
+
+from evidently.report import Report
+from evidently.metric_preset import DataDriftPreset
+
+def generate_evidently_report():
+
+    if not os.path.exists("training_baseline.csv"):
+        st.error("❌ No existe training_baseline.csv")
+        return
+
+    if not os.path.exists("production_predictions.csv"):
+        st.error("❌ No hay datos de producción aún")
+        return
+
+    if os.path.exists("evidently_phishing_report.html"):
+        st.info("📄 Usando reporte Evidently existente")
+        return
+
+    baseline = pd.read_csv("training_baseline.csv")
+    production = pd.read_csv("production_predictions.csv")
+
+    FEATURES = [
+        "Fatiga_Global_Score",
+        "Big5_Responsabilidad",
+        "Big5_Apertura",
+        "Demo_Generacion_Edad",
+        "Demo_Rol_Trabajo",
+        "Demo_Horas",
+    ]
+
+    baseline = baseline[FEATURES]
+    production = production[FEATURES]
+
+    report = Report(metrics=[DataDriftPreset()])
+    report.run(reference_data=baseline, current_data=production)
+    report.save_html("evidently_phishing_report.html")
+
 
 def page_results():
 
@@ -36,21 +74,14 @@ def page_results():
     if st.session_state.get("prediction") is None:
         st.session_state.prediction = predict(model_features)
 
-    result = predict(model_features)
-    log_prediction(model_features, result) # Log para Evidently AI
-    
-    st.write("📂 Directorio actual:", os.getcwd())
-    st.write("📄 Archivos en este directorio:", os.listdir("."))
-
-    if os.path.exists("production_predictions.csv"):
-        st.success("✅ CSV encontrado")
-        st.dataframe(pd.read_csv("production_predictions.csv").tail())
-    else:
-        st.error("❌ CSV NO encontrado")
-    
+    result = st.session_state.prediction
     prediction = result["prediction"]
-    probability = result.get("probability")  # puede ser None
+    probability = result.get("probability")
 
+    # Log solo una vez
+    if not st.session_state.get("logged"):
+        log_prediction(model_features, result)
+        st.session_state.logged = True
 
     # =========================
     # 3️⃣ Mostrar resultado
@@ -83,18 +114,20 @@ def page_results():
     # =========================
     st.divider()
     if st.button("🔄 Reiniciar encuesta"):
-        for k in ["page", "responses", "scores", "prediction"]:
+        for k in ["page", "responses", "scores", "prediction", "logged"]:
             st.session_state.pop(k, None)
         st.session_state.page = 1
         st.experimental_rerun()
     
-    with st.expander("🧾 Últimas predicciones registradas"):
-        if os.path.exists("production_predictions.csv"):
-            st.dataframe(pd.read_csv("production_predictions.csv").tail(10))
-            with open("production_predictions.csv", "rb") as f:
-                st.download_button(
-                    label="📥 Descargar predicciones",
-                    data=f,
-                    file_name="production_predictions.csv",
-                    mime="text/csv"
-                )
+    if st.button("📈 Generar reporte de monitoreo"):
+        generate_evidently_report()
+        st.success("Reporte Evidently generado")
+
+    if os.path.exists("evidently_phishing_report.html"):
+        st.components.v1.html(
+                open("evidently_phishing_report.html").read(),
+                height=800,
+                scrolling=True
+            )
+
+
