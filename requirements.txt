@@ -2,3 +2,4 @@ streamlit
 requests
 pandas
 mlflow
+evidently==0.4.30
