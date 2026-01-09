@@ -11,7 +11,7 @@ MODEL_FEATURES = [
     "Fatiga_Global_Score",
     "Big5_Responsabilidad",
     "Big5_Apertura",
-    "Demo_Generacion_Edad",
+    "Phish_Riesgo_Percibido",
     "Demo_Rol_Trabajo",
     "Demo_Horas"
 ]
@@ -79,7 +79,7 @@ def prepare_features(scores: dict) -> dict:
         "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
         "Big5_Responsabilidad": float(scores["Big5_Responsabilidad"]),
         "Big5_Apertura": float(scores["Big5_Apertura"]),
-        "Demo_Generacion_Edad": int(scores["Demo_Generacion_Edad"]),
+        "Phish_Riesgo_Percibido": int(scores["Phish_Riesgo_Percibido"]),
         "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
         "Demo_Horas": int(scores["Demo_Horas"]),
     }
