@@ -5,7 +5,7 @@ import streamlit as st
 # Configuración
 # =====================================================
 
-DATABRICKS_ENDPOINT = "phishing-endpoint"
+DATABRICKS_ENDPOINT = "api-phishing"
 
 MODEL_FEATURES = [
     "Fatiga_Global_Score",
