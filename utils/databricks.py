@@ -7,14 +7,29 @@ import streamlit as st
 
 DATABRICKS_ENDPOINT = "phishing-endpoint"
 
-MODEL_FEATURES = [
-    "Fatiga_Global_Score",
-    "Big5_Responsabilidad",
-    "Big5_Apertura",
-    "Phish_Riesgo_Percibido",
-    "Demo_Rol_Trabajo",
-    "Demo_Horas"
-]
+def get_model_features():
+    host = get_databricks_host()
+    headers = get_headers()
+
+    url = f"{host}/api/2.0/serving-endpoints/{DATABRICKS_ENDPOINT}"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        st.error("❌ No se pudo obtener metadata del endpoint")
+        st.stop()
+
+    data = response.json()
+
+    # Tomamos el primer modelo servido
+    served_model = data["served_models"][0]
+
+    input_schema = served_model["model_version"]["signature"]["inputs"]
+
+    # Extraer solo nombres
+    feature_names = [f["name"] for f in input_schema]
+
+    return feature_names
+
 
 # =====================================================
 # Helpers
@@ -71,18 +86,17 @@ def get_endpoint_url():
 # =====================================================
 
 def prepare_features(scores: dict) -> dict:
-    missing = [f for f in MODEL_FEATURES if f not in scores]
+    model_features = get_model_features()
+
+    missing = [f for f in model_features if f not in scores]
     if missing:
         raise ValueError(f"❌ Faltan features requeridas por el modelo: {missing}")
 
-    return {
-        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
-        "Big5_Responsabilidad": float(scores["Big5_Responsabilidad"]),
-        "Big5_Apertura": float(scores["Big5_Apertura"]),
-        "Phish_Riesgo_Percibido": int(scores["Phish_Riesgo_Percibido"]),
-        "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
-        "Demo_Horas": int(scores["Demo_Horas"]),
-    }
+    # Enviar SOLO las features que el modelo espera
+    prepared = {f: scores[f] for f in model_features}
+
+    return prepared
+
 
 
 # =====================================================
