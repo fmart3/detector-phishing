@@ -148,6 +148,7 @@ from components.likert_renderer import render_likert_page
 from components.questions_likert import (
     BIG5_RESPONSABILIDAD,
     BIG5_APERTURA,
+    PHISH_RIESGO_PERCIBIDO,
     FATIGA_EMOCIONAL,
     FATIGA_CINISMO,
     FATIGA_ABANDONO
@@ -173,6 +174,19 @@ def page_big5_apertura():
         prev_page=1,
         next_page=3
     )
+    
+# ----------------------------
+# PHISHING
+# ----------------------------
+
+def page_phish_riesgo_percibido():
+    render_likert_page(
+        title="🎣 Phishing – Riesgo Percibido",
+        description="Indique su grado de acuerdo con las siguientes afirmaciones:",
+        questions=PHISH_RIESGO_PERCIBIDO,
+        prev_page=2,
+        next_page=4
+    )
 
 # ----------------------------
 # FATIGA
@@ -183,8 +197,8 @@ def page_fatiga_emocional():
         title="😴 Fatiga de Seguridad – Agotamiento Emocional",
         description="Indique su grado de acuerdo con las siguientes afirmaciones:",
         questions=FATIGA_EMOCIONAL,
-        prev_page=2,
-        next_page=4
+        prev_page=3,
+        next_page=5
     )
 
 def page_fatiga_cinismo():
@@ -192,8 +206,8 @@ def page_fatiga_cinismo():
         title="😴 Fatiga de Seguridad – Cinismo",
         description="Indique su grado de acuerdo con las siguientes afirmaciones:",
         questions=FATIGA_CINISMO,
-        prev_page=3,
-        next_page=5
+        prev_page=4,
+        next_page=6
     )
 
 def page_fatiga_abandono():
@@ -201,6 +215,6 @@ def page_fatiga_abandono():
         title="😴 Fatiga de Seguridad – Intención de Abandono",
         description="Indique su grado de acuerdo con las siguientes afirmaciones:",
         questions=FATIGA_ABANDONO,
-        prev_page=4,
-        next_page=6
+        prev_page=5,
+        next_page=7
     )

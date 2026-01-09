@@ -48,6 +48,7 @@ if "prediction" not in st.session_state:
 from pages.pages_likert import (
     page_big5_responsabilidad,
     page_big5_apertura,
+    page_phish_riesgo_percibido,
     page_fatiga_emocional,
     page_fatiga_cinismo,
     page_fatiga_abandono
@@ -80,10 +81,11 @@ from pages.results import page_results
 PAGESAUX = {
     1: page_big5_responsabilidad,
     2: page_big5_apertura,
-    3: page_fatiga_emocional,
-    4: page_fatiga_cinismo,
-    5: page_fatiga_abandono,
-    6: page_demographics,
+    3: page_phish_riesgo_percibido,
+    4: page_fatiga_emocional,
+    5: page_fatiga_cinismo,
+    6: page_fatiga_abandono,
+    7: page_demographics,
     99: page_results
 }
 
