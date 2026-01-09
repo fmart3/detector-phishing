@@ -8,27 +8,44 @@ import streamlit as st
 DATABRICKS_ENDPOINT = "phishing-endpoint"
 
 def get_model_features():
-    host = get_databricks_host()
+    url = f"{get_databricks_host()}/api/2.0/serving-endpoints/{DATABRICKS_ENDPOINT}"
     headers = get_headers()
 
-    url = f"{host}/api/2.0/serving-endpoints/{DATABRICKS_ENDPOINT}"
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
-        st.error("❌ No se pudo obtener metadata del endpoint")
-        st.stop()
+        raise RuntimeError(
+            f"❌ Error al obtener metadata del endpoint Databricks: {response.text}"
+        )
 
     data = response.json()
 
-    # Tomamos el primer modelo servido
-    served_model = data["served_models"][0]
+    # Validación defensiva
+    if "config" not in data or "served_models" not in data["config"]:
+        raise RuntimeError(
+            "❌ El endpoint no contiene 'served_models'. "
+            "Verifica que el endpoint esté activo y tenga un modelo servido."
+        )
 
-    input_schema = served_model["model_version"]["signature"]["inputs"]
+    served_models = data["config"]["served_models"]
 
-    # Extraer solo nombres
-    feature_names = [f["name"] for f in input_schema]
+    if not served_models:
+        raise RuntimeError("❌ No hay modelos servidos en este endpoint.")
+
+    served_model = served_models[0]
+
+    signature = served_model.get("signature")
+    if not signature or "inputs" not in signature:
+        raise RuntimeError("❌ El modelo no tiene signature definida en MLflow.")
+
+    # MLflow guarda inputs como string JSON
+    import json
+    inputs = json.loads(signature["inputs"])
+
+    feature_names = [f["name"] for f in inputs]
 
     return feature_names
+
 
 
 # =====================================================
@@ -92,10 +109,7 @@ def prepare_features(scores: dict) -> dict:
     if missing:
         raise ValueError(f"❌ Faltan features requeridas por el modelo: {missing}")
 
-    # Enviar SOLO las features que el modelo espera
-    prepared = {f: scores[f] for f in model_features}
-
-    return prepared
+    return {f: scores[f] for f in model_features}
 
 
 
