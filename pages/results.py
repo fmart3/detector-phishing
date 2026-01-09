@@ -30,7 +30,7 @@ def generate_evidently_report():
         "Fatiga_Global_Score",
         "Big5_Responsabilidad",
         "Big5_Apertura",
-        "Demo_Generacion_Edad",
+        "Phish_Riesgo_Percibido",
         "Demo_Rol_Trabajo",
         "Demo_Horas",
     ]

@@ -34,17 +34,12 @@ Big5_Apertura = st.slider(
     step=0.1
 )
 
-Demo_Generacion_Edad = st.selectbox(
-    "Generación",
-    options={
-        "Tradicionalistas": 1,
-        "Baby Boomers": 2,
-        "Generación X": 3,
-        "Millennials": 4,
-        "Generación Z": 5
-    }.items(),
-    format_func=lambda x: x[0]
-)[1]
+Phish_Riesgo_Percibido = st.slider(
+    "Phish – Riesgo Percibido",
+    min_value=1.0,
+    max_value=5.0,
+    step=0.1
+)
 
 Demo_Rol_Trabajo = st.selectbox(
     "Rol de trabajo",
@@ -77,7 +72,7 @@ if st.button("🚀 Ejecutar predicción"):
         "Fatiga_Global_Score": Fatiga_Global_Score,
         "Big5_Responsabilidad": Big5_Responsabilidad,
         "Big5_Apertura": Big5_Apertura,
-        "Demo_Generacion_Edad": Demo_Generacion_Edad,
+        "Phish_Riesgo_Percibido": Phish_Riesgo_Percibido,
         "Demo_Rol_Trabajo": Demo_Rol_Trabajo,
         "Demo_Horas": Demo_Horas
     }
