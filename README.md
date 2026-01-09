@@ -94,9 +94,3 @@ Las predicciones en producción no se guardan en Databricks (limitación Communi
 
 ```table
 ```
-
-
-
-
-👤 Autor Proyecto académico/aplicado en ciberseguridad y factores humanos. Enfocado en la prevención, concientización y cuantificación del riesgo humano.
-
