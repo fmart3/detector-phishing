@@ -32,16 +32,11 @@ def get_headers():
 
 
 def get_databricks_host():
-    """
-    Intenta obtener el host desde distintos nombres comunes
-    """
-    possible_keys = [
+    for key in [
         "DATABRICKS_HOST",
         "DATABRICKS_WORKSPACE_URL",
         "DATABRICKS_INSTANCE"
-    ]
-
-    for key in possible_keys:
+    ]:
         if key in st.secrets:
             host = st.secrets[key].rstrip("/")
             if not host.startswith("http"):
@@ -49,21 +44,12 @@ def get_databricks_host():
                 st.stop()
             return host
 
-    st.error(
-        "❌ No se encontró el HOST de Databricks.\n\n"
-        "Configura uno de los siguientes en Streamlit Secrets:\n"
-        "- DATABRICKS_HOST\n"
-        "- DATABRICKS_WORKSPACE_URL\n"
-        "- DATABRICKS_INSTANCE\n\n"
-        "Ejemplo:\n"
-        "https://adb-123456789012.3.azuredatabricks.net"
-    )
+    st.error("❌ No se encontró el HOST de Databricks")
     st.stop()
 
 
 def get_endpoint_url():
-    host = get_databricks_host()
-    return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
+    return f"{get_databricks_host()}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
 
 
 # =====================================================
@@ -73,7 +59,7 @@ def get_endpoint_url():
 def prepare_features(scores: dict) -> dict:
     missing = [f for f in MODEL_FEATURES if f not in scores]
     if missing:
-        raise ValueError(f"❌ Faltan features requeridas por el modelo: {missing}")
+        raise ValueError(f"❌ Faltan features: {missing}")
 
     return {
         "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
@@ -102,12 +88,19 @@ def predict(scores: dict) -> dict:
         st.code(response.text)
         st.stop()
 
-    result = response.json()
-    prediction = int(result["predictions"][0][1] >= 0.5)
-    probability = float(result["predictions"][0][1])
+    raw = response.json()
+
+    try:
+        probs = raw["predictions"][0]      # [p0, p1]
+        probability = float(probs[1])
+        prediction = int(probability >= 0.5)
+    except Exception:
+        st.error("❌ Respuesta inesperada del modelo")
+        st.json(raw)
+        st.stop()
 
     return {
         "prediction": prediction,
-        "probability": probability
+        "probability": probability,
+        "raw_response": raw
     }
-
