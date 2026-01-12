@@ -93,9 +93,6 @@ def predict(scores: dict) -> dict:
 
     result = response.json()
 
-    # =========================
-    # Validación defensiva
-    # =========================
     if "predictions" not in result or len(result["predictions"]) == 0:
         st.error("❌ Respuesta inesperada del modelo")
         st.json(result)
@@ -103,8 +100,27 @@ def predict(scores: dict) -> dict:
 
     row = result["predictions"][0]
 
+    # =========================
+    # CASO 1: el modelo devuelve solo probabilidad (float)
+    # =========================
+    if isinstance(row, (float, int)):
+        probability = float(row)
+        prediction = int(probability >= 0.5)
+
+    # =========================
+    # CASO 2: el modelo devuelve dict (pyfunc ideal)
+    # =========================
+    elif isinstance(row, dict):
+        probability = float(row["probability"])
+        prediction = int(row["prediction"])
+
+    else:
+        st.error("❌ Formato de predicción no soportado")
+        st.write(row)
+        st.stop()
+
     return {
-        "prediction": int(row["prediction"]),
-        "probability": float(row["probability"]),
+        "prediction": prediction,
+        "probability": probability,
         "raw_response": result
     }
