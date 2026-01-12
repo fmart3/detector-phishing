@@ -1,5 +1,5 @@
 import streamlit as st
-
+from pages.appAlt import page_app_alt
 # =========================
 # Configuración básica
 # =========================
@@ -71,6 +71,7 @@ PAGES = {
 }
 
 PAGESAUX = {
+    0: page_app_alt,
     1: page_big5_responsabilidad,
     2: page_big5_apertura,
     3: page_phish_riesgo_percibido,
@@ -86,9 +87,13 @@ PAGESAUX = {
 # =========================
 current_page = st.session_state.page
 
-if current_page in PAGES:
-    PAGES[current_page]()
+if "page" not in st.session_state:
+    st.session_state.page = 0   # 👈 arranca en appAlt
+
+if current_page in PAGESAUX:
+    PAGESAUX[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = 1
     st.rerun()
+    
