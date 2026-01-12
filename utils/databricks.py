@@ -80,7 +80,10 @@ def predict(scores: dict) -> dict:
     headers = get_headers()
     features = prepare_features(scores)
 
-    payload = {"dataframe_records": [features]}
+    payload = {
+        "dataframe_records": [features]
+    }
+
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code != 200:
@@ -88,11 +91,20 @@ def predict(scores: dict) -> dict:
         st.code(response.text)
         st.stop()
 
-    raw = response.json()
-    result = raw["predictions"][0]
+    result = response.json()
+
+    # =========================
+    # Validación defensiva
+    # =========================
+    if "predictions" not in result or len(result["predictions"]) == 0:
+        st.error("❌ Respuesta inesperada del modelo")
+        st.json(result)
+        st.stop()
+
+    row = result["predictions"][0]
 
     return {
-        "prediction": int(result["prediction"]),
-        "probability": float(result["probability"]),
-        "raw_response": raw
+        "prediction": int(row["prediction"]),
+        "probability": float(row["probability"]),
+        "raw_response": result
     }
