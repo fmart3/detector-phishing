@@ -109,10 +109,14 @@ def predict(scores: dict) -> dict:
     probability = None
     if "probabilities" in result:
         probability = float(result["probabilities"][0][1])
+    elif "confidence" in result:
+        probability = float(result["confidence"][0])
+    else:
+        # fallback defensivo
+        probability = float(prediction)
 
     return {
         "prediction": prediction,
-        "probability": probability,
-        "raw_response": result
+        "probability": probability
     }
 
