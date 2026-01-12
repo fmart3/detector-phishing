@@ -104,16 +104,9 @@ def predict(scores: dict) -> dict:
 
     result = response.json()
 
-    prediction = int(result["predictions"][0])
+    prediction = int(result["predictions"][0][1] >= 0.5)
+    probability = float(result["predictions"][0][1])
 
-    probability = None
-    if "probabilities" in result:
-        probability = float(result["probabilities"][0][1])
-    elif "confidence" in result:
-        probability = float(result["confidence"][0])
-    else:
-        # fallback defensivo
-        probability = float(prediction)
 
     return {
         "prediction": prediction,
