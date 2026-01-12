@@ -89,18 +89,10 @@ def predict(scores: dict) -> dict:
         st.stop()
 
     raw = response.json()
-
-    try:
-        probs = raw["predictions"][0]      # [p0, p1]
-        probability = float(probs[1])
-        prediction = int(probability >= 0.5)
-    except Exception:
-        st.error("❌ Respuesta inesperada del modelo")
-        st.json(raw)
-        st.stop()
+    result = raw["predictions"][0]
 
     return {
-        "prediction": prediction,
-        "probability": probability,
+        "prediction": int(result["prediction"]),
+        "probability": float(result["probability"]),
         "raw_response": raw
     }
