@@ -1,5 +1,4 @@
 import streamlit as st
-from utils.databricks import predict, prepare_features
 
 st.set_page_config(
     page_title="Test conexión modelo Phishing",
@@ -10,40 +9,16 @@ st.title("🧪 Test rápido – Modelo Phishing")
 st.caption("Ingreso manual de scores para validar conexión con Databricks")
 
 st.divider()
-
 st.subheader("📥 Ingreso de variables")
 
-Fatiga_Global_Score = st.slider(
-    "Fatiga Global Score",
-    min_value=1.0,
-    max_value=5.0,
-    step=0.1
-)
-
-Big5_Responsabilidad = st.slider(
-    "Big5 – Responsabilidad",
-    min_value=1.0,
-    max_value=5.0,
-    step=0.1
-)
-
-Big5_Apertura = st.slider(
-    "Big5 – Apertura",
-    min_value=1.0,
-    max_value=5.0,
-    step=0.1
-)
-
-Phish_Riesgo_Percibido = st.slider(
-    "Phish – Riesgo Percibido",
-    min_value=1.0,
-    max_value=5.0,
-    step=0.1
-)
+Fatiga_Global_Score = st.slider("Fatiga Global Score", 1.0, 5.0, 2.5, 0.1)
+Big5_Responsabilidad = st.slider("Big5 – Responsabilidad", 1.0, 5.0, 2.5, 0.1)
+Big5_Apertura = st.slider("Big5 – Apertura", 1.0, 5.0, 2.5, 0.1)
+Phish_Riesgo_Percibido = st.slider("Phish – Riesgo Percibido", 1.0, 5.0, 3.0, 0.1)
 
 Demo_Rol_Trabajo = st.selectbox(
     "Rol de trabajo",
-    options={
+    {
         "Liderazgo": 1,
         "Supervisión": 2,
         "Profesional / Analista": 3,
@@ -54,7 +29,7 @@ Demo_Rol_Trabajo = st.selectbox(
 
 Demo_Horas = st.selectbox(
     "Horas diarias frente al computador",
-    options={
+    {
         "Menos de 2 horas": 1,
         "Entre 2 y 5 horas": 2,
         "Entre 5 y 8 horas": 3,
@@ -68,7 +43,8 @@ st.divider()
 
 if st.button("🚀 Ejecutar predicción"):
 
-    scores = {
+    # 👉 Guardamos como si fueran respuestas
+    st.session_state.responses = {
         "Fatiga_Global_Score": Fatiga_Global_Score,
         "Big5_Responsabilidad": Big5_Responsabilidad,
         "Big5_Apertura": Big5_Apertura,
@@ -77,40 +53,10 @@ if st.button("🚀 Ejecutar predicción"):
         "Demo_Horas": Demo_Horas
     }
 
-    try:
-        features = prepare_features(scores)
-        result = predict(features)
+    # Limpiamos estados previos
+    for k in ["scores", "prediction", "logged"]:
+        st.session_state.pop(k, None)
 
-        st.success("✅ Conexión exitosa con Databricks")
-
-        st.subheader("📊 Resultado del modelo")
-
-        if result["prediction"] == 1:
-            st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
-        else:
-            st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
-            
-        probability = result.get("probability")
-
-        if probability is not None:
-            prob_pct = probability * 100
-
-            st.markdown(
-                f"""
-                **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
-                """
-            )
-
-            st.progress(probability)
-
-
-        with st.expander("🔎 Ver payload enviado"):
-            st.json(features)
-
-        with st.expander("📦 Respuesta completa del endpoint"):
-            st.json(result)
-
-    except Exception as e:
-        st.error("❌ Error al ejecutar la predicción")
-        st.write("Secrets disponibles:", list(st.secrets.keys()))
-        st.exception(e)
+    # 👉 Redirigir a la página oficial de resultados
+    st.session_state.page = 99
+    st.rerun()
