@@ -94,11 +94,20 @@ def page_results():
         st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
 
     if probability is not None:
+        prob_pct = probability * 100
+
         st.markdown(
-            f"### 📈 Susceptibilidad estimada: **{probability * 100:.1f}%**"
+            f"""
+            ### 📈 Resultado de la evaluación
+
+            **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
+            """
         )
+
+        st.progress(probability)
     else:
         st.caption("Probabilidad no disponible para este modelo.")
+
 
     # =========================
     # Debug / académico

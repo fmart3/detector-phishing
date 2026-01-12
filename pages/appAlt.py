@@ -89,6 +89,20 @@ if st.button("🚀 Ejecutar predicción"):
             st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
         else:
             st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
+            
+        probability = result.get("probability")
+
+        if probability is not None:
+            prob_pct = probability * 100
+
+            st.markdown(
+                f"""
+                **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
+                """
+            )
+
+            st.progress(probability)
+
 
         with st.expander("🔎 Ver payload enviado"):
             st.json(features)
