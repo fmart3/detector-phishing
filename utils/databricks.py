@@ -65,7 +65,7 @@ def prepare_features(scores: dict) -> dict:
         "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
         "Big5_Responsabilidad": float(scores["Big5_Responsabilidad"]),
         "Big5_Apertura": float(scores["Big5_Apertura"]),
-        "Phish_Riesgo_Percibido": int(scores["Phish_Riesgo_Percibido"]),
+        "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
         "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
         "Demo_Horas": int(scores["Demo_Horas"]),
     }
