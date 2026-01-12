@@ -103,10 +103,8 @@ def predict(scores: dict) -> dict:
         st.stop()
 
     result = response.json()
-
     prediction = int(result["predictions"][0][1] >= 0.5)
     probability = float(result["predictions"][0][1])
-
 
     return {
         "prediction": prediction,
