@@ -6,19 +6,20 @@ st.set_page_config(
 )
 
 st.title("🧪 Test rápido – Modelo Phishing")
-st.caption("Ingreso manual de scores para validar conexión con Databricks")
+st.caption("Ingreso manual de scores para validar el modelo")
 
 st.divider()
+
 st.subheader("📥 Ingreso de variables")
 
 Fatiga_Global_Score = st.slider("Fatiga Global Score", 1.0, 5.0, 2.5, 0.1)
-Big5_Responsabilidad = st.slider("Big5 – Responsabilidad", 1.0, 5.0, 2.5, 0.1)
-Big5_Apertura = st.slider("Big5 – Apertura", 1.0, 5.0, 2.5, 0.1)
+Big5_Responsabilidad = st.slider("Big5 – Responsabilidad", 1.0, 5.0, 3.0, 0.1)
+Big5_Apertura = st.slider("Big5 – Apertura", 1.0, 5.0, 3.0, 0.1)
 Phish_Riesgo_Percibido = st.slider("Phish – Riesgo Percibido", 1.0, 5.0, 3.0, 0.1)
 
 Demo_Rol_Trabajo = st.selectbox(
     "Rol de trabajo",
-    {
+    options={
         "Liderazgo": 1,
         "Supervisión": 2,
         "Profesional / Analista": 3,
@@ -29,7 +30,7 @@ Demo_Rol_Trabajo = st.selectbox(
 
 Demo_Horas = st.selectbox(
     "Horas diarias frente al computador",
-    {
+    options={
         "Menos de 2 horas": 1,
         "Entre 2 y 5 horas": 2,
         "Entre 5 y 8 horas": 3,
@@ -41,10 +42,10 @@ Demo_Horas = st.selectbox(
 
 st.divider()
 
-if st.button("🚀 Ejecutar predicción"):
+if st.button("🚀 Evaluar susceptibilidad"):
 
-    # 👉 Guardamos como si fueran respuestas
-    st.session_state.responses = {
+    # Guardamos scores directamente (sin predict)
+    st.session_state.scores = {
         "Fatiga_Global_Score": Fatiga_Global_Score,
         "Big5_Responsabilidad": Big5_Responsabilidad,
         "Big5_Apertura": Big5_Apertura,
@@ -54,9 +55,9 @@ if st.button("🚀 Ejecutar predicción"):
     }
 
     # Limpiamos estados previos
-    for k in ["scores", "prediction", "logged"]:
-        st.session_state.pop(k, None)
+    st.session_state.pop("prediction", None)
+    st.session_state.pop("logged", None)
 
-    # 👉 Redirigir a la página oficial de resultados
+    # Saltamos a resultados
     st.session_state.page = 99
     st.rerun()
