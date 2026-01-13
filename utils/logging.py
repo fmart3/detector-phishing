@@ -1,15 +1,16 @@
-import pandas as pd
 from datetime import datetime
+import pandas as pd
 import os
 
 LOG_FILE = "production_predictions.csv"
 
 def log_prediction(features: dict, result: dict):
+
     row = {
         "timestamp": datetime.utcnow(),
         **features,
-        "prediction": result["prediction"],
-        #"probability": result.get("probability")
+        "probability": result.get("probability"),
+        "risk_level": result.get("risk_level")
     }
 
     df = pd.DataFrame([row])
