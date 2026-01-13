@@ -51,12 +51,8 @@ def page_results():
     # =========================
     # 1️⃣ Obtener scores
     # =========================
-
-    # Caso A: vienen desde appAlt (scores ya calculados)
     if st.session_state.get("scores") is not None:
         scores = st.session_state.scores
-
-    # Caso B: vienen desde encuesta completa
     else:
         responses = st.session_state.get("responses")
 
@@ -66,9 +62,6 @@ def page_results():
 
         scores = compute_scores(responses)
         st.session_state.scores = scores
-
-
-    scores = st.session_state.scores
 
     try:
         model_features = prepare_features(scores)
@@ -83,47 +76,49 @@ def page_results():
         st.session_state.prediction = predict(model_features)
 
     result = st.session_state.prediction
-    prediction = result["prediction"]
     probability = result.get("probability")
-    THRESHOLD = 0.60
-    prediction = 1 if probability >= THRESHOLD else 0
 
+    if probability is None:
+        st.error("El modelo no devolvió una probabilidad válida.")
+        return
+
+    # =========================
+    # 3️⃣ Aplicar umbral
+    # =========================
+    THRESHOLD = 0.60
+    final_prediction = 1 if probability >= THRESHOLD else 0
 
     # Log solo una vez
     if not st.session_state.get("logged"):
-        log_prediction(model_features, result)
+        log_prediction(model_features, {
+            "prediction": final_prediction,
+            "probability": probability
+        })
         st.session_state.logged = True
 
     # =========================
-    # 3️⃣ Mostrar resultado
+    # 4️⃣ Mostrar resultado
     # =========================
     st.divider()
 
-    if probability >= THRESHOLD:
+    prob_pct = probability * 100
+
+    st.markdown(
+        f"""
+        ### 📈 Resultado de la evaluación
+
+        **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
+        """
+    )
+
+    st.progress(probability)
+
+    st.caption(f"Umbral de riesgo configurado en {int(THRESHOLD * 100)}%")
+
+    if final_prediction == 1:
         st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
     else:
-        st.success("✅ Riesgo BAJO de susceptibilidad a phishing")        
-    st.caption(
-    f"Umbral de riesgo configurado en {int(THRESHOLD*100)}%"
-)
-
-
-
-    if probability is not None:
-        prob_pct = probability * 100
-
-        st.markdown(
-            f"""
-            ### 📈 Resultado de la evaluación
-
-            **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
-            """
-        )
-
-        st.progress(probability)
-    else:
-        st.caption("Probabilidad no disponible para este modelo.")
-
+        st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
 
     # =========================
     # Debug / académico
@@ -144,16 +139,14 @@ def page_results():
         st.session_state.page = 0
         st.experimental_rerun()
 
-    st.divider()    
+    st.divider()
     if st.button("📈 Generar reporte de monitoreo"):
         generate_evidently_report()
         st.success("Reporte Evidently generado")
 
     if os.path.exists("evidently_phishing_report.html"):
         st.components.v1.html(
-                open("evidently_phishing_report.html").read(),
-                height=800,
-                scrolling=True
-            )
-
-
+            open("evidently_phishing_report.html").read(),
+            height=800,
+            scrolling=True
+        )
