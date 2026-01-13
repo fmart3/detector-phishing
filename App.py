@@ -14,6 +14,8 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # =========================
 # Inicialización de estado
 # =========================
+if "page" not in st.session_state:
+    st.session_state.page = 0
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
@@ -74,8 +76,8 @@ PAGES = {
 # =========================
 current_page = st.session_state.page
 
-if "page" not in st.session_state:
-    st.session_state.page = 0   # 👈 arranca en appAlt
+# if "page" not in st.session_state:
+#     st.session_state.page = 0
 
 if current_page in PAGES:
     PAGES[current_page]()
