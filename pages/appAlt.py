@@ -8,7 +8,7 @@ def page_app_alt():
     st.divider()
 
     Fatiga_Global_Score = st.slider("Fatiga Global Score", 1.0, 5.0, 2.5, 0.1)
-    Big5_Responsabilidad = st.slider("Big5 – Responsabilidad", 1.0, 5.0, 3.0, 0.1)
+    Phish_Susceptibilidad  = st.slider("Big5 – Susceptibilidad", 1.0, 5.0, 3.0, 0.1)
     Big5_Apertura = st.slider("Big5 – Apertura", 1.0, 5.0, 3.0, 0.1)
     Phish_Riesgo_Percibido = st.slider("Phish – Riesgo Percibido", 1.0, 5.0, 3.0, 0.1)
 
@@ -41,7 +41,7 @@ def page_app_alt():
 
         st.session_state.scores = {
             "Fatiga_Global_Score": Fatiga_Global_Score,
-            "Big5_Responsabilidad": Big5_Responsabilidad,
+            "Phish_Susceptibilidad ": Phish_Susceptibilidad ,
             "Big5_Apertura": Big5_Apertura,
             "Phish_Riesgo_Percibido": Phish_Riesgo_Percibido,
             "Demo_Rol_Trabajo": Demo_Rol_Trabajo,
