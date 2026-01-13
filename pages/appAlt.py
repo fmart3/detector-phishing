@@ -41,7 +41,7 @@ def page_app_alt():
 
         st.session_state.scores = {
             "Fatiga_Global_Score": Fatiga_Global_Score,
-            "Phish_Susceptibilidad ": Phish_Susceptibilidad ,
+            "Phish_Susceptibilidad": Phish_Susceptibilidad,
             "Big5_Apertura": Big5_Apertura,
             "Phish_Riesgo_Percibido": Phish_Riesgo_Percibido,
             "Demo_Rol_Trabajo": Demo_Rol_Trabajo,
