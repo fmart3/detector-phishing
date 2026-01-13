@@ -48,17 +48,25 @@ def page_results():
     st.markdown("## 📊 Resultado de la Evaluación")
     st.write("Este resultado se basa en sus respuestas.")
 
-    responses = st.session_state.get("responses")
-
-    if not responses:
-        st.error("No hay respuestas registradas.")
-        return
-
     # =========================
-    # 1️⃣ Calcular scores (una sola vez)
+    # 1️⃣ Obtener scores
     # =========================
-    if st.session_state.get("scores") is None:
-        st.session_state.scores = compute_scores(responses)
+
+    # Caso A: vienen desde appAlt (scores ya calculados)
+    if st.session_state.get("scores") is not None:
+        scores = st.session_state.scores
+
+    # Caso B: vienen desde encuesta completa
+    else:
+        responses = st.session_state.get("responses")
+
+        if not responses:
+            st.error("No hay respuestas registradas.")
+            return
+
+        scores = compute_scores(responses)
+        st.session_state.scores = scores
+
 
     scores = st.session_state.scores
 
