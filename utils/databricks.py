@@ -92,10 +92,23 @@ def predict(scores: dict) -> dict:
         st.stop()
 
     result = response.json()
-    pred_class = int(result["predictions"][0])
+    prediction_row = result["predictions"][0]
 
-    # ⚠️ Probabilidad proxy (explicada en el informe)
-    probability = 0.75 if pred_class == 1 else 0.25
+    # Caso 1: modelo PyFunc devuelve dict con keys
+    if isinstance(prediction_row, dict):
+        if "prediction" in prediction_row:
+            pred_class = int(prediction_row["prediction"])
+            probability = float(prediction_row.get("probability"))
+        else:
+            # fallback genérico (por índice)
+            pred_class = int(list(prediction_row.values())[0])
+            probability = None
+
+    # Caso 2: modelo clásico (lista de números)
+    else:
+        pred_class = int(prediction_row)
+        probability = None
+
 
     return {
         "prediction": pred_class,

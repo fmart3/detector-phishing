@@ -91,8 +91,8 @@ current_page = st.session_state.page
 if "page" not in st.session_state:
     st.session_state.page = 0   # 👈 arranca en appAlt
 
-if current_page in PAGESAUX:
-    PAGESAUX[current_page]()
+if current_page in PAGES:
+    PAGES[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = 1
