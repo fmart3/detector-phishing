@@ -83,17 +83,30 @@ def page_results():
         return
 
     # =========================
-    # 3️⃣ Aplicar umbral
+    # 3️⃣ Clasificación por niveles (NO binaria)
     # =========================
-    THRESHOLD = 0.60
-    final_prediction = 1 if probability >= THRESHOLD else 0
+    if probability < 0.45:
+        risk_level = "BAJO"
+        risk_color = "success"
+        risk_msg = "🟢 Riesgo BAJO de susceptibilidad a phishing"
+    elif probability < 0.55:
+        risk_level = "MEDIO"
+        risk_color = "warning"
+        risk_msg = "🟡 Riesgo MEDIO de susceptibilidad a phishing"
+    else:
+        risk_level = "ALTO"
+        risk_color = "error"
+        risk_msg = "🔴 Riesgo ALTO de susceptibilidad a phishing"
 
-    # Log solo una vez
+    # Log solo una vez (guardamos score, no clase dura)
     if not st.session_state.get("logged"):
-        log_prediction(model_features, {
-            "prediction": final_prediction,
-            "probability": probability
-        })
+        log_prediction(
+            model_features,
+            {
+                "risk_level": risk_level,
+                "probability": probability
+            }
+        )
         st.session_state.logged = True
 
     # =========================
@@ -107,18 +120,24 @@ def page_results():
         f"""
         ### 📈 Resultado de la evaluación
 
-        **Tienes un {prob_pct:.1f}% de probabilidad de caer en ataques de phishing.**
+        **Probabilidad estimada de susceptibilidad a phishing:**  
+        **{prob_pct:.1f}%**
         """
     )
 
     st.progress(probability)
 
-    st.caption(f"Umbral de riesgo configurado en {int(THRESHOLD * 100)}%")
-
-    if final_prediction == 1:
-        st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
+    if risk_color == "success":
+        st.success(risk_msg)
+    elif risk_color == "warning":
+        st.warning(risk_msg)
     else:
-        st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
+        st.error(risk_msg)
+
+    st.caption(
+        "Este modelo funciona como un **score continuo de riesgo**, "
+        "no como un clasificador binario estricto."
+    )
 
     # =========================
     # Debug / académico
@@ -133,7 +152,7 @@ def page_results():
     # Reinicio
     # =========================
     st.divider()
-    if st.button("🔄 Reiniciar encuesta"):
+    if st.button("🔄 Reiniciar evaluación"):
         for k in ["page", "responses", "scores", "prediction", "logged"]:
             st.session_state.pop(k, None)
         st.session_state.page = 0
