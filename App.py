@@ -14,8 +14,6 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # =========================
 # Inicialización de estado
 # =========================
-if "page" not in st.session_state:
-    st.session_state.page = 0
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
@@ -69,18 +67,6 @@ PAGES = {
    13: page_fatiga_abandono,
    14: page_demographics,
    99: page_results
-}
-
-PAGESAUX = {
-    0: page_app_alt,
-    #1: page_big5_responsabilidad,
-    #2: page_big5_apertura,
-    #3: page_phish_riesgo_percibido,
-    #4: page_fatiga_emocional,
-    #5: page_fatiga_cinismo,
-    #6: page_fatiga_abandono,
-    #7: page_demographics,
-    99: page_results
 }
 
 # =========================
