@@ -7,8 +7,8 @@ def page_app_alt():
 
     st.divider()
 
-    Fatiga_Global_Score = st.slider("Fatiga Global Score", 1.0, 5.0, 2.5, 0.1)
-    Phish_Susceptibilidad  = st.slider("Big5 – Susceptibilidad", 1.0, 5.0, 3.0, 0.1)
+    Fatiga_Global_Score = st.slider("Fatiga Global Score", 1.0, 5.0, 3.0, 0.1)
+    Phish_Susceptibilidad  = st.slider("Phish – Susceptibilidad", 1.0, 5.0, 3.0, 0.1)
     Big5_Apertura = st.slider("Big5 – Apertura", 1.0, 5.0, 3.0, 0.1)
     Phish_Riesgo_Percibido = st.slider("Phish – Riesgo Percibido", 1.0, 5.0, 3.0, 0.1)
 
