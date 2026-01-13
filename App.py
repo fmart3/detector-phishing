@@ -95,6 +95,6 @@ if current_page in PAGES:
     PAGES[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
-    st.session_state.page = 1
+    st.session_state.page = 0
     st.rerun()
     
