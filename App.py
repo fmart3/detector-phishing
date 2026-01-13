@@ -71,14 +71,14 @@ PAGES = {
 }
 
 PAGESAUX = {
-    0: page_app_alt,
-    1: page_big5_responsabilidad,
-    2: page_big5_apertura,
-    3: page_phish_riesgo_percibido,
-    4: page_fatiga_emocional,
-    5: page_fatiga_cinismo,
-    6: page_fatiga_abandono,
-    7: page_demographics,
+    1: page_app_alt,
+    #1: page_big5_responsabilidad,
+    #2: page_big5_apertura,
+    #3: page_phish_riesgo_percibido,
+    #4: page_fatiga_emocional,
+    #5: page_fatiga_cinismo,
+    #6: page_fatiga_abandono,
+    #7: page_demographics,
     99: page_results
 }
 
