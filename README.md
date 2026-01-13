@@ -71,7 +71,7 @@ URL del Endpoint: https://<DATABRICKS-HOST>/serving-endpoints/api_phishing/invoc
   "dataframe_records": [
     {
       "Fatiga_Global_Score": 1.8,
-      "Big5_Responsabilidad": 3.9,
+      "Phish_Susceptibilidad": 3.9,
       "Big5_Apertura": 4.1,
       "Demo_Generacion_Edad": 3,
       "Demo_Rol_Trabajo": 2,
