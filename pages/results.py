@@ -28,7 +28,7 @@ def generate_evidently_report():
 
     FEATURES = [
         "Fatiga_Global_Score",
-        "Big5_Responsabilidad",
+        "Phish_Susceptibilidad ",
         "Big5_Apertura",
         "Phish_Riesgo_Percibido",
         "Demo_Rol_Trabajo",
