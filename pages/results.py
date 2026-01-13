@@ -85,6 +85,9 @@ def page_results():
     result = st.session_state.prediction
     prediction = result["prediction"]
     probability = result.get("probability")
+    THRESHOLD = 0.60
+    prediction = 1 if probability >= THRESHOLD else 0
+
 
     # Log solo una vez
     if not st.session_state.get("logged"):
@@ -96,10 +99,15 @@ def page_results():
     # =========================
     st.divider()
 
-    if prediction == 1:
+    if probability >= THRESHOLD:
         st.error("⚠️ Riesgo ALTO de susceptibilidad a phishing")
     else:
-        st.success("✅ Riesgo BAJO de susceptibilidad a phishing")
+        st.success("✅ Riesgo BAJO de susceptibilidad a phishing")        
+    st.caption(
+    f"Umbral de riesgo configurado en {int(THRESHOLD*100)}%"
+)
+
+
 
     if probability is not None:
         prob_pct = probability * 100
