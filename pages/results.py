@@ -133,7 +133,7 @@ def page_results():
     if st.button("🔄 Reiniciar encuesta"):
         for k in ["page", "responses", "scores", "prediction", "logged"]:
             st.session_state.pop(k, None)
-        st.session_state.page = 1
+        st.session_state.page = 0
         st.experimental_rerun()
 
     st.divider()    

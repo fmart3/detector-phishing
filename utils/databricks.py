@@ -113,5 +113,5 @@ def predict(scores: dict) -> dict:
     return {
         "prediction": pred_class,
         "probability": probability,
-        "raw_response": result
+        #"raw_response": result
     }
