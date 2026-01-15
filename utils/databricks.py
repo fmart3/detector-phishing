@@ -56,32 +56,27 @@ def get_endpoint_url():
 # Features
 # =====================================================
 
-def prepare_features(scores: dict, responses: dict) -> dict:
-    try:
-        role = responses.get("Demo_Rol_Trabajo")
-        hours = responses.get("Demo_Horas")
+def prepare_features(scores, responses):
 
-        if role is None:
-            raise ValueError("Demo_Rol_Trabajo no fue respondido")
+    hours = responses.get("Demo_Horas")
+    role = responses.get("Demo_Rol_Trabajo")
 
-        if hours is None:
-            raise ValueError("Demo_Horas no fue respondido")
+    if hours is None:
+        raise ValueError("Demo_Horas no fue respondido")
 
-        features = {
-            "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
-            "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
-            "Big5_Apertura": float(scores["Big5_Apertura"]),
-            "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
-            "Demo_Rol_Trabajo": int(role),
-            "Demo_Horas": int(hours),
-        }
+    if role is None:
+        raise ValueError("Demo_Rol_Trabajo no fue respondido")
 
-    except KeyError as e:
-        raise ValueError(f"Feature faltante para el modelo: {e}")
-
+    features = {
+        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
+        "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
+        "Big5_Apertura": float(scores["Big5_Apertura"]),
+        "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
+        "Demo_Rol_Trabajo": int(role),
+        "Demo_Horas": int(hours),
+    }
+    
     return features
-
-
 
 # =====================================================
 # Predicción

@@ -54,17 +54,20 @@ def page_results():
     # =========================
     # 1️⃣ Obtener scores
     # =========================
-    if st.session_state.get("scores") is not None:
-        scores = st.session_state.scores
-    else:
-        responses = st.session_state.get("responses")
 
-        if not responses:
-            st.error("No hay respuestas registradas.")
-            return
+    responses = st.session_state.get("responses")    
+    
+    if not responses:
+        st.error("No hay respuestas registradas.")
+        return
 
+    if st.session_state.get("scores") is None:
         scores = compute_scores(responses)
         st.session_state.scores = scores
+    else:
+        scores = st.session_state.scores
+
+    
 
     try:
         model_features = prepare_features(scores, responses)
