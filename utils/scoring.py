@@ -12,12 +12,6 @@ amabilidad = ["AM01", "AM02", "AM03", "AM04", "AM05", "AM06", "AM07", "AM08", "A
 responsabilidad = ["CO01", "CO02", "CO03", "CO04", "CO05", "CO06", "CO07", "CO08", "CO09", "CO10"]
 neuroticismo = ["NE01", "NE02", "NE03", "NE04", "NE05", "NE06", "NE07", "NE08", "NE09", "NE10"]
 apertura = ["AE01", "AE02", "AE03", "AE04", "AE05", "AE06", "AE07", "AE08", "AE09", "AE10"]
-phish_actitud_riesgo = ["ER01", "ER02", "ER03", "ER04", "ER05", "ER06", "ER07", "ER08", "ER09", "ER10"]
-phish_awareness = ["AW01", "AW02", "AW03"]
-phish_riesgo_percibido = ["PR01", "PR02", "PR03"]
-phish_autoeficacia = ["CP01", "CP02", "CP03"]
-phish_susceptibilidad = ["SU01","SU02","SU03", "SU04"]
-fatiga = ["FE01","FE02","FE03", "FC01","FC02","FC03", "DS01","DS02"]
 
 # ----------------------------
 # PHISHING
