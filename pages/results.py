@@ -71,6 +71,10 @@ def page_results():
     except ValueError as e:
         st.error(str(e))
         return
+    
+    with st.expander("🧪 DEBUG RESPONSES"):
+        st.json(st.session_state.responses)
+
 
     # =========================
     # 2️⃣ Predicción (una sola vez)
