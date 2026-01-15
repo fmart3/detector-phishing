@@ -15,7 +15,7 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # Inicialización de estado
 # =========================
 if "page" not in st.session_state:
-    st.session_state.page = 0
+    st.session_state.page = 1
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
@@ -53,21 +53,21 @@ from pages.results import page_results
 # Enrutador de páginas
 # =========================
 PAGES = {
-    0: page_app_alt,
-#     1: page_big5_extraversion,
-#     2: page_big5_amabilidad,
-#     3: page_big5_responsabilidad,
-#     4: page_big5_neuroticismo,
-#     5: page_big5_apertura,
-#     6: page_phish_actitud_riesgo,
-#     7: page_phish_awareness,
-#     8: page_phish_riesgo_percibido,
-#     9: page_phish_autoeficacia,
-#    10: page_phish_susceptibilidad,
-#    11: page_fatiga_emocional,
-#    12: page_fatiga_cinismo,
-#    13: page_fatiga_abandono,
-#    14: page_demographics,
+    #0: page_app_alt,
+    1: page_big5_extraversion,
+    2: page_big5_amabilidad,
+    3: page_big5_responsabilidad,
+    4: page_big5_neuroticismo,
+    5: page_big5_apertura,
+    6: page_phish_actitud_riesgo,
+    7: page_phish_awareness,
+    8: page_phish_riesgo_percibido,
+    9: page_phish_autoeficacia,
+   10: page_phish_susceptibilidad,
+   11: page_fatiga_emocional,
+   12: page_fatiga_cinismo,
+   13: page_fatiga_abandono,
+   14: page_demographics,
    99: page_results
 }
 
@@ -83,6 +83,6 @@ if current_page in PAGES:
     PAGES[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
-    st.session_state.page = 0
+    st.session_state.page = 1
     st.rerun()
     

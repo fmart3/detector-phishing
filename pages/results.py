@@ -1,3 +1,5 @@
+# /pages/results.py
+
 import streamlit as st
 import os
 import pandas as pd
@@ -5,6 +7,10 @@ import pandas as pd
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
+from utils.scoring import build_full_row
+from utils.persistence import insert_survey_response
+from datetime import datetime
+import uuid
 
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
@@ -100,6 +106,22 @@ def page_results():
 
     # Log solo una vez (guardamos score, no clase dura)
     if not st.session_state.get("logged"):
+
+        responses = st.session_state.get("responses")
+
+        if not responses:
+            st.error("No hay respuestas para persistir.")
+            return
+
+        insert_survey_response(
+            responses=responses,
+            scores=scores,
+            model_output={
+                "probability": probability,
+                "risk_level": risk_level
+            }
+        )
+
         log_prediction(
             model_features,
             {
@@ -107,6 +129,7 @@ def page_results():
                 "probability": probability
             }
         )
+
         st.session_state.logged = True
 
     # =========================
@@ -155,7 +178,7 @@ def page_results():
     if st.button("🔄 Reiniciar evaluación"):
         for k in ["page", "responses", "scores", "prediction", "logged"]:
             st.session_state.pop(k, None)
-        st.session_state.page = 0
+        st.session_state.page = 1
         st.experimental_rerun()
 
     st.divider()

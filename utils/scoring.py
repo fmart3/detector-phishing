@@ -1,4 +1,4 @@
-## envio a modelo
+# /utils/scoring.py
 
 def calculate_mean_score(responses, keys):
     return sum(responses.get(k, 0) for k in keys) / len(keys)
