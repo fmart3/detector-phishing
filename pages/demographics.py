@@ -108,6 +108,7 @@ def page_demographics():
         options=list(COUNTRIES.keys()),
         index=None
     )
+    st.session_state.responses["Demo_Pais"] = COUNTRIES.get(country)
 
     # -----------------------------
     # Tipo de organización
@@ -116,6 +117,7 @@ def page_demographics():
         "Seleccione el tipo de organización",
         options=list(ORG_TYPE.keys())
     )
+    st.session_state.responses["Demo_Tipo_Organización"] = ORG_TYPE.get(org_type)
 
     # -----------------------------
     # Industria (texto libre controlado)
@@ -125,6 +127,7 @@ def page_demographics():
         options=list(INDUSTRY.keys()),
         index=None
     )
+    st.session_state.responses["Demo_Industria"] = INDUSTRY.get(industry)
 
     # -----------------------------
     # Tamaño organización
@@ -133,6 +136,7 @@ def page_demographics():
         "Seleccione el número de colaboradores que trabajan en su organización",
         options=list(EMPLOYEES.keys())
     )
+    st.session_state.responses["Demo_Tamano_Org"] = EMPLOYEES.get(employees)
 
     # -----------------------------
     # Rol
@@ -141,6 +145,7 @@ def page_demographics():
         "Seleccione lo que define mejor su rol en su puesto de trabajo actual",
         options=list(ROLE.keys())
     )
+    st.session_state.responses["Demo_Tipo_Organización"] = ROLE.get(role)
 
     # -----------------------------
     # Generación
@@ -149,6 +154,7 @@ def page_demographics():
         "Seleccione a qué generación pertenece",
         options=list(GENERATION.keys())
     )
+    st.session_state.responses["Demo_Generacion_Edad"] = GENERATION.get(generation)
 
     # -----------------------------
     # Género
@@ -157,7 +163,8 @@ def page_demographics():
         "¿Qué describe mejor su género?",
         options=list(GENDER.keys())
     )
-
+    st.session_state.responses["Demo_Genero"] = GENDER.get(gender)
+    
     # -----------------------------
     # Educación
     # -----------------------------
@@ -165,6 +172,7 @@ def page_demographics():
         "Seleccione su nivel más alto de educación",
         options=list(EDUCATION.keys())
     )
+    st.session_state.responses["Demo_Nivel_Educacion"] = EDUCATION.get(education)
     
     # -----------------------------
     # Horas en PC
@@ -173,21 +181,15 @@ def page_demographics():
         "Seleccione las horas que está conectado a su computador de trabajo en el día",
         options=list(HORAS.keys())
     )
+    st.session_state.responses["Demo_Horas"] = HORAS.get(hours)
 
     # -----------------------------
     # Validación
     # -----------------------------
-    all_answered = all([
-        country,
-        org_type,
-        industry.strip() != "",
-        employees,
-        role,
-        generation,
-        gender,
-        education,
-        hours
-    ])
+    all_answered = (
+        country is not None and
+        industry is not None
+    )
 
     st.divider()
 

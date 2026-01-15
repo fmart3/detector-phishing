@@ -76,7 +76,7 @@ def page_results():
         return
     
     with st.expander("🧪 DEBUG RESPONSES"):
-        st.json(st.session_state.responses)
+        st.json(responses)
 
 
     # =========================

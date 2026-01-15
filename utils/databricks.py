@@ -60,6 +60,13 @@ def prepare_features(scores, responses):
 
     hours = responses.get("Demo_Horas")
     role = responses.get("Demo_Rol_Trabajo")
+    
+    if not isinstance(role, int):
+        raise ValueError(f"Demo_Rol_Trabajo inválido: {role}")
+
+    if not isinstance(hours, int):
+        raise ValueError(f"Demo_Horas inválido: {hours}")
+
 
     if hours is None:
         raise ValueError("Demo_Horas no fue respondido")
