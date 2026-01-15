@@ -203,14 +203,15 @@ def page_demographics():
         else:
             if st.button("Finalizar"):
                 st.session_state.responses.update({
-                    "Demo_Pais": COUNTRIES[country],
-                    "Demo_Tipo_Organizacion": ORG_TYPE[org_type],
-                    "Demo_Industria": INDUSTRY[industry],
-                    "Demo_Tamano_Org": EMPLOYEES[employees],
-                    "Demo_Rol_Trabajo": ROLE[role],
-                    "Demo_Generacion_Edad": GENERATION[generation],
-                    "Demo_Genero": GENDER[gender],
-                    "Demo_Nivel_Educacion": EDUCATION[education],
-                    "Demo_Horas": HORAS[hours]
+                    "Demo_Pais": COUNTRIES.get(country),
+                    "Demo_Tipo_Organizacion": ORG_TYPE.get(org_type),
+                    "Demo_Industria": INDUSTRY.get(industry),
+                    "Demo_Tamano_Org": EMPLOYEES.get(employees),
+                    "Demo_Rol_Trabajo": ROLE.get(role),
+                    "Demo_Generacion_Edad": GENERATION.get(generation),
+                    "Demo_Genero": GENDER.get(gender),
+                    "Demo_Nivel_Educacion": EDUCATION.get(education),
+                    "Demo_Horas": HORAS.get(hours),
                 })
+
                 st.session_state.page = 99
