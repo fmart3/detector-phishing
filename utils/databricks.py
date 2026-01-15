@@ -76,16 +76,18 @@ def prepare_features(scores, responses):
         "Demo_Horas": int(hours),
     }
     
+    if responses is None:
+        raise ValueError("No hay respuestas registradas")
+    
     return features
 
 # =====================================================
 # Predicción
 # =====================================================
 
-def predict(scores: dict) -> dict:
+def predict(features: dict) -> dict:
     url = get_endpoint_url()
     headers = get_headers()
-    features = prepare_features(scores)
 
     payload = {
         "dataframe_records": [features]
