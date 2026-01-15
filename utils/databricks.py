@@ -56,19 +56,20 @@ def get_endpoint_url():
 # Features
 # =====================================================
 
-def prepare_features(scores: dict) -> dict:
-    missing = [f for f in MODEL_FEATURES if f not in scores]
-    if missing:
-        raise ValueError(f"❌ Faltan features: {missing}")
+def prepare_features(scores: dict, responses: dict) -> dict:
+    try:
+        features = {
+            "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
+            "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
+            "Big5_Apertura": float(scores["Big5_Apertura"]),
+            "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
+            "Demo_Rol_Trabajo": int(responses["Demo_Rol_Trabajo"]),
+            "Demo_Horas": int(responses["Demo_Horas"]),
+        }
+    except KeyError as e:
+        raise ValueError(f"Feature faltante para el modelo: {e}")
 
-    return {
-        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
-        "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
-        "Big5_Apertura": float(scores["Big5_Apertura"]),
-        "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
-        "Demo_Rol_Trabajo": int(scores["Demo_Rol_Trabajo"]),
-        "Demo_Horas": int(scores["Demo_Horas"]),
-    }
+    return features
 
 
 # =====================================================

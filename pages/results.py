@@ -67,7 +67,7 @@ def page_results():
         st.session_state.scores = scores
 
     try:
-        model_features = prepare_features(scores)
+        model_features = prepare_features(scores, responses)
     except ValueError as e:
         st.error(str(e))
         return
