@@ -99,7 +99,7 @@ def insert_survey_response(
     
     columns = ", ".join(TABLE_COLUMNS)
     placeholders = ", ".join(["?"] * len(TABLE_COLUMNS))
-    values = [row.get[col] for col in TABLE_COLUMNS]
+    values = [row.get(col) for col in TABLE_COLUMNS]
 
     sql_stmt = f"""
         INSERT INTO phishing.surveys.responses ({columns})
