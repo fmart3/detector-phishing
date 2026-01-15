@@ -55,7 +55,7 @@ def compute_scores(responses: dict) -> dict:
 
         # --- Fatiga
         "Fatiga_Global_Score": calculate_mean_score(responses, fatiga),
-
+        
         # --- Demográficos (ya vienen codificados)
         "Demo_Pais": responses.get("COUNTRY"),
         "Demo_Tipo_Organizacion": responses.get("ORG_TYPE"),
@@ -67,5 +67,7 @@ def compute_scores(responses: dict) -> dict:
         "Demo_Nivel_Educacion": responses.get("EDUCATION"),
         "Demo_Horas": responses.get("HORAS")
     }
+    
+    
 
     return scores

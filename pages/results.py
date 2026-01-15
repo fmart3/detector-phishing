@@ -7,10 +7,7 @@ import pandas as pd
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
-from utils.scoring import build_full_row
 from utils.persistence import insert_survey_response
-from datetime import datetime
-import uuid
 
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset

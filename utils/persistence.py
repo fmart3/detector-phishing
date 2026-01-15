@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime
 from databricks import sql
-
+from databricks.sql.exc import Error as DatabricksSqlError
 from utils.schema import REQUIRED_RESPONSE_FIELDS
 
 
@@ -64,37 +64,65 @@ def insert_survey_response(
     # ---- Validaciones
     validate_responses(responses)
     validate_ranges(responses)
-
-    # ---- Construcción de la fila
+    
+    if model_output.get("probability") is None:
+        raise ValueError("probability no puede ser nula")
+    
     row = {
         "response_id": str(uuid.uuid4()),
         "timestamp": datetime.utcnow(),
+        **responses,
+        **scores,
+        "probability": model_output.get("probability"),
+        "risk_level": model_output.get("risk_level"),
     }
-
-    # Respuestas (todas las preguntas)
-    row.update(responses)
-
-    # Scores
-    row.update(scores)
-
-    # Modelo
-    row["probability"] = model_output.get("probability")
-    row["risk_level"] = model_output.get("risk_level")
-
-    # ---- Inserción SQL
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    columns = ", ".join(row.keys())
-    placeholders = ", ".join(["?"] * len(row))
+    
+    TABLE_COLUMNS = (
+        ["response_id", "timestamp"]
+        + REQUIRED_RESPONSE_FIELDS
+        + [
+            "Big5_Extraversion",
+            "Big5_Amabilidad",
+            "Big5_Responsabilidad",
+            "Big5_Neuroticismo",
+            "Big5_Apertura",
+            "Phish_Actitud_Riesgo",
+            "Phish_Awareness",
+            "Phish_Riesgo_Percibido",
+            "Phish_Autoeficacia",
+            "Phish_Susceptibilidad",
+            "Fatiga_Global_Score",
+            "probability",
+            "risk_level",
+        ]
+    )
+    
+    columns = ", ".join(TABLE_COLUMNS)
+    placeholders = ", ".join(["?"] * len(TABLE_COLUMNS))
+    values = [row.get[col] for col in TABLE_COLUMNS]
 
     sql_stmt = f"""
         INSERT INTO phishing.surveys.responses ({columns})
         VALUES ({placeholders})
     """
+        
+    # Retries suaves y Manejo errores SQL
+    
+    MAX_RETRIES = 3
 
-    cursor.execute(sql_stmt, list(row.values()))
-    conn.commit()
-
-    cursor.close()
-    conn.close()
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(sql_stmt, values)
+            conn.commit()
+            break
+        except DatabricksSQLError as e:
+            if attempt == MAX_RETRIES:
+                raise RuntimeError(
+                    f"Error insertando respuesta tras {MAX_RETRIES} intentos: {e}"
+                ) from e
+            time.sleep(0.5 * attempt)
+        finally:
+            cursor.close()
+            conn.close()
