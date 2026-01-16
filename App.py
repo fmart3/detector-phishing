@@ -15,7 +15,7 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # Inicialización de estado
 # =========================
 if "page" not in st.session_state:
-    st.session_state.page = 1
+    st.session_state.page = 0
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
@@ -48,12 +48,13 @@ from pages.pages_likert import (
 
 from pages.demographics import page_demographics
 from pages.results import page_results
+from pages.appAlt import page_app_alt
 
 # =========================
 # Enrutador de páginas
 # =========================
 PAGES = {
-    #0: page_app_alt,
+    0: page_app_alt,
     1: page_big5_extraversion,
     2: page_big5_amabilidad,
     3: page_big5_responsabilidad,
@@ -80,5 +81,5 @@ if current_page in PAGES:
     PAGES[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
-    st.session_state.page = 1
+    st.session_state.page = 0
     st.rerun()
