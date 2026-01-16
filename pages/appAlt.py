@@ -31,7 +31,7 @@ LIKERT_QUESTIONS = [
 
 def page_app_alt():
 
-    st.markdown("## ⚡ Modo Test – Respuestas Forzadas")
+    st.markdown("## ⚡Test – Respuestas Forzadas")
     st.caption("Esta herramienta simula el llenado completo de la encuesta para probar el pipeline (Scores -> Modelo -> SQL).")
 
     # Inicializar diccionario si no existe
