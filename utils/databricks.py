@@ -58,28 +58,37 @@ def get_endpoint_url():
 
 def prepare_features(scores: dict, responses: dict) -> dict:
     """
-    Prepara el payload JSON que espera el endpoint de Databricks.
-    Realiza conversiones de tipo seguras.
+    Prepara el payload JSON convirtiendo los datos de manera segura.
+    Evita el error 'int() argument must be a string...'.
     """
-    # 1. Recuperar valores crudos
-    role = responses.get("Demo_Rol_Trabajo")
-    hours = responses.get("Demo_Horas")
+    # 1. Recuperar valores crudos del diccionario de respuestas
+    role_raw = responses.get("Demo_Rol_Trabajo")
+    hours_raw = responses.get("Demo_Horas")
 
-    # 2. Validaciones de seguridad (Evitar el NoneType Error)
-    if role is None:
-        raise ValueError("Error: 'Demo_Rol_Trabajo' no fue respondido o es nulo.")
-    if hours is None:
-        raise ValueError("Error: 'Demo_Horas' no fue respondido o es nulo.")
+    # 2. VALIDACIÓN ESTRICTA: Si faltan datos, detenemos todo aquí
+    # Esto previene que 'None' llegue a las funciones int() o float()
+    if role_raw is None:
+        raise ValueError("Error Crítico: El usuario no seleccionó su 'Rol de Trabajo'.")
+    
+    if hours_raw is None:
+        raise ValueError("Error Crítico: El usuario no indicó sus 'Horas de uso'.")
 
-    # 3. Construcción del diccionario de features
-    # Asegúrate de que los nombres de las claves coincidan EXACTAMENTE con lo que espera tu modelo ML
+    # 3. Conversión segura (ahora sabemos que NO son None)
+    try:
+        role_val = int(role_raw)
+        hours_val = float(hours_raw)
+    except (ValueError, TypeError) as e:
+        # Si por alguna razón llegan datos corruptos que no son números
+        raise ValueError(f"Error de tipo de datos: Rol='{role_raw}', Horas='{hours_raw}'. Detalle: {e}")
+
+    # 4. Construcción del diccionario final
     features = {
         "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0)),
         "Phish_Susceptibilidad": float(scores.get("Phish_Susceptibilidad", 0.0)),
         "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
         "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
-        "Demo_Rol_Trabajo": int(role), 
-        "Demo_Horas": int(hours)
+        "Demo_Rol_Trabajo": role_val,
+        "Demo_Horas": hours_val
     }
 
     return features

@@ -199,22 +199,21 @@ def page_demographics():
     )
 
     st.divider()
-
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        # Botón para volver atrás
         if st.button("⬅️ Atrás"):
             st.session_state.page = 13
             st.rerun()
 
     with col2:
         if not all_answered:
-            st.button("Finalizar", disabled=True)
-            st.warning("⚠️ Por favor complete TODAS las preguntas para continuar.")
+            # Botón deshabilitado si falta algo
+            st.button("Finalizar Encuesta", disabled=True)
+            st.warning("⚠️ Responde TODAS las preguntas para ver tu resultado.")
         else:
-            if st.button("Finalizar"):
-                # Guardamos en session_state
+            if st.button("Finalizar Encuesta"):
+                # Guardado seguro usando .get() para evitar key errors
                 st.session_state.responses.update({
                     "Demo_Pais": COUNTRIES.get(country),
                     "Demo_Tipo_Organizacion": ORG_TYPE.get(org_type),
@@ -224,9 +223,9 @@ def page_demographics():
                     "Demo_Generacion_Edad": GENERATION.get(generation),
                     "Demo_Genero": GENDER.get(gender),
                     "Demo_Nivel_Educacion": EDUCATION.get(education),
-                    "Demo_Horas": HORAS.get(hours) # Usar .get es más seguro
+                    "Demo_Horas": HORAS.get(hours)
                 })
                 
-                # Avanzamos a la página de resultados
+                # Ir a resultados
                 st.session_state.page = 99
                 st.rerun()

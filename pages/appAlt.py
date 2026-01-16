@@ -1,9 +1,38 @@
 import streamlit as st
 
+# =====================================================
+# TODAS LAS PREGUNTAS DEL INSTRUMENTO
+# =====================================================
+
+LIKERT_QUESTIONS = [
+    # Big Five
+    "EX01","EX02","EX03","EX04","EX05", "EX06","EX07","EX08","EX09","EX10",
+    "AM01","AM02","AM03","AM04","AM05", "AM06","AM07","AM08","AM09","AM10",
+    "CO01","CO02","CO03","CO04","CO05", "CO06","CO07","CO08","CO09","CO10",
+    "NE01","NE02","NE03","NE04","NE05", "NE06","NE07","NE08","NE09","NE10",
+    "AE01","AE02","AE03","AE04","AE05", "AE06","AE07","AE08","AE09","AE10",
+
+    # Phishing
+    "ER01","ER02","ER03","ER04", "ER05","ER06","ER07","ER08","ER09","ER10",
+    "AW01","AW02","AW03",
+    "PR01","PR02","PR03",
+    "CP01","CP02","CP03",
+    "SU01","SU02","SU03","SU04",
+
+    # Fatiga digital
+    "FE01","FE02","FE03",
+    "FC01","FC02","FC03","FC04",
+    "DS01","DS02"
+]
+
+# =====================================================
+# PAGE
+# =====================================================
+
 def page_app_alt():
 
-    st.markdown("## ⚡ Modo Rápido – Testing Full Pipeline")
-    st.caption("Ingreso manual de scores + demografía (solo enteros)")
+    st.markdown("## ⚡ Modo Test – Respuestas Forzadas")
+    st.caption("Todas las preguntas individuales = 3")
 
     if "responses" not in st.session_state:
         st.session_state.responses = {}
@@ -11,92 +40,46 @@ def page_app_alt():
     r = st.session_state.responses
 
     # =====================================================
-    # SCORES PSICOLÓGICOS (1–5)
+    # 1️⃣ RESPUESTAS LIKERT (TODAS = 3)
     # =====================================================
     st.divider()
-    st.markdown("### 🧠 Big Five")
+    st.markdown("### 📋 Respuestas del cuestionario")
 
-    r["Big5_Extraversion"]     = st.number_input("Extraversion", 1, 5, 3)
-    r["Big5_Amabilidad"]       = st.number_input("Amabilidad", 1, 5, 3)
-    r["Big5_Responsabilidad"]  = st.number_input("Responsabilidad", 1, 5, 3)
-    r["Big5_Neuroticismo"]     = st.number_input("Neuroticismo", 1, 5, 3)
-    r["Big5_Apertura"]         = st.number_input("Apertura", 1, 5, 3)
+    for q in LIKERT_QUESTIONS:
+        r[q] = 3
 
-    st.divider()
-    st.markdown("### 🎣 Phishing")
-
-    r["Phish_Actitud_Riesgo"]      = st.number_input("Actitud al Riesgo", 1, 5, 3)
-    r["Phish_Awareness"]           = st.number_input("Awareness", 1, 5, 3)
-    r["Phish_Riesgo_Percibido"]    = st.number_input("Riesgo Percibido", 1, 5, 3)
-    r["Phish_Autoeficacia"]        = st.number_input("Autoeficacia", 1, 5, 3)
-    r["Phish_Susceptibilidad"]     = st.number_input("Susceptibilidad", 1, 5, 3)
-
-    st.divider()
-    st.markdown("### 😵 Fatiga Digital")
-
-    r["Fatiga_Emocional"]  = st.number_input("Fatiga Emocional", 1, 5, 3)
-    r["Fatiga_Cinismo"]    = st.number_input("Fatiga Cinismo", 1, 5, 3)
-    r["Fatiga_Abandono"]   = st.number_input("Fatiga Abandono", 1, 5, 3)
+    st.success(f"✅ {len(LIKERT_QUESTIONS)} preguntas cargadas con valor 3")
 
     # =====================================================
-    # DEMOGRAFÍA (MISMAS KEYS QUE PRODUCCIÓN)
+    # 2️⃣ DEMOGRAFÍA (VALORES VÁLIDOS)
     # =====================================================
     st.divider()
     st.markdown("### 👤 Demografía (codificada)")
 
-    r["Demo_Pais"] = st.number_input(
-        "País (1=Chile,2=Colombia,3=Honduras,4=México,5=Panamá)",
-        1, 5, 1
-    )
+    r.update({
+        "Demo_Pais": 1,               # Chile
+        "Demo_Tipo_Organizacion": 2,  # Privada
+        "Demo_Industria": 4,          # Tecnología
+        "Demo_Tamano_Org": 3,         # 500–1000
+        "Demo_Rol_Trabajo": 3,        # Administrativo / Técnico
+        "Demo_Generacion_Edad": 4,    # Millennials
+        "Demo_Genero": 1,             # Masculino
+        "Demo_Nivel_Educacion": 4,    # Magíster
+        "Demo_Horas": 3               # 5–8 horas
+    })
 
-    r["Demo_Tipo_Organizacion"] = st.number_input(
-        "Tipo Organización (1=Pública,2=Privada,3=Sin fines lucro,4=Otra)",
-        1, 4, 2
-    )
+    st.success("✅ Demografía cargada")
 
-    r["Demo_Industria"] = st.number_input(
-        "Industria (1–18)",
-        1, 18, 4
-    )
-
-    r["Demo_Tamano_Org"] = st.number_input(
-        "Tamaño Organización (1–7)",
-        1, 7, 3
-    )
-
-    r["Demo_Rol_Trabajo"] = st.number_input(
-        "Rol Trabajo (1=Liderazgo,2=Supervisión,3=Admin/Técnico,4=Otro)",
-        1, 4, 3
-    )
-
-    r["Demo_Generacion_Edad"] = st.number_input(
-        "Generación (1–5)",
-        1, 5, 4
-    )
-
-    r["Demo_Genero"] = st.number_input(
-        "Género (1=Masculino,2=Femenino,3=No Binario)",
-        1, 3, 1
-    )
-
-    r["Demo_Nivel_Educacion"] = st.number_input(
-        "Nivel Educación (1–5)",
-        1, 5, 4
-    )
-
-    r["Demo_Horas"] = st.number_input(
-        "Horas PC (1=<2h … 5=>10h)",
-        1, 5, 3
-    )
+    # =====================================================
+    # DEBUG
+    # =====================================================
+    st.divider()
+    with st.expander("🧪 DEBUG – responses"):
+        st.json(r)
 
     # =====================================================
     # CONTROL
     # =====================================================
-    st.divider()
-
-    with st.expander("🧪 DEBUG – responses"):
-        st.json(r)
-
     if st.button("🚀 Ir a resultados"):
         st.session_state.page = 99
         st.rerun()
