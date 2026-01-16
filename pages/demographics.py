@@ -79,7 +79,7 @@ EDUCATION = {
     "Doctorado": 5
 }
 
-HORAS = {
+HOURS = {
     "Menos de 2 horas": 1,
     "Entre 2 y 5 horas": 2,
     "Entre 5 y 8 horas": 3,
@@ -179,9 +179,9 @@ def page_demographics():
     # -----------------------------
     hours = st.radio(
         "Seleccione las horas que está conectado a su computador de trabajo en el día",
-        options=list(HORAS.keys())
+        options=list(HOURS.keys())
     )
-    st.session_state.responses["Demo_Horas"] = HORAS[hours]
+    st.session_state.responses["Demo_Horas"] = HOURS[hours]
 
     # -----------------------------
     # Validación
@@ -202,30 +202,34 @@ def page_demographics():
     col1, col2 = st.columns([1, 1])
 
     with col1:
+        # Botón atrás (ajusta el número de página según tu flujo)
         if st.button("⬅️ Atrás"):
-            st.session_state.page = 13
+            st.session_state.page -= 1
             st.rerun()
 
     with col2:
-        if not all_answered:
-            # Botón deshabilitado si falta algo
-            st.button("Finalizar Encuesta", disabled=True)
-            st.warning("⚠️ Responde TODAS las preguntas para ver tu resultado.")
-        else:
-            if st.button("Finalizar Encuesta"):
-                # Guardado seguro usando .get() para evitar key errors
-                st.session_state.responses.update({
-                    "Demo_Pais": COUNTRIES.get(country),
-                    "Demo_Tipo_Organizacion": ORG_TYPE.get(org_type),
-                    "Demo_Industria": INDUSTRY.get(industry),
-                    "Demo_Tamano_Org": EMPLOYEES.get(employees),
-                    "Demo_Rol_Trabajo": ROLE.get(role),
-                    "Demo_Generacion_Edad": GENERATION.get(generation),
-                    "Demo_Genero": GENDER.get(gender),
-                    "Demo_Nivel_Educacion": EDUCATION.get(education),
-                    "Demo_Horas": HORAS.get(hours)
-                })
-                
-                # Ir a resultados
-                st.session_state.page = 99
-                st.rerun()
+        if st.button("Finalizar", type="primary", disabled=not all_answered):
+            
+            # --- AQUÍ OCURRE LA MAGIA ---
+            # Solo intentamos buscar en los diccionarios SI el usuario ya respondió.
+            # Así evitamos el KeyError: None
+            
+            st.session_state.responses.update({
+                "Demo_Pais": COUNTRIES[country],
+                "Demo_Tipo_Organizacion": ORG_TYPE[org_type],
+                "Demo_Industria": INDUSTRY[industry],
+                "Demo_Tamano_Org": EMPLOYEES[employees],
+                "Demo_Rol_Trabajo": ROLE[role],
+                "Demo_Generacion_Edad": GENERATION[generation],
+                "Demo_Genero": GENDER[gender],
+                "Demo_Nivel_Educacion": EDUCATION[education],
+                "Demo_Horas": HOURS[hours]
+            })
+            
+            # Redirigir a resultados
+            st.session_state.page = 99
+            st.rerun()
+        
+        # Mensaje de ayuda si el botón está deshabilitado
+        elif not all_answered:
+            st.caption("⚠️ Complete todos los campos para finalizar.")
