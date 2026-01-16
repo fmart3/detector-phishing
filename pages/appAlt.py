@@ -65,7 +65,7 @@ def page_app_alt():
             "Demo_Tamano_Org": random.randint(1, 5),        # 5 Rangos de tamaño
             "Demo_Rol_Trabajo": random.randint(1, 1),       # 4 Roles
             "Demo_Generacion_Edad": random.randint(1, 5),   # 5 Generaciones
-            "Demo_Genero": random.randint(1, 4),            # 4 Opciones género
+            "Demo_Genero": random.randint(1, 3),            # 3 Opciones género
             "Demo_Nivel_Educacion": random.randint(1, 5),   # 5 Niveles
             "Demo_Horas": random.randint(1, 5)              # 5 Rangos de horas
         })
