@@ -54,7 +54,7 @@ def page_app_alt():
 
         # 2. Cargar Likert Aleatorio (1 a 5)
         for q in LIKERT_QUESTIONS:
-            r[q] = random.randint(1, 5)
+            r[q] = random.randint(1, 2)
 
         # 3. Cargar Demografía Aleatoria
         # Los rangos (randint) coinciden con el largo de tus diccionarios en demographics.py
