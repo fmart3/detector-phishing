@@ -95,7 +95,7 @@ def page_results():
     # 3️⃣ Clasificación por niveles (NO binaria)
     # =========================
     
-    probability = probability - 0.3  # Ajuste por sesgo observado
+    probability = probability - 0.4  # Ajuste por sesgo observado
     
     if probability < 0.45:
         risk_level = "BAJO"
