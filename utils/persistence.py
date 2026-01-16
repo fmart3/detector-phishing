@@ -1,4 +1,5 @@
 # utils/persistence.py
+import streamlit as st
 import os
 import uuid
 import time
@@ -13,7 +14,8 @@ from utils.schema import REQUIRED_RESPONSE_FIELDS
 # CONEXIÓN
 # =========================
 
-def get_connection():
+@st.cache_resource(ttl=3600)
+def get_connection_cached():
     return sql.connect(
         server_hostname=os.environ["DATABRICKS_HOST"],
         http_path=os.environ["DATABRICKS_HTTP_PATH"],
@@ -129,10 +131,23 @@ def insert_survey_response(
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            conn = get_connection()
-            cursor = conn.cursor()
+            conn = get_connection_cached()
+            
+            try: 
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1") # Ping Rápido
+            except:
+                st.cache_resource.clear()  # Limpiar caché si la conexión falló
+                conn = get_connection_cached()  # Reintentar obtener conexión
+                cursor = conn.cursor()
+
             cursor.execute(sql_stmt, values)
-            conn.commit()
+            # Nota: En conexiones compartidas/cacheadas, a veces commit() no es necesario 
+            # si el autocommit está on, pero mal no hace.
+            if hasattr(conn, 'commit'):
+                conn.commit()
+            
+            cursor.close() # Cerramos cursor, pero NO la conexión (conn)
             break
         except DatabricksSqlError as e:  # <--- CORREGIDO AQUÍ (coincide con el import)
             if attempt == MAX_RETRIES:
