@@ -145,7 +145,7 @@ def page_demographics():
         "Seleccione lo que define mejor su rol en su puesto de trabajo actual",
         options=list(ROLE.keys())
     )
-    st.session_state.responses["Demo_Tipo_Organización"] = ROLE.get(role)
+    st.session_state.responses["Demo_Rol_Trabajo"] = ROLE.get(role)
 
     # -----------------------------
     # Generación
