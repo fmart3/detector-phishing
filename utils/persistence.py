@@ -2,6 +2,7 @@
 import os
 import uuid
 import time
+import pytz
 from datetime import datetime
 from databricks import sql
 from databricks.sql.exc import Error as DatabricksSqlError
@@ -69,9 +70,24 @@ def insert_survey_response(
     if model_output.get("probability") is None:
         raise ValueError("probability no puede ser nula")
     
+    # ============================================================
+    # 2. CALCULAR HORA CHILE
+    # ============================================================
+    # Definimos la zona horaria
+    tz_chile = pytz.timezone("America/Santiago")
+    
+    # Obtenemos la hora actual en Chile
+    now_chile = datetime.now(tz_chile)
+    
+    # TRUCO IMPORTANTE:
+    # Las bases de datos a veces reconvierten a UTC si detectan zona horaria.
+    # Para forzar que se guarde "15:00" (hora Chile) y no se transforme,
+    # le quitamos la info de zona horaria (hacemos el datetime "naive").
+    timestamp_to_save = now_chile.replace(tzinfo=None)
+    
     row = {
         "response_id": str(uuid.uuid4()),
-        "timestamp": datetime.utcnow(),
+        "timestamp": timestamp_to_save,
         **responses,
         **scores,
         "probability": model_output.get("probability"),

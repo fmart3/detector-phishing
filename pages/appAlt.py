@@ -58,15 +58,15 @@ def page_app_alt():
         # 3. Cargar Demografía (Tipos de datos corregidos para databricks.py)
         # Aseguramos que coincidan con lo que espera prepare_features
         r.update({
-            "Demo_Pais": 1,              # Chile (Int)
+            "Demo_Pais": 3,              # Chile (Int)
             "Demo_Tipo_Organizacion": 2, # Privada (Int)
-            "Demo_Industria": 4,         # Tecnología (Int)
-            "Demo_Tamano_Org": 3,        # 500–1000 (Int)
-            "Demo_Rol_Trabajo": 3,       # Administrativo (Int) -> CRÍTICO para el modelo
-            "Demo_Generacion_Edad": 4,   # Millennials (Int)
-            "Demo_Genero": 1,            # Masculino (Int)
+            "Demo_Industria": 2,         # Tecnología (Int)
+            "Demo_Tamano_Org": 1,        # 500–1000 (Int)
+            "Demo_Rol_Trabajo": 1,       # Administrativo (Int) -> CRÍTICO para el modelo
+            "Demo_Generacion_Edad": 1,   # Millennials (Int)
+            "Demo_Genero": 2,            # Masculino (Int)
             "Demo_Nivel_Educacion": 4,   # Magíster (Int)
-            "Demo_Horas": 2              # (Int)
+            "Demo_Horas": 3              # (Int)
         })
 
         st.success(f"✅ Se cargaron {len(r)} variables en memoria.")
