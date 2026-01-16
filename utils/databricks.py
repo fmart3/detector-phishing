@@ -56,24 +56,33 @@ def get_endpoint_url():
 # Features
 # =====================================================
 
-def prepare_features(scores, responses):
-    try:
-        role = responses["Demo_Rol_Trabajo"]
-        hours = responses["Demo_Horas"]
-    except KeyError as e:
-        raise ValueError(f"Falta respuesta demográfica: {e}")
+def prepare_features(scores: dict, responses: dict) -> dict:
+    """
+    Prepara el payload JSON que espera el endpoint de Databricks.
+    Realiza conversiones de tipo seguras.
+    """
+    # 1. Recuperar valores crudos
+    role = responses.get("Demo_Rol_Trabajo")
+    hours = responses.get("Demo_Horas")
 
-    if role is None or hours is None:
-        raise ValueError("Datos demográficos incompletos")
+    # 2. Validaciones de seguridad (Evitar el NoneType Error)
+    if role is None:
+        raise ValueError("Error: 'Demo_Rol_Trabajo' no fue respondido o es nulo.")
+    if hours is None:
+        raise ValueError("Error: 'Demo_Horas' no fue respondido o es nulo.")
 
-    return {
-        "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
-        "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
-        "Big5_Apertura": float(scores["Big5_Apertura"]),
-        "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
-        "Demo_Rol_Trabajo": role,
-        "Demo_Horas": hours,
+    # 3. Construcción del diccionario de features
+    # Asegúrate de que los nombres de las claves coincidan EXACTAMENTE con lo que espera tu modelo ML
+    features = {
+        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0)),
+        "Phish_Susceptibilidad": float(scores.get("Phish_Susceptibilidad", 0.0)),
+        "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
+        "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
+        "Demo_Rol_Trabajo": int(role), 
+        "Demo_Horas": int(hours)
     }
+
+    return features
 
 # =====================================================
 # Predicción
