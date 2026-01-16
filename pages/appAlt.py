@@ -1,9 +1,9 @@
 import streamlit as st
-import random  # <--- IMPORTANTE: Necesario para generar números aleatorios
 
 # =====================================================
 # TODAS LAS PREGUNTAS DEL INSTRUMENTO
 # =====================================================
+# NOTA: Se eliminó 'FC04' porque no estaba en tu esquema SQL ni en scoring.py
 
 LIKERT_QUESTIONS = [
     # Big Five
@@ -20,9 +20,9 @@ LIKERT_QUESTIONS = [
     "CP01","CP02","CP03",
     "SU01","SU02","SU03","SU04",
 
-    # Fatiga digital
+    # Fatiga digital (Solo las definidas en Schema)
     "FE01","FE02","FE03",
-    "FC01","FC02","FC03","FC04", 
+    "FC01","FC02","FC03", "FC04",
     "DS01","DS02"
 ]
 
@@ -32,8 +32,8 @@ LIKERT_QUESTIONS = [
 
 def page_app_alt():
 
-    st.markdown("## 🎲 Modo Test – Respuestas Aleatorias")
-    st.caption("Genera respuestas simuladas (1-5) para probar variabilidad en los scores y el modelo.")
+    st.markdown("## ⚡ Modo Test – Respuestas Forzadas")
+    st.caption("Esta herramienta simula el llenado completo de la encuesta para probar el pipeline (Scores -> Modelo -> SQL).")
 
     # Inicializar diccionario si no existe
     if "responses" not in st.session_state:
@@ -42,41 +42,35 @@ def page_app_alt():
     col_btn, col_info = st.columns([1, 2])
 
     with col_btn:
-        # Cambié el nombre del botón para reflejar que es aleatorio
-        cargar = st.button("🎲 Generar Datos Random", type="primary")
+        cargar = st.button("📥 Cargar Datos de Prueba", type="primary")
 
     if cargar:
-        # 1. Limpiar estado previo
+        # 1. Limpiar estado previo para forzar recálculo en Results
         st.session_state.scores = None
         st.session_state.prediction = None
-        st.session_state.responses = {} 
+        st.session_state.responses = {} # Limpiar respuestas viejas
         
         r = st.session_state.responses
 
-        # 2. Generar Respuestas Likert Aleatorias (1 a 5)
+        # 2. Cargar Likert (Valor fijo = 3 para neutralidad)
         for q in LIKERT_QUESTIONS:
-            val = random.randint(1, 5) # <--- AQUÍ ESTÁ LA MAGIA
-            r[q] = val
+            r[q] = 3
 
-        # 3. Cargar Demografía 
-        # Mantengo los demográficos fijos para que sea un perfil consistente,
-        # pero 'Demo_Horas' sigue siendo INT como pediste.
+        # 3. Cargar Demografía (Tipos de datos corregidos para databricks.py)
+        # Aseguramos que coincidan con lo que espera prepare_features
         r.update({
-            "Demo_Pais": 1,              # Chile
-            "Demo_Tipo_Organizacion": 2, # Privada
-            "Demo_Industria": 4,         # Tecnología
-            "Demo_Tamano_Org": 3,        # 500–1000
-            "Demo_Rol_Trabajo": 3,       # Administrativo
-            "Demo_Generacion_Edad": 4,   # Millennials
-            "Demo_Genero": 1,            # Masculino
-            "Demo_Nivel_Educacion": 4,   # Magíster
-            
-            # Si quieres randomizar las horas también (entre 1 y 5), usa:
-            # "Demo_Horas": random.randint(1, 5)
-            "Demo_Horas": 3              # Dejamos 3 fijo por ahora (Entre 5 y 8 horas)
+            "Demo_Pais": 1,              # Chile (Int)
+            "Demo_Tipo_Organizacion": 2, # Privada (Int)
+            "Demo_Industria": 4,         # Tecnología (Int)
+            "Demo_Tamano_Org": 3,        # 500–1000 (Int)
+            "Demo_Rol_Trabajo": 3,       # Administrativo (Int) -> CRÍTICO para el modelo
+            "Demo_Generacion_Edad": 4,   # Millennials (Int)
+            "Demo_Genero": 1,            # Masculino (Int)
+            "Demo_Nivel_Educacion": 4,   # Magíster (Int)
+            "Demo_Horas": 2              # (Int)
         })
 
-        st.success(f"✅ Se generaron respuestas aleatorias para {len(LIKERT_QUESTIONS)} preguntas.")
+        st.success(f"✅ Se cargaron {len(r)} variables en memoria.")
 
     # =====================================================
     # VISUALIZACIÓN DE DATOS (DEBUG)
@@ -84,15 +78,15 @@ def page_app_alt():
     st.divider()
     
     if st.session_state.responses:
-        with st.expander("🔍 Ver datos generados (JSON)", expanded=True):
+        with st.expander("🔍 Ver datos cargados en JSON (Payload)", expanded=True):
             st.json(st.session_state.responses)
 
         st.markdown("---")
         st.markdown("### 🚀 Ejecución del Pipeline")
-        st.info("Presiona abajo para calcular los scores basados en estos números aleatorios y enviarlos a Databricks.")
+        st.info("Al presionar el botón, se redirigirá a la página de Resultados (99), donde se calcularán los scores, se consultará a Databricks y se guardará en SQL.")
         
         if st.button("Calcular, Predecir y Guardar >>"):
             st.session_state.page = 99
             st.rerun()
     else:
-        st.warning("⚠️ Primero presiona 'Generar Datos Random'")
+        st.warning("⚠️ Primero presiona 'Cargar Datos de Prueba'")
