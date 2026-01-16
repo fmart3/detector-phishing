@@ -63,7 +63,7 @@ def page_app_alt():
             "Demo_Tipo_Organizacion": random.randint(1, 4), # 4 Tipos
             "Demo_Industria": random.randint(1, 18),        # 18 Industrias
             "Demo_Tamano_Org": random.randint(1, 5),        # 5 Rangos de tamaño
-            "Demo_Rol_Trabajo": random.randint(1, 7),       # 7 Roles
+            "Demo_Rol_Trabajo": random.randint(1, 1),       # 4 Roles
             "Demo_Generacion_Edad": random.randint(1, 5),   # 5 Generaciones
             "Demo_Genero": random.randint(1, 4),            # 4 Opciones género
             "Demo_Nivel_Educacion": random.randint(1, 5),   # 5 Niveles
