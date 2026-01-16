@@ -15,7 +15,7 @@ REQUIRED_RESPONSE_FIELDS = [
 
     # Fatiga
     "FE01", "FE02", "FE03",
-    "FC01", "FC02", "FC03",
+    "FC01", "FC02", "FC03", "FC04",
     "DS01", "DS02",
 
     # Demográficos

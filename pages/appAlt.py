@@ -61,7 +61,7 @@ def page_app_alt():
         "Demo_Tipo_Organizacion": 2,  # Privada
         "Demo_Industria": 4,          # Tecnología
         "Demo_Tamano_Org": 3,         # 500–1000
-        "Demo_Rol_Trabajo": 3,        # Administrativo / Técnico
+        "Demo_Rol_Trabajo": 1,        # Administrativo / Técnico
         "Demo_Generacion_Edad": 4,    # Millennials
         "Demo_Genero": 1,             # Masculino
         "Demo_Nivel_Educacion": 4,    # Magíster
