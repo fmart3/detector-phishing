@@ -112,31 +112,41 @@ def page_results():
 
     # Log solo una vez (guardamos score, no clase dura)
     if not st.session_state.get("logged"):
+        
+        with st.status("🔄 Procesando evaluación...", expanded=True) as status:
+            
+            # Paso A: Predicción
+            if st.session_state.get("prediction") is None:
+                st.write("🧠 Consultando modelo de IA...")
+                model_features = prepare_features(scores, responses)
+                st.session_state.prediction = predict(model_features)
+                st.session_state.model_features_cache = model_features # Guardar features por si acaso
+            
+            # Recuperar datos
+            result = st.session_state.prediction
+            probability = result.get("probability")
+            
+            # Clasificación lógica (tu if/else de colores)
+            if probability < 0.45:
+                risk_level = "BAJO"
+            elif probability < 0.55:
+                risk_level = "MEDIO"
+            else:
+                risk_level = "ALTO"
 
-        responses = st.session_state.get("responses")
-
-        if not responses:
-            st.error("No hay respuestas para persistir.")
-            return
-
-        insert_survey_response(
-            responses=responses,
-            scores=scores,
-            model_output={
-                "probability": probability,
-                "risk_level": risk_level
-            }
-        )
-
-        log_prediction(
-            model_features,
-            {
-                "risk_level": risk_level,
-                "probability": probability
-            }
-        )
-
-        st.session_state.logged = True
+            # Paso B: Guardado en BD
+            st.write("💾 Guardando resultados en la nube...")
+            insert_survey_response(
+                responses=responses,
+                scores=scores,
+                model_output={
+                    "probability": probability,
+                    "risk_level": risk_level
+                }
+            )
+            
+            st.session_state.logged = True
+            status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
 
     # =========================
     # 4️⃣ Mostrar resultado
