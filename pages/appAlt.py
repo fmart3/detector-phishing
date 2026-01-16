@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 # =====================================================
 # TODAS LAS PREGUNTAS DEL INSTRUMENTO
@@ -31,7 +32,7 @@ LIKERT_QUESTIONS = [
 
 def page_app_alt():
 
-    st.markdown("## ⚡Test – Respuestas Forzadas")
+    st.markdown("## ⚡Test Rápido – Respuestas Aleatorias")
     st.caption("Esta herramienta simula el llenado completo de la encuesta para probar el pipeline (Scores -> Modelo -> SQL).")
 
     # Inicializar diccionario si no existe
@@ -41,35 +42,35 @@ def page_app_alt():
     col_btn, col_info = st.columns([1, 2])
 
     with col_btn:
-        cargar = st.button("📥 Cargar Datos de Prueba", type="primary")
+        cargar = st.button("📥 Cargar Datos Random", type="primary")
 
     if cargar:
-        # 1. Limpiar estado previo para forzar recálculo en Results
+        # 1. Limpiar estado previo
         st.session_state.scores = None
         st.session_state.prediction = None
-        st.session_state.responses = {} # Limpiar respuestas viejas
+        st.session_state.responses = {} 
         
         r = st.session_state.responses
 
-        # 2. Cargar Likert (Valor fijo = 3 para neutralidad)
+        # 2. Cargar Likert Aleatorio (1 a 5)
         for q in LIKERT_QUESTIONS:
-            r[q] = 3
+            r[q] = random.randint(1, 5)
 
-        # 3. Cargar Demografía (Tipos de datos corregidos para databricks.py)
-        # Aseguramos que coincidan con lo que espera prepare_features
+        # 3. Cargar Demografía Aleatoria
+        # Los rangos (randint) coinciden con el largo de tus diccionarios en demographics.py
         r.update({
-            "Demo_Pais": 3,              # Chile (Int)
-            "Demo_Tipo_Organizacion": 2, # Privada (Int)
-            "Demo_Industria": 2,         # Tecnología (Int)
-            "Demo_Tamano_Org": 1,        # 500–1000 (Int)
-            "Demo_Rol_Trabajo": 1,       # Administrativo (Int) -> CRÍTICO para el modelo
-            "Demo_Generacion_Edad": 1,   # Millennials (Int)
-            "Demo_Genero": 2,            # Masculino (Int)
-            "Demo_Nivel_Educacion": 4,   # Magíster (Int)
-            "Demo_Horas": 3              # (Int)
+            "Demo_Pais": random.randint(1, 5),              # 5 Países
+            "Demo_Tipo_Organizacion": random.randint(1, 4), # 4 Tipos
+            "Demo_Industria": random.randint(1, 18),        # 18 Industrias
+            "Demo_Tamano_Org": random.randint(1, 5),        # 5 Rangos de tamaño
+            "Demo_Rol_Trabajo": random.randint(1, 7),       # 7 Roles
+            "Demo_Generacion_Edad": random.randint(1, 5),   # 5 Generaciones
+            "Demo_Genero": random.randint(1, 4),            # 4 Opciones género
+            "Demo_Nivel_Educacion": random.randint(1, 5),   # 5 Niveles
+            "Demo_Horas": random.randint(1, 5)              # 5 Rangos de horas
         })
 
-        st.success(f"✅ Se cargaron {len(r)} variables en memoria.")
+        st.success(f"✅ Se generaron {len(r)} variables con valores aleatorios.")
 
     # =====================================================
     # VISUALIZACIÓN DE DATOS (DEBUG)
