@@ -57,36 +57,23 @@ def get_endpoint_url():
 # =====================================================
 
 def prepare_features(scores, responses):
+    try:
+        role = responses["Demo_Rol_Trabajo"]
+        hours = responses["Demo_Horas"]
+    except KeyError as e:
+        raise ValueError(f"Falta respuesta demográfica: {e}")
 
-    hours = responses.get("Demo_Horas")
-    role = responses.get("Demo_Rol_Trabajo")
-    
-    if not isinstance(role, int):
-        raise ValueError(f"Demo_Rol_Trabajo inválido: {role}")
+    if role is None or hours is None:
+        raise ValueError("Datos demográficos incompletos")
 
-    if not isinstance(hours, int):
-        raise ValueError(f"Demo_Horas inválido: {hours}")
-
-
-    if hours is None:
-        raise ValueError("Demo_Horas no fue respondido")
-
-    if role is None:
-        raise ValueError("Demo_Rol_Trabajo no fue respondido")
-
-    features = {
+    return {
         "Fatiga_Global_Score": float(scores["Fatiga_Global_Score"]),
         "Phish_Susceptibilidad": float(scores["Phish_Susceptibilidad"]),
         "Big5_Apertura": float(scores["Big5_Apertura"]),
         "Phish_Riesgo_Percibido": float(scores["Phish_Riesgo_Percibido"]),
-        "Demo_Rol_Trabajo": int(role),
-        "Demo_Horas": int(hours),
+        "Demo_Rol_Trabajo": role,
+        "Demo_Horas": hours,
     }
-    
-    if responses is None:
-        raise ValueError("No hay respuestas registradas")
-    
-    return features
 
 # =====================================================
 # Predicción
