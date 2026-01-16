@@ -3,7 +3,6 @@
 import streamlit as st
 import os
 import pandas as pd
-
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction

@@ -1,6 +1,7 @@
 # utils/persistence.py
 import os
 import uuid
+import time
 from datetime import datetime
 from databricks import sql
 from databricks.sql.exc import Error as DatabricksSqlError
@@ -117,12 +118,17 @@ def insert_survey_response(
             cursor.execute(sql_stmt, values)
             conn.commit()
             break
-        except DatabricksSQLError as e:
+        except DatabricksSqlError as e:  # <--- CORREGIDO AQUÍ (coincide con el import)
             if attempt == MAX_RETRIES:
                 raise RuntimeError(
                     f"Error insertando respuesta tras {MAX_RETRIES} intentos: {e}"
                 ) from e
             time.sleep(0.5 * attempt)
         finally:
-            cursor.close()
-            conn.close()
+            # Es buena práctica verificar si 'conn' o 'cursor' existen antes de cerrarlos
+            # en caso de que la conexión falle antes de crearse.
+            try:
+                if 'cursor' in locals(): cursor.close()
+                if 'conn' in locals(): conn.close()
+            except:
+                pass
