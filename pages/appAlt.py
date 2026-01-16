@@ -3,7 +3,6 @@ import streamlit as st
 # =====================================================
 # TODAS LAS PREGUNTAS DEL INSTRUMENTO
 # =====================================================
-# NOTA: Se eliminó 'FC04' porque no estaba en tu esquema SQL ni en scoring.py
 
 LIKERT_QUESTIONS = [
     # Big Five

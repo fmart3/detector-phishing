@@ -27,7 +27,7 @@ phish_susceptibilidad = ["SU01","SU02","SU03", "SU04"]
 # FATIGA
 # ============================
 
-fatiga = ["FE01","FE02","FE03", "FC01","FC02","FC03", "DS01","DS02"]
+fatiga = ["FE01","FE02","FE03", "FC01","FC02","FC03", "FC04", "DS01","DS02"]
 
 # ============================
 # FUNCIÓN PRINCIPAL
