@@ -118,7 +118,7 @@ def page_results():
     # =========================
     # 4️⃣ Mostrar resultado
     # =========================
-    st.divider()
+    #st.divider()
 
     prob_pct = probability_adj * 100
     
@@ -148,12 +148,19 @@ def page_results():
     # =========================
     # Reinicio
     # =========================
-    st.divider()
+    #st.divider()
     if st.button("🔄 Reiniciar evaluación"):
-        for k in ["page", "responses", "scores", "prediction", "logged"]:
-            st.session_state.pop(k, None)
-        st.session_state.page = 0
-        st.experimental_rerun()
+        # 1. Limpiamos las variables de sesión
+        keys_to_clear = ["page", "responses", "scores", "prediction", "logged"]
+        for k in keys_to_clear:
+            if k in st.session_state:
+                del st.session_state[k]
+        
+        # 2. Establecemos la página de inicio (Generalmente es la 1)
+        st.session_state.page = 1 
+        
+        # 3. Forzamos la recarga con el comando nuevo
+        st.rerun()
 
     # st.divider()
     # if st.button("📈 Generar reporte de monitoreo"):
