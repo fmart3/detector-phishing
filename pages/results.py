@@ -65,18 +65,12 @@ def page_results():
     else:
         scores = st.session_state.scores
 
-    
-
     try:
         model_features = prepare_features(scores, responses)
     except ValueError as e:
         st.error(str(e))
         return
     
-    # with st.expander("🧪 DEBUG RESPONSES"):
-    #     st.json(responses)
-
-
     # =========================
     # 2️⃣ Predicción (una sola vez)
     # =========================
@@ -94,52 +88,26 @@ def page_results():
     # 3️⃣ Clasificación por niveles (NO binaria)
     # =========================
     
-    probability = probability - 0.3  # Ajuste por sesgo observado
+    probability_adj = probability - 0.3 # Ajuste
     
-    if probability < 0.45:
+    if probability_adj < 0.45:
         risk_level = "BAJO"
-        risk_color = "success"
-        risk_msg = "🟢 Riesgo BAJO de susceptibilidad a phishing"
-    elif probability < 0.55:
+    elif probability_adj < 0.55:
         risk_level = "MEDIO"
-        risk_color = "warning"
-        risk_msg = "🟡 Riesgo MEDIO de susceptibilidad a phishing"
     else:
         risk_level = "ALTO"
-        risk_color = "error"
-        risk_msg = "🔴 Riesgo ALTO de susceptibilidad a phishing"
 
-    # Log solo una vez (guardamos score, no clase dura)
+    # Logica de Guardado (Solo una vez)
     if not st.session_state.get("logged"):
         
         with st.status("🔄 Procesando evaluación...", expanded=True) as status:
-            
-            # Paso A: Predicción
-            if st.session_state.get("prediction") is None:
-                st.write("🧠 Consultando modelo de IA...")
-                model_features = prepare_features(scores, responses)
-                st.session_state.prediction = predict(model_features)
-                st.session_state.model_features_cache = model_features # Guardar features por si acaso
-            
-            # Recuperar datos
-            result = st.session_state.prediction
-            probability = result.get("probability")
-            
-            # Clasificación lógica (tu if/else de colores)
-            if probability < 0.45:
-                risk_level = "BAJO"
-            elif probability < 0.55:
-                risk_level = "MEDIO"
-            else:
-                risk_level = "ALTO"
-
-            # Paso B: Guardado en BD
             st.write("💾 Guardando resultados en la nube...")
+            
             insert_survey_response(
                 responses=responses,
                 scores=scores,
                 model_output={
-                    "probability": probability,
+                    "probability": probability_adj,
                     "risk_level": risk_level
                 }
             )
@@ -152,39 +120,21 @@ def page_results():
     # =========================
     st.divider()
 
-    prob_pct = probability * 100
-
-    # st.markdown(
-    #     f"""
-    #     ### 📈 Resultado de la evaluación
-
-    #     **Probabilidad estimada de susceptibilidad a phishing:**  
-    #     **{prob_pct:.1f}%**
-    #     """
-    # )
-
-    # st.progress(probability)
-
-    # if risk_color == "success":
-    #     st.success(risk_msg)
-    # elif risk_color == "warning":
-    #     st.warning(risk_msg)
-    # else:
-    #     st.error(risk_msg)
-
-    # st.caption(
-    #     "Este modelo funciona como un **score continuo de riesgo**, "
-    #     "no como un clasificador binario estricto."
-    # )
+    prob_pct = probability_adj * 100
     
-    # Usamos columnas para que se vea estructurado (Grid System)
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Probabilidad de Phishing", f"{prob_pct:.1f}%", delta_color="inverse")
+        st.metric("Probabilidad de Phishing", f"{prob_pct:.1f}%")
     with col2:
-        st.info(f"Nivel de Riesgo: **{risk_level}**")
+        # Usamos colores de streamlit basados en el nivel
+        if risk_level == "BAJO":
+            st.success(f"Nivel de Riesgo: **{risk_level}**")
+        elif risk_level == "MEDIO":
+            st.warning(f"Nivel de Riesgo: **{risk_level}**")
+        else:
+            st.error(f"Nivel de Riesgo: **{risk_level}**")
         
-    st.markdown('</div>', unsafe_allow_html=True) # Cerramos la card
+    st.markdown('</div>', unsafe_allow_html=True) # CIERRE CARD
 
     # =========================
     # Debug / académico

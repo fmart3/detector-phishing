@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.style import load_css
 
 # =========================
 # Configuración básica
@@ -8,9 +9,6 @@ st.set_page_config(
     layout="centered"
 )
 
-from utils.style import load_css
-
-st.set_page_config(...)
 load_css() # <--- Carga los estilos
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")

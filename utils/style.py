@@ -13,14 +13,14 @@ def load_css():
             border: 1px solid #e0e0e0;
         }
         
-        /* Ajustar títulos para que se vean más limpios */
+        /* Ajustar títulos */
         h1, h2, h3 {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-weight: 600;
             color: #343a40;
         }
         
-        /* Mejorar la apariencia de las métricas */
+        /* Métricas más grandes y azules */
         [data-testid="stMetricValue"] {
             font-size: 2rem;
             color: #0d6efd;
