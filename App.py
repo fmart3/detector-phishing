@@ -1,4 +1,6 @@
 import streamlit as st
+import threading
+from utils.databricks import predict
 from utils.style import load_css
 
 # =========================
@@ -8,6 +10,22 @@ st.set_page_config(
     page_title="Detector de Susceptibilidad a Phishing",
     layout="centered"
 )
+
+# Función silenciosa para despertar al modelo
+def wake_up_model():
+    try:
+        # Enviamos datos basura solo para activar el servidor
+        # No nos importa el resultado, solo que el servidor arranque
+        dummy_data = {
+            "Fatiga_Global_Score": 0, "Phish_Susceptibilidad": 0,
+            "Big5_Apertura": 0, "Phish_Riesgo_Percibido": 0,
+            "Demo_Rol_Trabajo": 0, "Demo_Horas": 0
+            # ... asegúrate de incluir las columnas mínimas que pide tu modelo
+        }
+        print("⏰ Enviando señal de despertador a Databricks...")
+        predict(dummy_data) 
+    except:
+        pass # Si falla no importa, era solo para despertar
 
 INIT_PAGE = 0
 
@@ -30,6 +48,12 @@ if "scores" not in st.session_state:
 
 if "prediction" not in st.session_state:
     st.session_state.prediction = None
+    
+if "waked_up" not in st.session_state:
+    # Usamos un hilo (thread) para que NO congele la pantalla de inicio
+    thread = threading.Thread(target=wake_up_model)
+    thread.start()
+    st.session_state.waked_up = True
 
 # =========================
 # Importación de páginas
