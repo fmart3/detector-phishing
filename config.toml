@@ -1,0 +1,9 @@
+[theme]
+primaryColor = "#0d6efd"  # El azul clásico de Bootstrap (Primary)
+backgroundColor = "#f8f9fa" # Gris muy claro de fondo (tipo Bootstrap)
+secondaryBackgroundColor = "#ffffff" # Blanco para el sidebar y tarjetas
+textColor = "#212529" # Gris oscuro para texto
+font = "sans serif"
+
+[server]
+runOnSave = true

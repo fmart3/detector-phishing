@@ -74,8 +74,8 @@ def page_results():
         st.error(str(e))
         return
     
-    with st.expander("🧪 DEBUG RESPONSES"):
-        st.json(responses)
+    # with st.expander("🧪 DEBUG RESPONSES"):
+    #     st.json(responses)
 
 
     # =========================
@@ -181,11 +181,11 @@ def page_results():
     # =========================
     # Debug / académico
     # =========================
-    with st.expander("🔍 Ver scores calculados"):
-        st.json(scores)
+    # with st.expander("🔍 Ver scores calculados"):
+    #     st.json(scores)
 
-    with st.expander("📦 Respuesta cruda del modelo"):
-        st.json(result)
+    # with st.expander("📦 Respuesta cruda del modelo"):
+    #     st.json(result)
 
     # =========================
     # Reinicio
@@ -197,14 +197,14 @@ def page_results():
         st.session_state.page = 0
         st.experimental_rerun()
 
-    st.divider()
-    if st.button("📈 Generar reporte de monitoreo"):
-        generate_evidently_report()
-        st.success("Reporte Evidently generado")
+    # st.divider()
+    # if st.button("📈 Generar reporte de monitoreo"):
+    #     generate_evidently_report()
+    #     st.success("Reporte Evidently generado")
 
-    if os.path.exists("evidently_phishing_report.html"):
-        st.components.v1.html(
-            open("evidently_phishing_report.html").read(),
-            height=800,
-            scrolling=True
-        )
+    # if os.path.exists("evidently_phishing_report.html"):
+    #     st.components.v1.html(
+    #         open("evidently_phishing_report.html").read(),
+    #         height=800,
+    #         scrolling=True
+    #     )
