@@ -100,88 +100,110 @@ def page_demographics():
     st.write("Por favor complete la siguiente información.")
     st.divider()
 
-    # -----------------------------
-    # País
-    # -----------------------------
-    country = st.selectbox(
-        "Seleccione el país donde reside",
-        options=list(COUNTRIES.keys()),
-        index=None
-    )
-    st.session_state.responses["Demo_Pais"] = COUNTRIES[country]
+    # # -----------------------------
+    # # País
+    # # -----------------------------
+    # country = st.selectbox(
+    #     "Seleccione el país donde reside",
+    #     options=list(COUNTRIES.keys()),
+    #     index=None
+    # )
+    # st.session_state.responses["Demo_Pais"] = COUNTRIES[country]
 
-    # -----------------------------
-    # Tipo de organización
-    # -----------------------------
-    org_type = st.radio(
-        "Seleccione el tipo de organización",
-        options=list(ORG_TYPE.keys())
-    )
-    st.session_state.responses["Demo_Tipo_Organización"] = ORG_TYPE[org_type]
+    # # -----------------------------
+    # # Tipo de organización
+    # # -----------------------------
+    # org_type = st.radio(
+    #     "Seleccione el tipo de organización",
+    #     options=list(ORG_TYPE.keys())
+    # )
+    # st.session_state.responses["Demo_Tipo_Organización"] = ORG_TYPE[org_type]
 
-    # -----------------------------
-    # Industria (texto libre controlado)
-    # -----------------------------
-    industry = st.selectbox(
-        "Seleccione la industria a la cual pertenece su organización",
-        options=list(INDUSTRY.keys()),
-        index=None
-    )
-    st.session_state.responses["Demo_Industria"] = INDUSTRY[industry]
+    # # -----------------------------
+    # # Industria (texto libre controlado)
+    # # -----------------------------
+    # industry = st.selectbox(
+    #     "Seleccione la industria a la cual pertenece su organización",
+    #     options=list(INDUSTRY.keys()),
+    #     index=None
+    # )
+    # st.session_state.responses["Demo_Industria"] = INDUSTRY[industry]
 
-    # -----------------------------
-    # Tamaño organización
-    # -----------------------------
-    employees = st.radio(
-        "Seleccione el número de colaboradores que trabajan en su organización",
-        options=list(EMPLOYEES.keys())
-    )
-    st.session_state.responses["Demo_Tamano_Org"] = EMPLOYEES[employees]
+    # # -----------------------------
+    # # Tamaño organización
+    # # -----------------------------
+    # employees = st.radio(
+    #     "Seleccione el número de colaboradores que trabajan en su organización",
+    #     options=list(EMPLOYEES.keys())
+    # )
+    # st.session_state.responses["Demo_Tamano_Org"] = EMPLOYEES[employees]
 
-    # -----------------------------
-    # Rol
-    # -----------------------------
-    role = st.radio(
-        "Seleccione lo que define mejor su rol en su puesto de trabajo actual",
-        options=list(ROLE.keys())
-    )
-    st.session_state.responses["Demo_Rol_Trabajo"] = ROLE[role]
+    # # -----------------------------
+    # # Rol
+    # # -----------------------------
+    # role = st.radio(
+    #     "Seleccione lo que define mejor su rol en su puesto de trabajo actual",
+    #     options=list(ROLE.keys())
+    # )
+    # st.session_state.responses["Demo_Rol_Trabajo"] = ROLE[role]
 
-    # -----------------------------
-    # Generación
-    # -----------------------------
-    generation = st.radio(
-        "Seleccione a qué generación pertenece",
-        options=list(GENERATION.keys())
-    )
-    st.session_state.responses["Demo_Generacion_Edad"] = GENERATION[generation]
+    # # -----------------------------
+    # # Generación
+    # # -----------------------------
+    # generation = st.radio(
+    #     "Seleccione a qué generación pertenece",
+    #     options=list(GENERATION.keys())
+    # )
+    # st.session_state.responses["Demo_Generacion_Edad"] = GENERATION[generation]
 
-    # -----------------------------
-    # Género
-    # -----------------------------
-    gender = st.radio(
-        "¿Qué describe mejor su género?",
-        options=list(GENDER.keys())
-    )
-    st.session_state.responses["Demo_Genero"] = GENDER[gender]
+    # # -----------------------------
+    # # Género
+    # # -----------------------------
+    # gender = st.radio(
+    #     "¿Qué describe mejor su género?",
+    #     options=list(GENDER.keys())
+    # )
+    # st.session_state.responses["Demo_Genero"] = GENDER[gender]
     
-    # -----------------------------
-    # Educación
-    # -----------------------------
-    education = st.radio(
-        "Seleccione su nivel más alto de educación",
-        options=list(EDUCATION.keys())
-    )
-    st.session_state.responses["Demo_Nivel_Educacion"] = EDUCATION[education]
+    # # -----------------------------
+    # # Educación
+    # # -----------------------------
+    # education = st.radio(
+    #     "Seleccione su nivel más alto de educación",
+    #     options=list(EDUCATION.keys())
+    # )
+    # st.session_state.responses["Demo_Nivel_Educacion"] = EDUCATION[education]
     
-    # -----------------------------
-    # Horas en PC
-    # -----------------------------
-    hours = st.radio(
-        "Seleccione las horas que está conectado a su computador de trabajo en el día",
-        options=list(HOURS.keys())
-    )
-    st.session_state.responses["Demo_Horas"] = HOURS[hours]
+    # # -----------------------------
+    # # Horas en PC
+    # # -----------------------------
+    # hours = st.radio(
+    #     "Seleccione las horas que está conectado a su computador de trabajo en el día",
+    #     options=list(HOURS.keys())
+    # )
+    # st.session_state.responses["Demo_Horas"] = HOURS[hours]
+    
+    # Abres una Card
+    st.markdown('<div class="bootstrap-card">', unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        country = st.selectbox("País", list(COUNTRIES.keys()), index=None)
+        org_type = st.selectbox("Tipo Organización", list(ORG_TYPE.keys()), index=None)
+        industry = st.selectbox("Industria", list(INDUSTRY.keys()), index=None)
+        employees = st.selectbox("Tamaño Empresa", list(EMPLOYEES.keys()), index=None)
+
+    with c2:
+        role = st.selectbox("Rol", list(ROLE.keys()), index=None)
+        generation = st.selectbox("Generación", list(GENERATION.keys()), index=None)
+        gender = st.selectbox("Género", list(GENDER.keys()), index=None)
+        education = st.selectbox("Educación", list(EDUCATION.keys()), index=None)
+
+    # La pregunta de horas puede ir abajo ocupando todo el ancho
+    hours = st.radio("Horas conectado", list(HOURS.keys()), horizontal=True)
+
+    st.markdown('</div>', unsafe_allow_html=True) # Cierras la Card
 
     # -----------------------------
     # Validación
