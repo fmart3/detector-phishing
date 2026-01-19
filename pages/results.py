@@ -8,6 +8,7 @@ from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
 from utils.persistence import insert_survey_response
+from utils.scales import INIT_PAGE
 
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
@@ -169,7 +170,7 @@ def page_results():
                 del st.session_state[k]
         
         # 2. Establecemos la página de inicio (Generalmente es la 1)
-        st.session_state.page = 1 
+        st.session_state.page = INIT_PAGE
         
         # 3. Forzamos la recarga con el comando nuevo
         st.rerun()

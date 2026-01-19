@@ -2,6 +2,7 @@ import streamlit as st
 import threading
 from utils.databricks import predict
 from utils.style import load_css
+from utils.scales import INIT_PAGE
 
 # =========================
 # Configuración básica
@@ -26,8 +27,6 @@ def wake_up_model():
         predict(dummy_data) 
     except:
         pass # Si falla no importa, era solo para despertar
-
-INIT_PAGE = 0
 
 load_css() # <--- Carga los estilos
 

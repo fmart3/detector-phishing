@@ -9,4 +9,4 @@ LIKERT_5 = {
 def invert_likert(value: int) -> int:
     return 6 - value
 
-## hacer la escala de paises?
+INIT_PAGE = 1
