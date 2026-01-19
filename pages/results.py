@@ -3,6 +3,7 @@
 import streamlit as st
 import os
 import pandas as pd
+import time
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
@@ -101,19 +102,30 @@ def page_results():
     if not st.session_state.get("logged"):
         
         with st.status("🔄 Procesando evaluación...", expanded=True) as status:
-            st.write("💾 Guardando resultados en la nube...")
+            # 1. Creamos un contenedor placeholder
+            status_placeholder = st.empty()
             
-            insert_survey_response(
-                responses=responses,
-                scores=scores,
-                model_output={
-                    "probability": probability_adj,
-                    "risk_level": risk_level
-                }
-            )
-            
-            st.session_state.logged = True
-            status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
+            # 2. Construimos el status DENTRO del placeholder
+            with status_placeholder.status("🔄 Procesando evaluación...", expanded=True) as status:
+                st.write("💾 Guardando resultados en la nube...")
+                
+                insert_survey_response(
+                    responses=responses,
+                    scores=scores,
+                    model_output={
+                        "probability": probability_adj,
+                        "risk_level": risk_level
+                    }
+                )
+                
+                st.session_state.logged = True
+                
+                # Mostramos éxito brevemente
+                status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
+                time.sleep(1.5) # Esperamos 1.5 segundos para que el usuario vea el éxito
+                
+            # 3. ¡Magia! Borramos el contenedor completo
+            status_placeholder.empty()
 
     # =========================
     # 4️⃣ Mostrar resultado

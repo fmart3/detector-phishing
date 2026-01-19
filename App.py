@@ -9,6 +9,8 @@ st.set_page_config(
     layout="centered"
 )
 
+INIT_PAGE = 0
+
 load_css() # <--- Carga los estilos
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")
@@ -18,7 +20,7 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # Inicialización de estado
 # =========================
 if "page" not in st.session_state:
-    st.session_state.page = 1
+    st.session_state.page = INIT_PAGE
 
 if "responses" not in st.session_state:
     st.session_state.responses = {}
@@ -57,7 +59,7 @@ from pages.appAlt import page_app_alt
 # Enrutador de páginas
 # =========================
 PAGES = {
-    #0: page_app_alt,
+    0: page_app_alt,
     1: page_big5_extraversion,
     2: page_big5_amabilidad,
     3: page_big5_responsabilidad,
@@ -84,5 +86,5 @@ if current_page in PAGES:
     PAGES[current_page]()
 else:
     st.error("Página no válida. Reiniciando encuesta.")
-    st.session_state.page = 1
+    st.session_state.page = INIT_PAGE
     st.rerun()
