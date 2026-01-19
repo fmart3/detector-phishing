@@ -44,9 +44,8 @@ def generate_evidently_report():
     report.run(reference_data=baseline, current_data=production)
     report.save_html("evidently_phishing_report.html")
 
-
 def page_results():
-
+    st.markdown('<div class="bootstrap-card">', unsafe_allow_html=True)
     st.markdown("## 📊 Resultado de la Evaluación")
     st.write("Este resultado se basa en sus respuestas.")
 
@@ -155,28 +154,37 @@ def page_results():
 
     prob_pct = probability * 100
 
-    st.markdown(
-        f"""
-        ### 📈 Resultado de la evaluación
+    # st.markdown(
+    #     f"""
+    #     ### 📈 Resultado de la evaluación
 
-        **Probabilidad estimada de susceptibilidad a phishing:**  
-        **{prob_pct:.1f}%**
-        """
-    )
+    #     **Probabilidad estimada de susceptibilidad a phishing:**  
+    #     **{prob_pct:.1f}%**
+    #     """
+    # )
 
-    st.progress(probability)
+    # st.progress(probability)
 
-    if risk_color == "success":
-        st.success(risk_msg)
-    elif risk_color == "warning":
-        st.warning(risk_msg)
-    else:
-        st.error(risk_msg)
+    # if risk_color == "success":
+    #     st.success(risk_msg)
+    # elif risk_color == "warning":
+    #     st.warning(risk_msg)
+    # else:
+    #     st.error(risk_msg)
 
-    st.caption(
-        "Este modelo funciona como un **score continuo de riesgo**, "
-        "no como un clasificador binario estricto."
-    )
+    # st.caption(
+    #     "Este modelo funciona como un **score continuo de riesgo**, "
+    #     "no como un clasificador binario estricto."
+    # )
+    
+    # Usamos columnas para que se vea estructurado (Grid System)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Probabilidad de Phishing", f"{prob_pct:.1f}%", delta_color="inverse")
+    with col2:
+        st.info(f"Nivel de Riesgo: **{risk_level}**")
+        
+    st.markdown('</div>', unsafe_allow_html=True) # Cerramos la card
 
     # =========================
     # Debug / académico
