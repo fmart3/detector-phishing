@@ -82,7 +82,7 @@ from pages.appAlt import page_app_alt
 # Enrutador de páginas
 # =========================
 PAGES = {
-    0: page_app_alt,
+    #0: page_app_alt,
     1: page_big5_extraversion,
     2: page_big5_amabilidad,
     3: page_big5_responsabilidad,
