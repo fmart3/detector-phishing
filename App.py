@@ -136,3 +136,18 @@ else:
     st.error("Página no válida. Reiniciando encuesta.")
     st.session_state.page = INIT_PAGE
     st.rerun()
+    
+# ---------------------------------------------------------
+# 🔐 ACCESO ADMINISTRADOR (En el Sidebar)
+# ---------------------------------------------------------
+st.sidebar.divider()
+st.sidebar.markdown("### 🔧 Zona Admin")
+
+# Un input de contraseña simple para no exponer los datos a cualquiera
+password = st.sidebar.text_input("Contraseña de acceso", type="password")
+
+if st.sidebar.button("Ir al Dashboard"):
+    if password == "admin123":  # ⚠️ Cambia esto por una contraseña segura o usa secrets
+        st.switch_page("pages/dashboard.py")
+    else:
+        st.sidebar.error("❌ Contraseña incorrecta")
