@@ -135,7 +135,7 @@ def page_results():
                 
                 # Mostramos éxito brevemente
                 status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
-                time.sleep(1.5) # Esperamos 1.5 segundos para que el usuario vea el éxito
+                time.sleep(1) # Esperamos 1.5 segundos para que el usuario vea el éxito
                 
             # 3. ¡Magia! Borramos el contenedor completo
             status_placeholder.empty()
