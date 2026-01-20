@@ -149,7 +149,7 @@ def page_results():
     
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Probabilidad de Phishing", f"{prob_pct:.1f}%")
+        st.metric("Su probabilidad de caer en Phishing es:", f"{prob_pct:.1f}%")
     with col2:
         # Usamos colores de streamlit basados en el nivel
         if risk_level == "BAJO":
