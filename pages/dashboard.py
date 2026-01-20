@@ -8,9 +8,15 @@ import os
 # ==========================================
 def run_query(query):
     """Ejecuta una query SQL en Databricks y devuelve un DataFrame"""
+    
+    # Validamos que existan los secretos antes de conectar
+    if "DATABRICKS_HTTP_PATH" not in st.secrets:
+        st.error("❌ Falta configurar DATABRICKS_HTTP_PATH en secrets.toml")
+        return pd.DataFrame()
+
     with sql.connect(
-        server_hostname=st.secrets["DATABRICKS_HOST"].replace("https://", ""),
-        http_path="/sql/1.0/warehouses/39ed97d80270fe2a", # Búscalo en Databricks -> SQL Warehouses -> Connection Details
+        server_hostname=st.secrets["DATABRICKS_HOST"].replace("https://", "").replace("http://", ""),
+        http_path=st.secrets["DATABRICKS_HTTP_PATH"], # <--- AHORA SÍ LEE EL SECRETO
         access_token=st.secrets["DATABRICKS_TOKEN"]
     ) as connection:
         with connection.cursor() as cursor:
