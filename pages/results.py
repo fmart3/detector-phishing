@@ -77,7 +77,14 @@ def page_results():
     # 2️⃣ Predicción (una sola vez)
     # =========================
     if st.session_state.get("prediction") is None:
+        st.write("⏱️ Iniciando predicción...")
+        start_pred = time.time()
+        
         st.session_state.prediction = predict(model_features)
+        
+        end_pred = time.time()    # <--- FIN CRONÓMETRO PREDICCIÓN
+        seconds_pred = end_pred - start_pred
+        print(f"🚨 TIEMPO DE PREDICCIÓN (MODELO): {seconds_pred:.2f} segundos") # Míralo en la consola
 
     result = st.session_state.prediction
     probability = result.get("probability")
@@ -109,6 +116,7 @@ def page_results():
             # 2. Construimos el status DENTRO del placeholder
             with status_placeholder.status("🔄 Procesando evaluación...", expanded=True) as status:
                 st.write("💾 Guardando resultados en la nube...")
+                start_sql = time.time()
                 
                 insert_survey_response(
                     responses=responses,
@@ -120,6 +128,9 @@ def page_results():
                 )
                 
                 st.session_state.logged = True
+                end_sql = time.time()     # <--- FIN CRONÓMETRO SQL
+                seconds_sql = end_sql - start_sql
+                print(f"🚨 TIEMPO DE INSERT SQL (BD): {seconds_sql:.2f} segundos") # Míralo en la consola
                 
                 # Mostramos éxito brevemente
                 status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
@@ -175,6 +186,9 @@ def page_results():
         # 3. Forzamos la recarga con el comando nuevo
         st.rerun()
 
+    # =========================
+    # Evidently Report
+    # =========================
     # st.divider()
     # if st.button("📈 Generar reporte de monitoreo"):
     #     generate_evidently_report()
