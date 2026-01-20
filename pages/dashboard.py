@@ -10,7 +10,7 @@ def run_query(query):
     """Ejecuta una query SQL en Databricks y devuelve un DataFrame"""
     with sql.connect(
         server_hostname=st.secrets["DATABRICKS_HOST"].replace("https://", ""),
-        http_path="/sql/1.0/warehouses/TU_WAREHOUSE_ID", # Búscalo en Databricks -> SQL Warehouses -> Connection Details
+        http_path="/sql/1.0/warehouses/39ed97d80270fe2a", # Búscalo en Databricks -> SQL Warehouses -> Connection Details
         access_token=st.secrets["DATABRICKS_TOKEN"]
     ) as connection:
         with connection.cursor() as cursor:
