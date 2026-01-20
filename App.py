@@ -29,6 +29,15 @@ def wake_up_model():
     except:
         pass # Si falla no importa, era solo para despertar
     
+st.markdown("""
+    <style>
+        /* Oculta la lista de páginas en el sidebar */
+        [data-testid="stSidebarNav"] {
+            display: none !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 load_css() # <--- Carga los estilos
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")
