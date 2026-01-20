@@ -54,20 +54,23 @@ def page_app_alt():
 
         # 2. Cargar Likert Aleatorio (1 a 5)
         for q in LIKERT_QUESTIONS:
-            r[q] = random.randint(1, 2)
+            r[q] = random.randint(1, 5)
 
         # 3. Cargar Demografía Aleatoria
         # Los rangos (randint) coinciden con el largo de tus diccionarios en demographics.py
         r.update({
+            "Big5_Apertura": 1,        # 1-5
+            "Phish_Riesgo_Percibido": 1, # 1-5
+            "Fatiga_Global_Score": 5,   # 1-5
             "Demo_Pais": random.randint(1, 5),              # 5 Países
             "Demo_Tipo_Organizacion": random.randint(1, 4), # 4 Tipos
             "Demo_Industria": random.randint(1, 18),        # 18 Industrias
-            "Demo_Tamano_Org": random.randint(1, 5),        # 5 Rangos de tamaño
-            "Demo_Rol_Trabajo": random.randint(1, 1),       # 4 Roles
+            "Demo_Tamano_Org": 5,        # 5 Rangos de tamaño
+            "Demo_Rol_Trabajo": 4,       # 4 Roles
             "Demo_Generacion_Edad": random.randint(1, 5),   # 5 Generaciones
             "Demo_Genero": random.randint(1, 3),            # 3 Opciones género
             "Demo_Nivel_Educacion": random.randint(1, 5),   # 5 Niveles
-            "Demo_Horas": random.randint(1, 5)              # 5 Rangos de horas
+            "Demo_Horas": 1              # 5 Rangos de horas
         })
 
         st.success(f"✅ Se generaron {len(r)} variables con valores aleatorios.")

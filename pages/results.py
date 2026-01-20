@@ -31,12 +31,12 @@ def generate_evidently_report():
     production = pd.read_csv("production_predictions.csv")
 
     FEATURES = [
-        "Fatiga_Global_Score",
-        "Phish_Susceptibilidad",
-        "Big5_Apertura",
-        "Phish_Riesgo_Percibido",
-        "Demo_Rol_Trabajo",
-        "Demo_Horas",
+        'Demo_Tamano_Org',
+        'Demo_Rol_Trabajo',
+        'Big5_Apertura',
+        'Demo_Horas',
+        'Phish_Riesgo_Percibido',
+        'Fatiga_Global_Score'
     ]
 
     baseline = baseline[FEATURES]
