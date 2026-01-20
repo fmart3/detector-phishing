@@ -173,11 +173,11 @@ def page_results():
     # =========================
     # Debug / académico
     # =========================
-    with st.expander("🔍 Ver scores calculados"):
-        st.json(scores)
+    # with st.expander("🔍 Ver scores calculados"):
+    #     st.json(scores)
 
-    with st.expander("📦 Respuesta cruda del modelo"):
-        st.json(result)
+    # with st.expander("📦 Respuesta cruda del modelo"):
+    #     st.json(result)
 
     # =========================
     # Reinicio
