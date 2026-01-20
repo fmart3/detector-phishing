@@ -1,16 +1,35 @@
 import streamlit as st
+import threading
+from utils.databricks import predict
 from utils.style import load_css
 from utils.scales import INIT_PAGE
 
 # =========================
 # Configuración básica
 # =========================
+
 st.set_page_config(
     page_title="Detector de Susceptibilidad a Phishing",
     layout="centered"
-)
 
-load_css() 
+)
+# Función silenciosa para despertar al modelo
+def wake_up_model():
+    try:
+        # Enviamos datos basura solo para activar el servidor
+        # No nos importa el resultado, solo que el servidor arranque
+        dummy_data = {
+            "Fatiga_Global_Score": 0, "Phish_Susceptibilidad": 0,
+            "Big5_Apertura": 0, "Phish_Riesgo_Percibido": 0,
+            "Demo_Rol_Trabajo": 0, "Demo_Horas": 0
+            # ... asegúrate de incluir las columnas mínimas que pide tu modelo
+        }
+        print("⏰ Enviando señal de despertador a Databricks...")
+        predict(dummy_data)
+    except:
+        pass # Si falla no importa, era solo para despertar
+    
+load_css() # <--- Carga los estilos
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")
 st.caption("Basado en personalidad, actitudes y fatiga digital")
@@ -18,19 +37,24 @@ st.caption("Basado en personalidad, actitudes y fatiga digital")
 # =========================
 # Inicialización de estado
 # =========================
+
 if "page" not in st.session_state:
     st.session_state.page = INIT_PAGE
-
+    
 if "responses" not in st.session_state:
     st.session_state.responses = {}
-    
+
 if "scores" not in st.session_state:
     st.session_state.scores = None
-
+    
 if "prediction" not in st.session_state:
     st.session_state.prediction = None
 
-# (Eliminamos waked_up y threading para desbloquear la carga)
+if "waked_up" not in st.session_state:
+    # Usamos un hilo (thread) para que NO congele la pantalla de inicio
+    thread = threading.Thread(target=wake_up_model)
+    thread.start()
+    st.session_state.waked_up = True
 
 # =========================
 # Importación de páginas
@@ -54,11 +78,14 @@ from pages.pages_likert import (
 
 from pages.demographics import page_demographics
 from pages.results import page_results
+from pages.appAlt import page_app_alt
 
 # =========================
 # Enrutador de páginas
 # =========================
+
 PAGES = {
+    0: page_app_alt,
     1: page_big5_extraversion,
     2: page_big5_amabilidad,
     3: page_big5_responsabilidad,
@@ -68,17 +95,18 @@ PAGES = {
     7: page_phish_awareness,
     8: page_phish_riesgo_percibido,
     9: page_phish_autoeficacia,
-    10: page_phish_susceptibilidad,
-    11: page_fatiga_emocional,
-    12: page_fatiga_cinismo,
-    13: page_fatiga_abandono,
-    14: page_demographics,
-    99: page_results
+   10: page_phish_susceptibilidad,
+   11: page_fatiga_emocional,
+   12: page_fatiga_cinismo,
+   13: page_fatiga_abandono,
+   14: page_demographics,
+   99: page_results
 }
 
 # =========================
 # Render de la página actual
 # =========================
+
 current_page = st.session_state.page
 
 if current_page in PAGES:
