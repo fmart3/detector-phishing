@@ -35,6 +35,18 @@ st.markdown("""
         [data-testid="stSidebarNav"] {
             display: none !important;
         }
+        [theme]
+        primaryColor = "#194485"  # El azul clásico de Bootstrap (Primary)
+        backgroundColor = "#1e2f41" # Gris muy claro de fondo (tipo Bootstrap)
+        secondaryBackgroundColor = "#000000" # Blanco para el sidebar y tarjetas
+        textColor = "#ffffff" # Gris oscuro para texto
+        font = "comic sans"
+
+        [server]
+        runOnSave = true
+
+        [client]
+        showSidebarNavigation = false
     </style>
 """, unsafe_allow_html=True)
 
