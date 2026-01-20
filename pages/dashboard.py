@@ -39,8 +39,8 @@ def page_dashboard():
     kpi_query = """
     SELECT 
         COUNT(*) as total,
-        AVG(model_output.probability) as riesgo_global,
-        SUM(CASE WHEN model_output.risk_level = 'ALTO' THEN 1 ELSE 0 END) as usuarios_criticos
+        AVG(probability) as riesgo_global,  -- Antes: model_output.probability
+        SUM(CASE WHEN risk_level = 'ALTO' THEN 1 ELSE 0 END) as usuarios_criticos -- Antes: model_output.risk_level
     FROM phishing.surveys.responses
     """
     df_kpi = run_query(kpi_query)
@@ -57,8 +57,8 @@ def page_dashboard():
     st.subheader("Riesgo por Rol de Trabajo")
     risk_query = """
     SELECT 
-        responses.Demo_Rol_Trabajo as Rol,
-        AVG(model_output.probability) as Riesgo
+        Demo_Rol_Trabajo as Rol,
+        AVG(probability) as Riesgo  -- Antes: model_output.probability
     FROM phishing.surveys.responses
     GROUP BY 1
     ORDER BY 2 DESC
