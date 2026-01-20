@@ -48,40 +48,43 @@ def get_endpoint_url():
 
 def prepare_features(scores: dict, responses: dict) -> dict:
     """
-    Prepara el payload JSON con EXACTAMENTE los 6 features del modelo nuevo.
+    Prepara el payload JSON.
+    NOTA: Envía TODAS las variables para satisfacer el esquema del modelo antiguo
+    hasta que el endpoint se actualice a la versión de solo 6 variables.
     """
     
-    # 1. Recuperar valores
+    # 1. Recuperar valores clave y validar
     role_raw = responses.get("Demo_Rol_Trabajo")
     hours_raw = responses.get("Demo_Horas")
     size_raw = responses.get("Demo_Tamano_Org")
 
-    # 2. Validaciones básicas
-    if role_raw is None:
-        raise ValueError("Error: Falta 'Rol de Trabajo'.")
-    if hours_raw is None:
-        raise ValueError("Error: Falta 'Horas de uso'.")
-    
-    # Si falta el tamaño (ej. usuario se saltó algo raro), ponemos 1 por defecto
-    if size_raw is None:
-        size_raw = 1 
+    if role_raw is None: role_raw = 1
+    if hours_raw is None: hours_raw = 1
+    if size_raw is None: size_raw = 1
 
-    # 3. Conversión de tipos (CRÍTICO: Int vs Float)
-    try:
-        role_val = int(role_raw)
-        hours_val = int(hours_raw) # <--- ENTERO (Int), NO FLOAT
-        size_val = int(size_raw)
-    except (ValueError, TypeError) as e:
-        raise ValueError(f"Error de tipo de datos. Detalle: {e}")
-
-    # 4. Construcción del diccionario limpio (Solo 6 features)
+    # 2. Construcción del diccionario (Mapeo completo)
     features = {
-        "Demo_Tamano_Org": size_val,
-        "Demo_Rol_Trabajo": role_val,
+        # --- Las 6 Variables del Modelo Nuevo (Prioridad) ---
+        "Demo_Tamano_Org": int(size_raw),
+        "Demo_Rol_Trabajo": int(role_raw),
         "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
-        "Demo_Horas": hours_val,  # <--- Confirmado INT
+        "Demo_Horas": int(hours_raw),
         "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
-        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0))
+        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0)),
+
+        # --- Variables Extras (Requeridas por el Modelo Antiguo) ---
+        # Demográficos (Integers / Longs)
+        "Demo_Pais": int(responses.get("Demo_Pais", 1)),
+        "Demo_Tipo_Organizacion": int(responses.get("Demo_Tipo_Organizacion", 1)),
+        "Demo_Industria": int(responses.get("Demo_Industria", 1)),
+        "Demo_Genero": int(responses.get("Demo_Genero", 1)),
+        "Demo_Generacion_Edad": int(responses.get("Demo_Generacion_Edad", 1)),
+        "Demo_Nivel_Educacion": int(responses.get("Demo_Nivel_Educacion", 1)),
+
+        # Scores Psicológicos (Doubles / Floats)
+        "Phish_Susceptibilidad": float(scores.get("Phish_Susceptibilidad", 0.0)),
+        "Phish_Autoeficacia": float(scores.get("Phish_Autoeficacia", 0.0)),
+        "Phish_Awareness": float(scores.get("Phish_Awareness", 0.0))
     }
 
     return features
