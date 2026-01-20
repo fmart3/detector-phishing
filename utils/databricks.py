@@ -7,13 +7,14 @@ import streamlit as st
 
 DATABRICKS_ENDPOINT = "phishing-endpoint"
 
+# Lista exacta de features que espera el modelo actual
 MODEL_FEATURES = [
-    "Fatiga_Global_Score",
-    "Phish_Susceptibilidad",
-    "Big5_Apertura",
-    "Phish_Riesgo_Percibido",
+    "Demo_Tamano_Org",
     "Demo_Rol_Trabajo",
-    "Demo_Horas"
+    "Big5_Apertura",
+    "Demo_Horas",
+    "Phish_Riesgo_Percibido",
+    "Fatiga_Global_Score"
 ]
 
 # =====================================================
@@ -58,37 +59,39 @@ def get_endpoint_url():
 
 def prepare_features(scores: dict, responses: dict) -> dict:
     """
-    Prepara el payload JSON convirtiendo los datos de manera segura.
-    Evita el error 'int() argument must be a string...'.
+    Prepara el payload JSON con los 6 features exactos que pide el modelo.
     """
-    # 1. Recuperar valores crudos del diccionario de respuestas
+    # 1. Recuperar valores crudos de las respuestas demográficas
     role_raw = responses.get("Demo_Rol_Trabajo")
     hours_raw = responses.get("Demo_Horas")
+    size_raw = responses.get("Demo_Tamano_Org") # Nuevo feature
 
-    # 2. VALIDACIÓN ESTRICTA: Si faltan datos, detenemos todo aquí
-    # Esto previene que 'None' llegue a las funciones int() o float()
+    # 2. VALIDACIÓN ESTRICTA
     if role_raw is None:
         raise ValueError("Error Crítico: El usuario no seleccionó su 'Rol de Trabajo'.")
     
     if hours_raw is None:
         raise ValueError("Error Crítico: El usuario no indicó sus 'Horas de uso'.")
+        
+    if size_raw is None:
+        raise ValueError("Error Crítico: El usuario no indicó el 'Tamaño de la Organización'.")
 
-    # 3. Conversión segura (ahora sabemos que NO son None)
+    # 3. Conversión segura de tipos
     try:
         role_val = int(role_raw)
         hours_val = float(hours_raw)
+        size_val = int(size_raw) # Convertimos tamaño a entero
     except (ValueError, TypeError) as e:
-        # Si por alguna razón llegan datos corruptos que no son números
-        raise ValueError(f"Error de tipo de datos: Rol='{role_raw}', Horas='{hours_raw}'. Detalle: {e}")
+        raise ValueError(f"Error de tipo de datos en demográficos. Detalle: {e}")
 
-    # 4. Construcción del diccionario final
+    # 4. Construcción del diccionario final (Orden no importa en JSON, pero ayuda a la lectura)
     features = {
-        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0)),
-        "Phish_Susceptibilidad": float(scores.get("Phish_Susceptibilidad", 0.0)),
-        "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
-        "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
+        "Demo_Tamano_Org": size_val,
         "Demo_Rol_Trabajo": role_val,
-        "Demo_Horas": hours_val
+        "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
+        "Demo_Horas": hours_val,
+        "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
+        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0))
     }
 
     return features
@@ -101,11 +104,16 @@ def predict(features: dict) -> dict:
     url = get_endpoint_url()
     headers = get_headers()
 
+    # Formato 'dataframe_records' es el estándar para Databricks Serving con pandas
     payload = {
         "dataframe_records": [features]
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Error de conexión con Databricks: {e}")
+        st.stop()
 
     if response.status_code != 200:
         st.error("❌ Error al invocar endpoint Databricks")
@@ -113,26 +121,30 @@ def predict(features: dict) -> dict:
         st.stop()
 
     result = response.json()
-    prediction_row = result["predictions"][0]
+    
+    # Manejo robusto de la respuesta (dependiendo de si viene con wrapper o cruda)
+    if "predictions" in result:
+        prediction_row = result["predictions"][0]
 
-    # Caso 1: modelo PyFunc devuelve dict con keys
-    if isinstance(prediction_row, dict):
-        if "prediction" in prediction_row:
-            pred_class = int(prediction_row["prediction"])
-            probability = float(prediction_row.get("probability"))
+        # Caso A: Modelo con Wrapper (devuelve diccionario)
+        if isinstance(prediction_row, dict):
+            # Buscamos 'prediction' (int) y 'probability' (float)
+            pred_class = int(prediction_row.get("prediction", 0))
+            probability = prediction_row.get("probability") 
+            if probability is not None:
+                probability = float(probability)
+        
+        # Caso B: Modelo crudo (devuelve solo el valor predicho)
         else:
-            # fallback genérico (por índice)
-            pred_class = int(list(prediction_row.values())[0])
+            pred_class = int(prediction_row)
             probability = None
-
-    # Caso 2: modelo clásico (lista de números)
     else:
-        pred_class = int(prediction_row)
-        probability = None
-
+        # Caso raro: formato inesperado
+        st.error("Formato de respuesta de Databricks desconocido")
+        st.write(result)
+        st.stop()
 
     return {
         "prediction": pred_class,
-        "probability": probability,
-        #"raw_response": result
+        "probability": probability
     }
