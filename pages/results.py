@@ -98,7 +98,7 @@ def page_results():
     # 3️⃣ Clasificación por niveles (NO binaria)
     # =========================
     
-    probability_adj = probability #- 0.3 # Ajuste
+    probability_adj = probability 
     
     if probability_adj < 0.45:
         risk_level = "BAJO"
@@ -107,38 +107,47 @@ def page_results():
     else:
         risk_level = "ALTO"
 
-    # Logica de Guardado (Solo una vez)
+    # =================================================
+    # 📝 LOGICA DE GUARDADO (OPTIMIZADA)
+    # =================================================
     if not st.session_state.get("logged"):
         
-        with st.status("🔄 Procesando evaluación...", expanded=True) as status:
-            # 1. Creamos un contenedor placeholder
-            status_placeholder = st.empty()
+        # Creamos un placeholder vacío PRIMERO
+        status_placeholder = st.empty()
+        
+        # Usamos el status DENTRO del placeholder
+        with status_placeholder.status("🔄 Procesando y guardando...", expanded=True) as status:
             
-            # 2. Construimos el status DENTRO del placeholder
-            with status_placeholder.status("🔄 Procesando evaluación...", expanded=True) as status:
-                st.write("💾 Guardando resultados en la nube...")
-                start_sql = time.time()
-                
-                insert_survey_response(
-                    responses=responses,
-                    scores=scores,
-                    model_output={
-                        "probability": probability_adj,
-                        "risk_level": risk_level
-                    }
-                )
-                
-                st.session_state.logged = True
-                end_sql = time.time()     # <--- FIN CRONÓMETRO SQL
-                seconds_sql = end_sql - start_sql
-                st.sidebar.info(f"💾 Base de Datos: **{seconds_sql:.2f} seg**")
-                
-                # Mostramos éxito brevemente
-                status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
-                time.sleep(1) # Esperamos 1.5 segundos para que el usuario vea el éxito
-                
-            # 3. ¡Magia! Borramos el contenedor completo
-            status_placeholder.empty()
+            st.write("☁️ Conectando con Base de Datos...")
+            start_sql = time.time()
+            
+            # Llamada a la función de persistencia
+            insert_survey_response(
+                responses=responses,
+                scores=scores,
+                model_output={
+                    "probability": probability_adj,
+                    "risk_level": risk_level
+                }
+            )
+            
+            end_sql = time.time()
+            seconds_sql = end_sql - start_sql
+            
+            # Mostramos info en sidebar (opcional, pero útil)
+            st.sidebar.info(f"💾 Guardado DB: **{seconds_sql:.2f} s**")
+            
+            # Marcamos como logueado para que no se repita
+            st.session_state.logged = True
+            
+            # Actualizamos el estado visual a Éxito
+            status.update(label="✅ ¡Evaluación guardada con éxito!", state="complete", expanded=False)
+            
+            # Pequeña pausa para que el usuario vea el check verde antes de que desaparezca
+            time.sleep(1.5)
+        
+        # (Opcional) Si quieres que desaparezca la caja de status por completo:
+        status_placeholder.empty()
 
     # =========================
     # 4️⃣ Mostrar resultado
