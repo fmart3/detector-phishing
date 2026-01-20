@@ -98,7 +98,7 @@ def page_results():
     # 3️⃣ Clasificación por niveles (NO binaria)
     # =========================
     
-    probability_adj = probability - 0.3 # Ajuste
+    probability_adj = probability #- 0.3 # Ajuste
     
     if probability_adj < 0.45:
         risk_level = "BAJO"
