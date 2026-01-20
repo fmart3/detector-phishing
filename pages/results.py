@@ -84,7 +84,8 @@ def page_results():
         
         end_pred = time.time()    # <--- FIN CRONÓMETRO PREDICCIÓN
         seconds_pred = end_pred - start_pred
-        print(f"🚨 TIEMPO DE PREDICCIÓN (MODELO): {seconds_pred:.2f} segundos") # Míralo en la consola
+        st.sidebar.markdown("### ⏱️ Tiempos de Ejecución")
+        st.sidebar.warning(f"🧠 Modelo IA: **{seconds_pred:.2f} seg**")
 
     result = st.session_state.prediction
     probability = result.get("probability")
@@ -130,7 +131,7 @@ def page_results():
                 st.session_state.logged = True
                 end_sql = time.time()     # <--- FIN CRONÓMETRO SQL
                 seconds_sql = end_sql - start_sql
-                print(f"🚨 TIEMPO DE INSERT SQL (BD): {seconds_sql:.2f} segundos") # Míralo en la consola
+                st.sidebar.info(f"💾 Base de Datos: **{seconds_sql:.2f} seg**")
                 
                 # Mostramos éxito brevemente
                 status.update(label="✅ ¡Evaluación completada!", state="complete", expanded=False)
