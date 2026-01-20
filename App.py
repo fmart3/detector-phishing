@@ -1,10 +1,6 @@
 import streamlit as st
-import threading
-import requests
-import json
 from utils.style import load_css
 from utils.scales import INIT_PAGE
-from utils.databricks import get_endpoint_url # Importamos solo para obtener la URL
 
 # =========================
 # Configuración básica
@@ -14,49 +10,13 @@ st.set_page_config(
     layout="centered"
 )
 
-# =========================
-# Lógica de "Despertador" (Wake Up) Seguro
-# =========================
-
-def wake_up_worker(url, token):
-    """
-    Esta función se ejecuta en un hilo separado.
-    Recibe la URL y el Token directamente, por lo que NO toca st.secrets
-    y no genera el error de ScriptRunContext.
-    """
-    try:
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
-        # Datos basura mínimos para despertar al modelo
-        dummy_payload = {
-            "dataframe_records": [{
-                "Demo_Tamano_Org": 1,
-                "Demo_Rol_Trabajo": 1,
-                "Big5_Apertura": 0.5,
-                "Demo_Horas": 1.0,
-                "Phish_Riesgo_Percibido": 0.5,
-                "Fatiga_Global_Score": 0.5
-            }]
-        }
-        print(f"⏰ (Thread) Enviando señal de despertador a: {url}")
-        requests.post(url, headers=headers, json=dummy_payload, timeout=5)
-        print("✅ (Thread) Señal enviada.")
-    except Exception as e:
-        print(f"⚠️ (Thread) El despertador falló silenciosamente: {e}")
-
-# =========================
-# Inicio de la App
-# =========================
-
 load_css() 
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")
 st.caption("Basado en personalidad, actitudes y fatiga digital")
 
 # =========================
-# Inicialización de estado y Thread
+# Inicialización de estado
 # =========================
 if "page" not in st.session_state:
     st.session_state.page = INIT_PAGE
@@ -70,24 +30,7 @@ if "scores" not in st.session_state:
 if "prediction" not in st.session_state:
     st.session_state.prediction = None
 
-# AQUÍ ESTÁ EL TRUCO: Solo lanzamos el hilo una vez por sesión
-if "waked_up" not in st.session_state:
-    
-    # 1. Obtenemos las credenciales AQUI (en el hilo principal seguro)
-    try:
-        if "DATABRICKS_TOKEN" in st.secrets:
-            token_safe = st.secrets["DATABRICKS_TOKEN"]
-            # Usamos la función auxiliar para armar la URL, pero lo hacemos aquí
-            url_safe = get_endpoint_url() 
-            
-            # 2. Lanzamos el hilo pasando los datos como argumentos
-            # args=(url_safe, token_safe) evita que el hilo busque st.secrets
-            t = threading.Thread(target=wake_up_worker, args=(url_safe, token_safe))
-            t.start()
-            
-            st.session_state.waked_up = True
-    except Exception as e:
-        print(f"No se pudo iniciar el worker: {e}")
+# (Eliminamos waked_up y threading para desbloquear la carga)
 
 # =========================
 # Importación de páginas
