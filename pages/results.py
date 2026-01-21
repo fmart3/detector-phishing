@@ -4,6 +4,7 @@ import streamlit as st
 import os
 import pandas as pd
 import time
+import threading  # <--- IMPORTANTE: Para Fire and Forget
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.logging import log_prediction
@@ -13,8 +14,41 @@ from utils.scales import INIT_PAGE
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
 
-def generate_evidently_report():
+# ==========================================================
+# FUNCIÓN WORKER (Se ejecuta en segundo plano)
+# ==========================================================
+def task_save_background(responses, scores, probability, risk_level):
+    """
+    Esta función se ejecuta en un hilo separado.
+    No puede escribir en la UI de Streamlit (st.write, st.error)
+    porque el contexto de script principal ya habrá terminado para el usuario.
+    """
+    try:
+        print("🔄 [Background] Iniciando guardado en Databricks...")
+        start_t = time.time()
+        
+        # Preparamos el diccionario como lo espera tu función de persistencia
+        model_out = {
+            "probability": probability,
+            "risk_level": risk_level
+        }
+        
+        insert_survey_response(
+            responses=responses,
+            scores=scores,
+            model_output=model_out
+        )
+        
+        duration = time.time() - start_t
+        print(f"✅ [Background] Guardado exitoso en {duration:.2f}s")
+        
+    except Exception as e:
+        print(f"❌ [Background] Error guardando en DB: {e}")
 
+# ==========================================================
+# EVIDENTLY (Tu código original)
+# ==========================================================
+def generate_evidently_report():
     if not os.path.exists("training_baseline.csv"):
         st.error("❌ No existe training_baseline.csv")
         return
@@ -31,12 +65,8 @@ def generate_evidently_report():
     production = pd.read_csv("production_predictions.csv")
 
     FEATURES = [
-        'Demo_Tamano_Org',
-        'Demo_Rol_Trabajo',
-        'Big5_Apertura',
-        'Demo_Horas',
-        'Phish_Riesgo_Percibido',
-        'Fatiga_Global_Score'
+        'Demo_Tamano_Org', 'Demo_Rol_Trabajo', 'Big5_Apertura',
+        'Demo_Horas', 'Phish_Riesgo_Percibido', 'Fatiga_Global_Score'
     ]
 
     baseline = baseline[FEATURES]
@@ -46,15 +76,15 @@ def generate_evidently_report():
     report.run(reference_data=baseline, current_data=production)
     report.save_html("evidently_phishing_report.html")
 
+# ==========================================================
+# PÁGINA PRINCIPAL
+# ==========================================================
 def page_results():
     st.markdown('<div class="bootstrap-card">', unsafe_allow_html=True)
     st.markdown("## 📊 Resultado de la Evaluación")
     st.write("Este resultado se basa en sus respuestas.")
 
-    # =========================
     # 1️⃣ Obtener scores
-    # =========================
-
     responses = st.session_state.get("responses")    
     
     if not responses:
@@ -73,16 +103,14 @@ def page_results():
         st.error(str(e))
         return
     
-    # =========================
     # 2️⃣ Predicción (una sola vez)
-    # =========================
     if st.session_state.get("prediction") is None:
         st.write("⏱️ Iniciando predicción...")
         start_pred = time.time()
         
         st.session_state.prediction = predict(model_features)
         
-        end_pred = time.time()    # <--- FIN CRONÓMETRO PREDICCIÓN
+        end_pred = time.time()
         seconds_pred = end_pred - start_pred
         st.sidebar.markdown("### ⏱️ Tiempos de Ejecución")
         st.sidebar.warning(f"🧠 Modelo IA: **{seconds_pred:.2f} seg**")
@@ -94,10 +122,7 @@ def page_results():
         st.error("El modelo no devolvió una probabilidad válida.")
         return
 
-    # =========================
-    # 3️⃣ Clasificación por niveles (NO binaria)
-    # =========================
-    
+    # 3️⃣ Clasificación
     probability_adj = probability 
     
     if probability_adj < 0.45:
@@ -108,51 +133,27 @@ def page_results():
         risk_level = "ALTO"
 
     # =================================================
-    # 📝 LOGICA DE GUARDADO (OPTIMIZADA)
+    # 📝 LOGICA FIRE AND FORGET (NUEVA)
     # =================================================
     if not st.session_state.get("logged"):
         
-        # Creamos un placeholder vacío PRIMERO
-        status_placeholder = st.empty()
+        # 1. Mensaje inmediato al usuario
+        st.success("✅ Evaluación completada. (Guardando datos en segundo plano...)")
         
-        # Usamos el status DENTRO del placeholder
-        with status_placeholder.status("🔄 Procesando y guardando...", expanded=True) as status:
-            
-            st.write("☁️ Conectando con Base de Datos...")
-            start_sql = time.time()
-            
-            # Llamada a la función de persistencia
-            insert_survey_response(
-                responses=responses,
-                scores=scores,
-                model_output={
-                    "probability": probability_adj,
-                    "risk_level": risk_level
-                }
-            )
-            
-            end_sql = time.time()
-            seconds_sql = end_sql - start_sql
-            
-            # Mostramos info en sidebar (opcional, pero útil)
-            st.sidebar.info(f"💾 Guardado DB: **{seconds_sql:.2f} s**")
-            
-            # Marcamos como logueado para que no se repita
-            st.session_state.logged = True
-            
-            # Actualizamos el estado visual a Éxito
-            status.update(label="✅ ¡Evaluación guardada con éxito!", state="complete", expanded=False)
-            
-            # Pequeña pausa para que el usuario vea el check verde antes de que desaparezca
-            time.sleep(1.5)
+        # 2. Preparamos los argumentos para el hilo
+        # Pasamos copias de los datos, no el st.session_state completo por seguridad
+        thread_args = (responses, scores, probability_adj, risk_level)
         
-        # (Opcional) Si quieres que desaparezca la caja de status por completo:
-        status_placeholder.empty()
+        # 3. Lanzamos el Hilo (Fire and Forget)
+        db_thread = threading.Thread(target=task_save_background, args=thread_args)
+        db_thread.start()
+        
+        # 4. Marcamos como logueado para que no se repita al recargar
+        st.session_state.logged = True
 
-    # =========================
-    # 4️⃣ Mostrar resultado
-    # =========================
-    #st.divider()
+    # =================================================
+    # 4️⃣ Mostrar resultado VISUAL
+    # =================================================
 
     prob_pct = probability_adj * 100
     
@@ -160,7 +161,6 @@ def page_results():
     with col1:
         st.metric("Su probabilidad de caer en Phishing es:", f"{prob_pct:.1f}%")
     with col2:
-        # Usamos colores de streamlit basados en el nivel
         if risk_level == "BAJO":
             st.success(f"Nivel de Riesgo: **{risk_level}**")
         elif risk_level == "MEDIO":
@@ -168,45 +168,16 @@ def page_results():
         else:
             st.error(f"Nivel de Riesgo: **{risk_level}**")
         
-    st.markdown('</div>', unsafe_allow_html=True) # CIERRE CARD
-
-    # =========================
-    # Debug / académico
-    # =========================
-    # with st.expander("🔍 Ver scores calculados"):
-    #     st.json(scores)
-
-    # with st.expander("📦 Respuesta cruda del modelo"):
-    #     st.json(result)
+    st.markdown('</div>', unsafe_allow_html=True) 
 
     # =========================
     # Reinicio
     # =========================
-    #st.divider()
     if st.button("🔄 Reiniciar evaluación"):
-        # 1. Limpiamos las variables de sesión
         keys_to_clear = ["page", "responses", "scores", "prediction", "logged"]
         for k in keys_to_clear:
             if k in st.session_state:
                 del st.session_state[k]
         
-        # 2. Establecemos la página de inicio (Generalmente es la 1)
         st.session_state.page = INIT_PAGE
-        
-        # 3. Forzamos la recarga con el comando nuevo
         st.rerun()
-
-    # =========================
-    # Evidently Report
-    # =========================
-    # st.divider()
-    # if st.button("📈 Generar reporte de monitoreo"):
-    #     generate_evidently_report()
-    #     st.success("Reporte Evidently generado")
-
-    # if os.path.exists("evidently_phishing_report.html"):
-    #     st.components.v1.html(
-    #         open("evidently_phishing_report.html").read(),
-    #         height=800,
-    #         scrolling=True
-    #     )
