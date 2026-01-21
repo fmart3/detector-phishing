@@ -46,13 +46,15 @@ def page_app_alt():
         
         input_tamano = st.selectbox(
             "Tamaño Organización",
-            options=[1, 2, 3, 4, 5],
+            options=[1, 2, 3, 4, 5, 6, 7],
             format_func=lambda x: {
-                1: "1. Micro (1-10)", 
-                2: "2. Pequeña (11-50)", 
-                3: "3. Mediana (51-200)", 
-                4: "4. Grande (201-500)", 
-                5: "5. Muy Grande (500+)"
+                1: "100 o menos",
+                2:"Entre 100 y 500",
+                3:"Entre 500 y 1.000",
+                4:"Entre 1.000 y 3.000",
+                5:"Entre 3.000 y 10.000",
+                6:"Entre 10.000 y 50.000",
+                7:"Superior a 50.000"
             }[x]
         )
 
@@ -60,10 +62,10 @@ def page_app_alt():
             "Rol de Trabajo",
             options=[1, 2, 3, 4],
             format_func=lambda x: {
-                1: "1. Administrativo/Staff", 
-                2: "2. Técnico/IT", 
-                3: "3. Manager/Gerente", 
-                4: "4. Ejecutivo/Directivo"
+                1: "Liderazgo (Director, Gerencia, SubGerencia, otros)", 
+                2: "Supervisión y Control (Supervisor, Jefatura)", 
+                3: "Administrativo, Analista, Ingeniero", 
+                4: "Otro"
             }[x]
         )
 
@@ -71,11 +73,11 @@ def page_app_alt():
             "Horas de Uso (Dispositivo)",
             options=[1, 2, 3, 4, 5],
             format_func=lambda x: {
-                1: "1. < 2 horas", 
-                2: "2. 2-4 horas", 
-                3: "3. 4-6 horas", 
-                4: "4. 6-8 horas", 
-                5: "5. > 8 horas"
+                1: "Menos de 2 horas",
+                2: "Entre 2 y 5 horas",
+                3: "Entre 5 y 8 horas",
+                4: "Entre 8 y 10 horas",
+                5: "Más de 10 horas"
             }[x]
         )
 
