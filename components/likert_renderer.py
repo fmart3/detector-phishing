@@ -1,7 +1,6 @@
 import streamlit as st
 from utils.scales import LIKERT_5, invert_likert
 
-
 def render_likert_page(
     title: str,
     description: str,
@@ -10,91 +9,147 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    questions: lista de dicts:
-    {
-        "code": "AE01",
-        "text": "Yo creo en la importancia del arte.",
-        "reverse": False
-    }
+    Renderiza una página de encuesta estilo Likert moderna y limpia.
+    Usa escala numérica 1-5 para mantener la alineación horizontal perfecta.
     """
 
     # -----------------------------
-    # Inicialización de estado
+    # 0. Estilos CSS Personalizados (Para que se vea "Bonito")
+    # -----------------------------
+    st.markdown("""
+        <style>
+        /* Estilo de la tarjeta de la pregunta */
+        .question-card {
+            background-color: #262730; /* Fondo oscuro suave (ajusta si usas modo claro) */
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #41444e;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        /* Ajustar los radio buttons para que estén centrados */
+        div.row-widget.stRadio > div {
+            justify-content: center;
+            gap: 2rem; /* Espacio entre los círculos */
+        }
+        /* Leyenda superior */
+        .legend-box {
+            background-color: #0e1117;
+            border: 1px solid #41444e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 14px;
+            color: #fafafa;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # -----------------------------
+    # 1. Inicialización de estado
     # -----------------------------
     if "responses" not in st.session_state:
         st.session_state.responses = {}
-
     if "page" not in st.session_state:
         st.session_state.page = 1
 
     # -----------------------------
-    # UI - Header
+    # 2. Header y Leyenda
     # -----------------------------
-    st.markdown(f"## {title}")
+    st.title(title)
     st.write(description)
-    st.divider()
+    
+    # LEYENDA VISUAL: Explica la escala una sola vez arriba
+    st.markdown("""
+    <div class="legend-box">
+        <b>Escala de Respuesta:</b><br>
+        1 = Muy en Desacuerdo &nbsp;|&nbsp; 
+        2 = En Desacuerdo &nbsp;|&nbsp; 
+        3 = Neutro &nbsp;|&nbsp; 
+        4 = De Acuerdo &nbsp;|&nbsp; 
+        5 = Muy de Acuerdo
+    </div>
+    """, unsafe_allow_html=True)
 
     unanswered = []
     
-    likert_labels = list(LIKERT_5.keys())
-    value_to_label = {v: k for k, v in LIKERT_5.items()}
-
+    # Opciones numéricas limpias (garantizan una sola fila)
+    options_numeric = [1, 2, 3, 4, 5]
+    
+    # Mapeo inverso para guardar el valor correcto en tu lógica
+    # Asumimos que LIKERT_5 tiene las claves como texto y valores como números, 
+    # o si LIKERT_5 ya mapea Texto -> Numero, usamos los números directamente.
+    
     # -----------------------------
-    # Preguntas
+    # 3. Renderizado de Preguntas
     # -----------------------------
     
-    for q in questions:
-        st.markdown(
-            f"<div style='font-size:18px; font-weight:500'>{q['text']}</div>",
-            unsafe_allow_html=True
-        )
+    for i, q in enumerate(questions):
+        # Contenedor visual (Tarjeta)
+        with st.container():
+            st.markdown(f"""
+            <div class="question-card">
+                <div class="question-text">{i+1}. {q['text']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # 🔁 recuperar respuesta previa
-        saved_value = st.session_state.responses.get(q["code"])
-        saved_label = None
+            # Recuperar respuesta previa
+            saved_val = st.session_state.responses.get(q["code"])
+            
+            # Lógica de inversión si la pregunta es reversa
+            display_val = saved_val
+            if saved_val is not None and q.get("reverse", False):
+                display_val = invert_likert(saved_val)
 
-        if saved_value is not None:
-            if q.get("reverse", False):
-                saved_value = invert_likert(saved_value)
-            saved_label = value_to_label[saved_value]
+            # Radio Button Numérico (Horizontal y limpio)
+            # Usamos label_visibility="collapsed" para que no repita el texto
+            selection = st.radio(
+                label=q['text'], 
+                options=options_numeric,
+                index=options_numeric.index(display_val) if display_val in options_numeric else None,
+                horizontal=True,
+                label_visibility="collapsed",
+                key=f"{q['code']}_ui",
+                help="1: Muy en desacuerdo ... 5: Muy de acuerdo"
+            )
 
-        response_label = st.radio(
-            label="",
-            options=likert_labels,
-            index=likert_labels.index(saved_label) if saved_label else None,
-            horizontal=True,
-            key=f"{q['code']}_ui"
-        )
+            # Guardado de respuesta
+            if selection is None:
+                unanswered.append(q["code"])
+            else:
+                # Calculamos el valor real a guardar
+                final_value = selection
+                if q.get("reverse", False):
+                    final_value = invert_likert(selection)
+                
+                st.session_state.responses[q["code"]] = final_value
 
-        if response_label is None:
-            unanswered.append(q["code"])
-        else:
-            value = LIKERT_5[response_label]
-            if q.get("reverse", False):
-                value = invert_likert(value)
-
-            st.session_state.responses[q["code"]] = value
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
+    st.divider()
 
     # -----------------------------
-    # Navegación
+    # 4. Navegación
     # -----------------------------
     col1, col2, col3 = st.columns([1, 3, 1])
 
-    # ⬅️ Atrás
     if prev_page is not None:
         with col1:
-            st.button(
-                "⬅️ Atrás",
-                on_click=lambda: st.session_state.update(page=prev_page)
-            )
+            st.button("⬅️ Atrás", on_click=lambda: st.session_state.update(page=prev_page), use_container_width=True)
 
-    # Siguiente ➡️
     with col3:
+        # El botón se deshabilita si faltan respuestas
+        btn_disabled = len(unanswered) > 0
+        btn_text = f"Faltan {len(unanswered)}" if btn_disabled else "Siguiente ➡️"
+        
         st.button(
-            "Siguiente ➡️",
-            disabled=bool(unanswered),
-            on_click=lambda: st.session_state.update(page=next_page)
+            btn_text,
+            disabled=btn_disabled,
+            on_click=lambda: st.session_state.update(page=next_page),
+            type="primary" if not btn_disabled else "secondary",
+            use_container_width=True
         )
