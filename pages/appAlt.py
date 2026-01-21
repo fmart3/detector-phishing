@@ -24,6 +24,7 @@ ALL_GROUPS = [
 # Generamos la lista de códigos dinámicamente: ["EX01", "EX02", ..., "DS02"]
 LIKERT_QUESTIONS = [q["code"] for group in ALL_GROUPS for q in group]
 
+from utils.scoring import compute_scores
 
 # =====================================================
 # PAGE APP ALT
@@ -111,19 +112,22 @@ def page_app_alt():
     if st.button("🚀 Simular Predicción con estos datos", type="primary"):
         
         # A. Inicializar/Limpiar estado
-        st.session_state.scores = {}
         st.session_state.responses = {}
         st.session_state.prediction = None
+        # Nota: No ponemos st.session_state.scores = {} aquí, 
+        # porque compute_scores creará el diccionario completo.
         
         r = st.session_state.responses
-        s = st.session_state.scores 
 
-        # B. Generar Relleno Aleatorio (Usando la lista dinámica LIKERT_QUESTIONS)
+        # B. Generar Relleno Aleatorio (Preguntas Likert)
         # ---------------------------------------------------
+        # Esto llena EX01, AM01, etc. con números del 1 al 5
         for code in LIKERT_QUESTIONS:
             r[code] = random.randint(1, 5)
 
-        # Variables demográficas extra (requeridas por endpoint viejo o SQL)
+        # C. Variables Demográficas
+        # -----------------------------------------------------
+        # Relleno aleatorio para lo que NO está en la pantalla
         r.update({
             "Demo_Pais": random.randint(1, 5),
             "Demo_Tipo_Organizacion": random.randint(1, 4),
@@ -133,19 +137,29 @@ def page_app_alt():
             "Demo_Nivel_Educacion": random.randint(1, 5),
         })
         
-        # -----------------------------------------------------
-        # C. INYECTAR DATOS MANUALES
-        # -----------------------------------------------------
+        # Inyectar lo que el usuario eligió manualmente en los selectbox
         r["Demo_Tamano_Org"] = input_tamano
         r["Demo_Rol_Trabajo"] = input_rol
         r["Demo_Horas"] = input_horas
         
-        s["Big5_Apertura"] = float(input_apertura)
-        s["Phish_Riesgo_Percibido"] = float(input_riesgo)
-        s["Fatiga_Global_Score"] = float(input_fatiga)
-
-        st.toast("✅ Datos generados correctamente")
+        # D. CÁLCULO DE SCORES (Paso Clave)
+        # -----------------------------------------------------
+        # 1. Calculamos TODOS los scores usando las respuestas aleatorias.
+        # Esto evita que los scores no simulados queden en 0.
+        full_scores = compute_scores(r)
         
-        # D. Redirigir a Resultados
+        # 2. Guardamos ese diccionario completo en la sesión
+        st.session_state.scores = full_scores
+
+        # E. SOBRESCRIBIR CON SLIDERS MANUALES
+        # -----------------------------------------------------
+        # Ahora forzamos los valores de tus sliders sobre los calculados.
+        st.session_state.scores["Big5_Apertura"] = float(input_apertura)
+        st.session_state.scores["Phish_Riesgo_Percibido"] = float(input_riesgo)
+        st.session_state.scores["Fatiga_Global_Score"] = float(input_fatiga)
+
+        st.toast("✅ Datos generados y calculados correctamente")
+        
+        # F. Redirigir a Resultados
         st.session_state.page = 99
         st.rerun()
