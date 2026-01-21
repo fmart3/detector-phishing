@@ -1,46 +1,48 @@
-# /pages/results.py
-
 import streamlit as st
 import os
-import pandas as pd
 import time
 import threading
-import json
-import numpy as np # Importante para detectar tipos
+import numpy as np
 
+# Imports de tus utilidades
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.persistence import insert_survey_response
 from utils.scales import INIT_PAGE
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
 
 # ==========================================================
-# HELPER: SANITIZAR DATOS (Clave para evitar errores de DB)
+# 1. HELPER: SANITIZAR DATOS (Convierte NumPy a Python puro)
 # ==========================================================
 def sanitize_dict(d):
-    new_d = {}
-    for k, v in d.items():
-        if isinstance(v, (np.integer, np.int64, np.int32)):
-            new_d[k] = int(v)
-        elif isinstance(v, (np.floating, np.float64, np.float32)):
-            new_d[k] = float(v)
-        else:
-            new_d[k] = v
-    return new_d
+    """Recursivamente convierte tipos numpy a nativos de python"""
+    if isinstance(d, dict):
+        return {k: sanitize_dict(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [sanitize_dict(v) for v in d]
+    elif isinstance(d, (np.integer, np.int64, np.int32)):
+        return int(d)
+    elif isinstance(d, (np.floating, np.float64, np.float32)):
+        return float(d)
+    elif pd.isna(d):  # Maneja NaN de pandas
+        return None
+    else:
+        return d
+
+import pandas as pd # Necesario para el pd.isna de arriba
 
 # ==========================================================
-# FUNCIÓN WORKER (Background)
+# 2. FUNCIÓN WORKER (Segundo Plano)
 # ==========================================================
 def task_save_background(responses, scores, model_output):
     """
-    Ejecuta la inserción en BD en un hilo aparte.
+    Se ejecuta en un hilo aparte.
     """
-    print("🔄 [Background] Hilo iniciado. Preparando inserción...")
+    # Usamos flush=True para forzar que salga en la terminal inmediatamente
+    print("🔄 [Background] Hilo iniciado...", flush=True)
+    
     try:
         start_t = time.time()
         
-        # Intentamos insertar
         insert_survey_response(
             responses=responses,
             scores=scores,
@@ -48,150 +50,140 @@ def task_save_background(responses, scores, model_output):
         )
         
         duration = time.time() - start_t
-        print(f"✅ [Background] Guardado exitoso en BDD en {duration:.4f}s")
+        print(f"✅ [Background] Guardado exitoso en {duration:.2f}s", flush=True)
         
     except Exception as e:
-        # Este print es vital: aparecerá en tu terminal de VSCode/Servidor
-        print(f"❌ [Background] FATAL ERROR guardando en DB: {e}")
-        # Tip: Imprime los datos para ver si algo viene mal
-        print(f"   Datos: {model_output}")
+        print(f"❌ [Background] FATAL ERROR en DB: {e}", flush=True)
 
 # ==========================================================
-# EVIDENTLY REPORT
-# ==========================================================
-def generate_evidently_report():
-    if not os.path.exists("training_baseline.csv") or not os.path.exists("production_predictions.csv"):
-        st.error("❌ Faltan archivos de datos para el reporte.")
-        return
-
-    if os.path.exists("evidently_phishing_report.html"):
-        st.info("📄 Usando reporte existente")
-        return
-
-    baseline = pd.read_csv("training_baseline.csv")
-    production = pd.read_csv("production_predictions.csv")
-
-    # Solo las features que usa el modelo nuevo
-    FEATURES = [
-        'Demo_Tamano_Org', 'Demo_Rol_Trabajo', 'Big5_Apertura',
-        'Demo_Horas', 'Phish_Riesgo_Percibido', 'Fatiga_Global_Score'
-    ]
-
-    # Filtrar columnas si existen en el CSV, si no, manejar error
-    try:
-        baseline = baseline[FEATURES]
-        production = production[FEATURES]
-        report = Report(metrics=[DataDriftPreset()])
-        report.run(reference_data=baseline, current_data=production)
-        report.save_html("evidently_phishing_report.html")
-    except KeyError as e:
-        st.error(f"Error generando reporte: Falta columna {e}")
-
-# ==========================================================
-# PÁGINA PRINCIPAL
+# 3. PÁGINA PRINCIPAL
 # ==========================================================
 def page_results():
     st.markdown('<div class="bootstrap-card">', unsafe_allow_html=True)
     st.markdown("## 📊 Resultado de la Evaluación")
-    st.write("Análisis completado.")
 
-    # 1️⃣ Obtener inputs y Scores
+    # ------------------------------------------------------
+    # A. OBTENCIÓN DE DATOS
+    # ------------------------------------------------------
     responses = st.session_state.get("responses")    
     if not responses:
-        st.error("⚠️ No hay respuestas registradas. Vuelva al inicio.")
+        st.error("⚠️ No hay respuestas. Vuelva al inicio.")
         if st.button("Ir al Inicio"):
             st.session_state.page = INIT_PAGE
             st.rerun()
         return
 
+    # Calcular Scores si no existen
     if st.session_state.get("scores") is None:
         scores = compute_scores(responses)
         st.session_state.scores = scores
     else:
         scores = st.session_state.scores
 
-    # 2️⃣ Predicción
+    # ------------------------------------------------------
+    # B. PREDICCIÓN (IA)
+    # ------------------------------------------------------
     if st.session_state.get("prediction") is None:
-        try:
-            # Preparamos features (Tu función arreglada de 6 vars)
-            model_features = prepare_features(scores, responses)
-            
-            # Llamada al API
-            st.session_state.prediction = predict(model_features)
-            
-        except Exception as e:
-            st.error(f"Error conectando con el motor de IA: {e}")
-            return
+        with st.spinner("⏱️ Analizando patrones de comportamiento..."):
+            try:
+                # 1. Preparar features (Versión Lite 6 variables)
+                model_features = prepare_features(scores, responses)
+                
+                # 2. Predecir
+                pred_result = predict(model_features)
+                st.session_state.prediction = pred_result
+                
+            except Exception as e:
+                st.error(f"Error en el motor de IA: {e}")
+                # Valores por defecto para no bloquear
+                st.session_state.prediction = {"probability": 0.0, "prediction": 0}
 
+    # Extraer valores seguros
     result = st.session_state.prediction
-    # Forzamos float nativo por seguridad
     probability = float(result.get("probability", 0.0))
 
-    # 3️⃣ Lógica de Riesgo (Ajustada a tu modelo)
+    # Determinar Riesgo
     if probability < 0.33:
         risk_level = "BAJO"
-        msg_color = "success"
+        color = "green"
+        msg_type = "success"
     elif probability < 0.40:
         risk_level = "MEDIO"
-        msg_color = "warning"
+        color = "orange"
+        msg_type = "warning"
     else:
         risk_level = "ALTO"
-        msg_color = "error"
+        color = "red"
+        msg_type = "error"
 
-    # =================================================
-    # 🔥 LOGICA FIRE AND FORGET (MEJORADA)
-    # =================================================
-    if not st.session_state.get("logged"):
-        
-        # A. Preparar datos limpios (Sin NumPy)
-        clean_responses = sanitize_dict(responses)
-        clean_scores = sanitize_dict(scores)
-        clean_output = {
-            "probability": probability,
-            "risk_level": risk_level
-        }
-        
-        # B. Lanzar Hilo
-        # Usamos threading para no bloquear al usuario
-        db_thread = threading.Thread(
-            target=task_save_background, 
-            args=(clean_responses, clean_scores, clean_output)
-        )
-        db_thread.start()
-        
-        # C. Marcar como logueado
-        st.session_state.logged = True
-        
-        # D. Feedback visual sutil (Toast si es versión nueva, o info pequeña)
-        try:
-            st.toast("✅ Resultados calculados. Guardando registro anónimo...", icon="☁️")
-        except AttributeError:
-            st.info("☁️ Guardando registro anónimo en segundo plano...")
-
-    # =================================================
-    # 5️⃣ Mostrar resultado VISUAL
-    # =================================================
-    prob_pct = probability * 100
+    # ------------------------------------------------------
+    # C. VISUALIZACIÓN (¡PRIORIDAD ALTA!)
+    # ------------------------------------------------------
+    # Mostramos esto ANTES de intentar guardar, para que el usuario siempre vea su resultado.
     
+    st.write("---")
     col1, col2 = st.columns(2)
+    
     with col1:
-        st.metric("Probabilidad de Phishing:", f"{prob_pct:.1f}%")
-    with col2:
-        if msg_color == "success":
-            st.success(f"Nivel de Riesgo: **{risk_level}**")
-        elif msg_color == "warning":
-            st.warning(f"Nivel de Riesgo: **{risk_level}**")
-        else:
-            st.error(f"Nivel de Riesgo: **{risk_level}**")
+        st.metric("Probabilidad de Phishing", f"{probability*100:.1f}%")
+        st.caption("Basado en el modelo XGBoost Lite")
         
-    st.markdown('</div>', unsafe_allow_html=True) 
+    with col2:
+        st.markdown(f"""
+            <div style="background-color: {color}; padding: 10px; border-radius: 5px; color: white; text-align: center;">
+                <h3 style="margin:0;">Riesgo {risk_level}</h3>
+            </div>
+        """, unsafe_allow_html=True)
 
-    # =========================
-    # Reinicio
-    # =========================
-    if st.button("🔄 Reiniciar evaluación"):
-        keys_to_clear = ["page", "responses", "scores", "prediction", "logged"]
-        for k in keys_to_clear:
+    st.write("")
+    if risk_level == "ALTO":
+        st.error("🚨 Su perfil indica alta vulnerabilidad. Se recomienda entrenamiento intensivo.")
+    elif risk_level == "MEDIO":
+        st.warning("⚠️ Riesgo moderado. Preste atención a remitentes desconocidos.")
+    else:
+        st.success("✅ Buen nivel de ciberseguridad. Mantenga sus hábitos.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ------------------------------------------------------
+    # D. GUARDADO EN SEGUNDO PLANO (Fire and Forget)
+    # ------------------------------------------------------
+    # Lo hacemos al final dentro de un try/except gigante para que NADA rompa la UI.
+    
+    if not st.session_state.get("logged"):
+        try:
+            # 1. Sanitizar datos (Quitar NumPy)
+            clean_responses = sanitize_dict(responses)
+            clean_scores = sanitize_dict(scores)
+            clean_output = {
+                "probability": probability,
+                "risk_level": risk_level
+            }
+
+            # 2. Iniciar Hilo
+            db_thread = threading.Thread(
+                target=task_save_background,
+                args=(clean_responses, clean_scores, clean_output)
+            )
+            db_thread.start()
+            
+            # 3. Marcar y Notificar
+            st.session_state.logged = True
+            
+            # Usamos toast en lugar de success fijo para no ensuciar la UI
+            st.toast("✅ Resultados guardados exitosamente.", icon="💾")
+            
+        except Exception as e:
+            # Si falla la preparación del hilo, lo mostramos en consola
+            print(f"❌ Error iniciando guardado en background: {e}", flush=True)
+            # Opcional: st.warning("No se pudo guardar el registro, pero sus resultados son correctos.")
+
+    # ------------------------------------------------------
+    # E. BOTÓN DE REINICIO
+    # ------------------------------------------------------
+    st.write("---")
+    if st.button("🔄 Nueva Evaluación"):
+        for k in ["page", "responses", "scores", "prediction", "logged"]:
             if k in st.session_state:
                 del st.session_state[k]
         st.session_state.page = INIT_PAGE
