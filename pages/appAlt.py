@@ -2,94 +2,152 @@ import streamlit as st
 import random
 
 # =====================================================
-# TODAS LAS PREGUNTAS DEL INSTRUMENTO
+# IMPORTAR PREGUNTAS (Fuente Única de Verdad)
 # =====================================================
+from components.questions_likert import (
+    BIG5_EXTRAVERSION, BIG5_AMABILIDAD, BIG5_RESPONSABILIDAD, 
+    BIG5_NEUROTICISMO, BIG5_APERTURA,
+    PHISH_ACTITUD_RIESGO, PHISH_AWARENESS, PHISH_RIESGO_PERCIBIDO, 
+    PHISH_AUTOEFICACIA, PHISH_SUSCEPTIBILIDAD,
+    FATIGA_EMOCIONAL, FATIGA_CINISMO, FATIGA_ABANDONO
+)
 
-LIKERT_QUESTIONS = [
-    # Big Five
-    "EX01","EX02","EX03","EX04","EX05", "EX06","EX07","EX08","EX09","EX10",
-    "AM01","AM02","AM03","AM04","AM05", "AM06","AM07","AM08","AM09","AM10",
-    "CO01","CO02","CO03","CO04","CO05", "CO06","CO07","CO08","CO09","CO10",
-    "NE01","NE02","NE03","NE04","NE05", "NE06","NE07","NE08","NE09","NE10",
-    "AE01","AE02","AE03","AE04","AE05", "AE06","AE07","AE08","AE09","AE10",
-
-    # Phishing
-    "ER01","ER02","ER03","ER04", "ER05","ER06","ER07","ER08","ER09","ER10",
-    "AW01","AW02","AW03",
-    "PR01","PR02","PR03",
-    "CP01","CP02","CP03",
-    "SU01","SU02","SU03","SU04",
-
-    # Fatiga digital (Solo las definidas en Schema)
-    "FE01","FE02","FE03",
-    "FC01","FC02","FC03", "FC04",
-    "DS01","DS02"
+# Agrupamos todas las listas importadas en una sola lista maestra
+ALL_GROUPS = [
+    BIG5_EXTRAVERSION, BIG5_AMABILIDAD, BIG5_RESPONSABILIDAD, 
+    BIG5_NEUROTICISMO, BIG5_APERTURA,
+    PHISH_ACTITUD_RIESGO, PHISH_AWARENESS, PHISH_RIESGO_PERCIBIDO, 
+    PHISH_AUTOEFICACIA, PHISH_SUSCEPTIBILIDAD,
+    FATIGA_EMOCIONAL, FATIGA_CINISMO, FATIGA_ABANDONO
 ]
 
+# Generamos la lista de códigos dinámicamente: ["EX01", "EX02", ..., "DS02"]
+LIKERT_QUESTIONS = [q["code"] for group in ALL_GROUPS for q in group]
+
+
 # =====================================================
-# PAGE
+# PAGE APP ALT
 # =====================================================
 
 def page_app_alt():
+    st.markdown("## ⚡ Simulador de Escenarios (Test Rápido)")
+    st.caption("Define manualmente las variables clave para el modelo. El resto (relleno para SQL) será aleatorio.")
 
-    st.markdown("## ⚡Test Rápido – Respuestas Aleatorias")
-    st.caption("Esta herramienta simula el llenado completo de la encuesta para probar el pipeline (Scores -> Modelo -> SQL).")
+    # -----------------------------------------------------
+    # 1. CONTROLES MANUALES (Inputs del Modelo)
+    # -----------------------------------------------------
+    
+    st.subheader("🎛️ Configura tu Perfil de Prueba")
+    
+    col1, col2 = st.columns(2)
 
-    # Inicializar diccionario si no existe
-    if "responses" not in st.session_state:
+    with col1:
+        st.markdown("##### 🏢 Datos Demográficos")
+        
+        input_tamano = st.selectbox(
+            "Tamaño Organización",
+            options=[1, 2, 3, 4, 5],
+            format_func=lambda x: {
+                1: "1. Micro (1-10)", 
+                2: "2. Pequeña (11-50)", 
+                3: "3. Mediana (51-200)", 
+                4: "4. Grande (201-500)", 
+                5: "5. Muy Grande (500+)"
+            }[x]
+        )
+
+        input_rol = st.selectbox(
+            "Rol de Trabajo",
+            options=[1, 2, 3, 4],
+            format_func=lambda x: {
+                1: "1. Administrativo/Staff", 
+                2: "2. Técnico/IT", 
+                3: "3. Manager/Gerente", 
+                4: "4. Ejecutivo/Directivo"
+            }[x]
+        )
+
+        input_horas = st.selectbox(
+            "Horas de Uso (Dispositivo)",
+            options=[1, 2, 3, 4, 5],
+            format_func=lambda x: {
+                1: "1. < 2 horas", 
+                2: "2. 2-4 horas", 
+                3: "3. 4-6 horas", 
+                4: "4. 6-8 horas", 
+                5: "5. > 8 horas"
+            }[x]
+        )
+
+    with col2:
+        st.markdown("##### 🧠 Scores Psicológicos")
+        
+        input_apertura = st.slider(
+            "Big5 - Apertura (Openness)", 
+            min_value=1.0, max_value=5.0, value=3.5, step=0.1,
+            help="Qué tan abierta a nuevas experiencias es la persona."
+        )
+        
+        input_riesgo = st.slider(
+            "Riesgo Percibido", 
+            min_value=1.0, max_value=5.0, value=3.0, step=0.1,
+            help="Qué tanto riesgo cree el usuario que existe en internet."
+        )
+        
+        input_fatiga = st.slider(
+            "Fatiga Global", 
+            min_value=1.0, max_value=5.0, value=2.5, step=0.1,
+            help="Nivel de agotamiento digital."
+        )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # 2. BOTÓN DE ACCIÓN
+    # -----------------------------------------------------
+    
+    if st.button("🚀 Simular Predicción con estos datos", type="primary"):
+        
+        # A. Inicializar/Limpiar estado
+        st.session_state.scores = {}
         st.session_state.responses = {}
-
-    col_btn, col_info = st.columns([1, 2])
-
-    with col_btn:
-        cargar = st.button("📥 Cargar Datos Random", type="primary")
-
-    if cargar:
-        # 1. Limpiar estado previo
-        st.session_state.scores = None
         st.session_state.prediction = None
-        st.session_state.responses = {} 
         
         r = st.session_state.responses
+        s = st.session_state.scores 
 
-        # 2. Cargar Likert Aleatorio (1 a 5)
-        for q in LIKERT_QUESTIONS:
-            r[q] = random.randint(1, 5)
+        # B. Generar Relleno Aleatorio (Usando la lista dinámica LIKERT_QUESTIONS)
+        # ---------------------------------------------------
+        for code in LIKERT_QUESTIONS:
+            r[code] = random.randint(1, 5)
 
-        # 3. Cargar Demografía Aleatoria
-        # Los rangos (randint) coinciden con el largo de tus diccionarios en demographics.py
+        # Variables demográficas extra (requeridas por endpoint viejo o SQL)
         r.update({
-            "Big5_Apertura": 1,        # 1-5
-            "Phish_Riesgo_Percibido": 1, # 1-5
-            "Fatiga_Global_Score": 5,   # 1-5
-            "Demo_Pais": random.randint(1, 5),              # 5 Países
-            "Demo_Tipo_Organizacion": random.randint(1, 4), # 4 Tipos
-            "Demo_Industria": random.randint(1, 18),        # 18 Industrias
-            "Demo_Tamano_Org": 5,        # 5 Rangos de tamaño
-            "Demo_Rol_Trabajo": 4,       # 4 Roles
-            "Demo_Generacion_Edad": random.randint(1, 5),   # 5 Generaciones
-            "Demo_Genero": random.randint(1, 3),            # 3 Opciones género
-            "Demo_Nivel_Educacion": random.randint(1, 5),   # 5 Niveles
-            "Demo_Horas": 1              # 5 Rangos de horas
+            "Demo_Pais": random.randint(1, 5),
+            "Demo_Tipo_Organizacion": random.randint(1, 4),
+            "Demo_Industria": random.randint(1, 18),
+            "Demo_Generacion_Edad": random.randint(1, 5),
+            "Demo_Genero": random.randint(1, 3),
+            "Demo_Nivel_Educacion": random.randint(1, 5),
         })
-
-        st.success(f"✅ Se generaron {len(r)} variables con valores aleatorios.")
-
-    # =====================================================
-    # VISUALIZACIÓN DE DATOS (DEBUG)
-    # =====================================================
-    st.divider()
-    
-    if st.session_state.responses:
-        with st.expander("🔍 Ver datos cargados en JSON (Payload)", expanded=True):
-            st.json(st.session_state.responses)
-
-        st.markdown("---")
-        st.markdown("### 🚀 Ejecución del Pipeline")
-        st.info("Al presionar el botón, se redirigirá a la página de Resultados (99), donde se calcularán los scores, se consultará a Databricks y se guardará en SQL.")
         
-        if st.button("Calcular, Predecir y Guardar >>"):
-            st.session_state.page = 99
-            st.rerun()
-    else:
-        st.warning("⚠️ Primero presiona 'Cargar Datos de Prueba'")
+        # Scores extra (relleno)
+        s["Phish_Susceptibilidad"] = random.uniform(1.0, 5.0)
+        s["Phish_Autoeficacia"] = random.uniform(1.0, 5.0)
+        s["Phish_Awareness"] = random.uniform(1.0, 5.0)
+
+        # C. INYECTAR DATOS MANUALES
+        # -----------------------------------------------------
+        r["Demo_Tamano_Org"] = input_tamano
+        r["Demo_Rol_Trabajo"] = input_rol
+        r["Demo_Horas"] = input_horas
+        
+        s["Big5_Apertura"] = float(input_apertura)
+        s["Phish_Riesgo_Percibido"] = float(input_riesgo)
+        s["Fatiga_Global_Score"] = float(input_fatiga)
+
+        st.toast("✅ Datos generados correctamente")
+        
+        # D. Redirigir a Resultados
+        st.session_state.page = 99
+        st.rerun()
