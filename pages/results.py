@@ -72,6 +72,13 @@ def page_results():
             st.session_state.page = INIT_PAGE
             st.rerun()
         return
+    
+    # === NUEVO BLOQUE DE DEBUG ===
+    with st.expander("🔍 Ver Datos Crudos (Debug)"):
+        st.write("Estos son los datos exactos que se enviarán:")
+        st.json(responses)
+        st.write(f"Total llaves: {len(responses)}")
+    # ==============================
 
     # Calcular Scores si no existen
     if st.session_state.get("scores") is None:
