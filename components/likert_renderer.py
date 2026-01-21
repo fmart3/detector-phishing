@@ -9,55 +9,84 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    Renderiza encuesta con distribución horizontal completa (Justified).
+    Renderiza encuesta con distribución horizontal forzada usando CSS Grid.
     """
 
     # -----------------------------
-    # 0. CSS MEJORADO (Distribución Ancha)
+    # 0. CSS AGRESIVO (Grid Layout)
     # -----------------------------
     st.markdown("""
         <style>
         /* 1. Tarjeta de la pregunta */
         .question-card {
             background-color: #262730; 
-            padding: 25px; /* Un poco más de padding */
+            padding: 20px 25px; 
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border: 1px solid #41444e;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         
         .question-text {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 15px; /* Más espacio entre texto y botones */
+            margin-bottom: 20px;
         }
 
-        /* 2. MAGIA DE DISTRIBUCIÓN HORIZONTAL */
-        /* Esto afecta al contenedor de los circulitos */
+        /* 2. FORZAR ANCHO TOTAL EN LOS RADIO BUTTONS */
+        
+        /* Nivel 1: El contenedor del widget */
+        div.row-widget.stRadio {
+            width: 100% !important;
+            padding-bottom: 10px;
+        }
+
+        /* Nivel 2: El grupo de opciones (flex container interno) */
         div.row-widget.stRadio > div[role="radiogroup"] {
-            justify-content: space-between; /* Distribuye de extremo a extremo */
-            width: 100%;       /* Ocupa todo el ancho disponible */
-            padding: 0 20px;   /* Un pequeño margen interno para que no toquen el borde exacto */
+            display: flex !important;
+            justify-content: space-between !important; /* Extremo a extremo */
+            width: 100% !important;
+            gap: 0 !important; /* Sin gaps forzados */
         }
 
-        /* 3. Hacer los números/opciones más grandes y clicables */
+        /* Nivel 3: Cada opción individual (el círculo + el número) */
+        div.row-widget.stRadio > div[role="radiogroup"] > label {
+            background-color: transparent !important;
+            display: flex !important;
+            flex-direction: column; /* Pone el número debajo del círculo si hay espacio, o al lado */
+            align-items: center !important;
+            justify-content: center !important;
+            width: 15% !important; /* Forzamos un ancho para clic fácil */
+            margin-right: 0px !important;
+        }
+
+        /* 3. Hacer los números más grandes */
         div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
-            font-size: 18px !important; /* Números más grandes */
+            font-size: 20px !important; 
             font-weight: bold;
+            margin-bottom: 0px !important;
         }
 
-        /* Leyenda superior */
+        /* 4. Leyenda superior */
         .legend-box {
             background-color: #0e1117;
             border: 1px solid #41444e;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             text-align: center;
             font-size: 14px;
-            color: #fafafa;
+            color: #bdc2c9;
+        }
+        
+        /* Decoración visual para la leyenda */
+        .legend-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #ffffff;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -76,11 +105,14 @@ def render_likert_page(
     st.title(title)
     st.write(description)
     
+    # Leyenda mejorada visualmente
     st.markdown("""
     <div class="legend-box">
-        <b>Escala:</b> &nbsp; 
-        1 (Muy en Desacuerdo) &nbsp; ↔ &nbsp; 
-        5 (Muy de Acuerdo)
+        <div>Selecciona el grado de acuerdo:</div>
+        <div class="legend-scale">
+            <span>1<br><small style="font-weight:normal; color:#aaa">Muy en<br>desacuerdo</small></span>
+            <span>5<br><small style="font-weight:normal; color:#aaa">Muy de<br>acuerdo</small></span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -96,12 +128,7 @@ def render_likert_page(
             st.markdown(f"""
             <div class="question-card">
                 <div class="question-text">{i+1}. {q['text']}</div>
-            """, unsafe_allow_html=True) # Nota: No cerramos el div aquí para envolver el radio (truco visual) o cerramos y el radio queda dentro visualmente por el fondo.
-            
-            # Corrección: El st.radio no se puede meter DENTRO del div HTML de arriba fácilmente.
-            # Mejor estrategia: Cerramos el div del texto, pero visualmente parecerá parte de lo mismo si el fondo es igual.
-            # Pero para que quede PERFECTO, el st.radio queda fuera del HTML puro. 
-            # El CSS global de arriba ajustará el st.radio.
+            """, unsafe_allow_html=True)
             
             st.markdown("</div>", unsafe_allow_html=True) 
 
@@ -113,7 +140,7 @@ def render_likert_page(
 
             # RADIO BUTTON
             selection = st.radio(
-                label=q['text'], # Hidden by label_visibility
+                label=q['text'], 
                 options=options_numeric,
                 index=options_numeric.index(display_val) if display_val in options_numeric else None,
                 horizontal=True,
@@ -129,8 +156,8 @@ def render_likert_page(
                     final_value = invert_likert(selection)
                 st.session_state.responses[q["code"]] = final_value
             
-            # Espaciador sutil
-            st.write("") 
+            # Espacio visual extra
+            st.markdown("<div style='margin-bottom: 10px'></div>", unsafe_allow_html=True)
 
     st.divider()
 
