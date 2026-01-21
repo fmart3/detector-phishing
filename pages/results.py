@@ -4,43 +4,63 @@ import streamlit as st
 import os
 import pandas as pd
 import time
-import threading  # <--- IMPORTANTE: Para Fire and Forget
+import threading
+import json
+import numpy as np # Importante para detectar tipos
+
 from utils.scoring import compute_scores
 from utils.databricks import predict, prepare_features
 from utils.persistence import insert_survey_response
 from utils.scales import INIT_PAGE
-
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
 
 # ==========================================================
-# FUNCIÓN WORKER (Se ejecuta en segundo plano)
+# HELPER: SANITIZAR DATOS (Clave para evitar errores de DB)
 # ==========================================================
-def task_save_background(responses, scores, probability, risk_level):
+def sanitize_dict(d):
     """
-    Esta función se ejecuta en un hilo separado.
-    No puede escribir en la UI de Streamlit.
+    Convierte tipos de NumPy (int64, float32) a tipos nativos de Python (int, float).
+    Esto es crucial para que JSON y SQL no fallen.
     """
+    new_d = {}
+    for k, v in d.items():
+        if isinstance(v, (np.integer, np.int64, np.int32)):
+            new_d[k] = int(v)
+        elif isinstance(v, (np.floating, np.float64, np.float32)):
+            new_d[k] = float(v)
+        elif isinstance(v, dict):
+            new_d[k] = sanitize_dict(v)
+        else:
+            new_d[k] = v
+    return new_d
+
+# ==========================================================
+# FUNCIÓN WORKER (Background)
+# ==========================================================
+def task_save_background(responses, scores, model_output):
+    """
+    Ejecuta la inserción en BD en un hilo aparte.
+    """
+    print("🔄 [Background] Hilo iniciado. Preparando inserción...")
     try:
-        print("🔄 [Background] Iniciando guardado en Databricks...")
         start_t = time.time()
         
-        model_out = {
-            "probability": probability,
-            "risk_level": risk_level
-        }
-        
+        # Intentamos insertar
         insert_survey_response(
             responses=responses,
             scores=scores,
-            model_output=model_out
+            model_output=model_output
         )
         
         duration = time.time() - start_t
-        print(f"✅ [Background] Guardado exitoso en {duration:.2f}s")
+        print(f"✅ [Background] Guardado exitoso en BDD en {duration:.4f}s")
         
     except Exception as e:
-        print(f"❌ [Background] Error guardando en DB: {e}")
+        # Este print es vital: aparecerá en tu terminal de VSCode/Servidor
+        print(f"❌ [Background] FATAL ERROR guardando en DB: {e}")
+        # Tip: Imprime los datos para ver si algo viene mal
+        print(f"   Datos: {model_output}")
 
 # ==========================================================
 # EVIDENTLY REPORT
@@ -79,12 +99,15 @@ def generate_evidently_report():
 def page_results():
     st.markdown('<div class="bootstrap-card">', unsafe_allow_html=True)
     st.markdown("## 📊 Resultado de la Evaluación")
-    st.write("Este resultado se basa en sus respuestas y el análisis de IA.")
+    st.write("Análisis completado.")
 
-    # 1️⃣ Obtener inputs
+    # 1️⃣ Obtener inputs y Scores
     responses = st.session_state.get("responses")    
     if not responses:
-        st.error("No hay respuestas registradas.")
+        st.error("⚠️ No hay respuestas registradas. Vuelva al inicio.")
+        if st.button("Ir al Inicio"):
+            st.session_state.page = INIT_PAGE
+            st.rerun()
         return
 
     if st.session_state.get("scores") is None:
@@ -93,41 +116,28 @@ def page_results():
     else:
         scores = st.session_state.scores
 
-    # 2️⃣ Preparar Features (Solo las 6 necesarias)
-    try:
-        model_features = prepare_features(scores, responses)
-    except ValueError as e:
-        st.error(f"Error preparando datos: {str(e)}")
-        return
-    
-    # 3️⃣ Predicción (una sola vez)
+    # 2️⃣ Predicción
     if st.session_state.get("prediction") is None:
-        st.write("⏱️ Analizando patrones de comportamiento...")
-        start_pred = time.time()
-        
         try:
+            # Preparamos features (Tu función arreglada de 6 vars)
+            model_features = prepare_features(scores, responses)
+            
+            # Llamada al API
             st.session_state.prediction = predict(model_features)
+            
         except Exception as e:
-            st.error(f"Error de conexión con el modelo: {e}")
+            st.error(f"Error conectando con el motor de IA: {e}")
             return
-        
-        end_pred = time.time()
-        seconds_pred = end_pred - start_pred
-        st.sidebar.markdown("### ⏱️ Tiempos de Ejecución")
-        st.sidebar.warning(f"🧠 Modelo IA: **{seconds_pred:.2f} seg**")
 
     result = st.session_state.prediction
-    probability = result.get("probability", 0.0)
+    # Forzamos float nativo por seguridad
+    probability = float(result.get("probability", 0.0))
 
-    # 4️⃣ Clasificación (Ajustada a la sensibilidad real del modelo)
-    # Rango real observado: 0.29 (Mín) - 0.42 (Máx)
-    
-    probability_adj = float(probability)
-    
-    if probability_adj < 0.33:
+    # 3️⃣ Lógica de Riesgo (Ajustada a tu modelo)
+    if probability < 0.33:
         risk_level = "BAJO"
         msg_color = "success"
-    elif probability_adj < 0.40:
+    elif probability < 0.40:
         risk_level = "MEDIO"
         msg_color = "warning"
     else:
@@ -135,22 +145,39 @@ def page_results():
         msg_color = "error"
 
     # =================================================
-    # 📝 LOGICA FIRE AND FORGET
+    # 🔥 LOGICA FIRE AND FORGET (MEJORADA)
     # =================================================
     if not st.session_state.get("logged"):
-        st.success("✅ Evaluación completada. (Guardando datos en segundo plano...)")
         
-        # Lanzamos el hilo
-        thread_args = (responses, scores, probability_adj, risk_level)
-        db_thread = threading.Thread(target=task_save_background, args=thread_args)
+        # A. Preparar datos limpios (Sin NumPy)
+        clean_responses = sanitize_dict(responses)
+        clean_scores = sanitize_dict(scores)
+        clean_output = {
+            "probability": probability,
+            "risk_level": risk_level
+        }
+        
+        # B. Lanzar Hilo
+        # Usamos threading para no bloquear al usuario
+        db_thread = threading.Thread(
+            target=task_save_background, 
+            args=(clean_responses, clean_scores, clean_output)
+        )
         db_thread.start()
         
+        # C. Marcar como logueado
         st.session_state.logged = True
+        
+        # D. Feedback visual sutil (Toast si es versión nueva, o info pequeña)
+        try:
+            st.toast("✅ Resultados calculados. Guardando registro anónimo...", icon="☁️")
+        except AttributeError:
+            st.info("☁️ Guardando registro anónimo en segundo plano...")
 
     # =================================================
     # 5️⃣ Mostrar resultado VISUAL
     # =================================================
-    prob_pct = probability_adj * 100
+    prob_pct = probability * 100
     
     col1, col2 = st.columns(2)
     with col1:
