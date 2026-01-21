@@ -133,11 +133,7 @@ def page_app_alt():
             "Demo_Nivel_Educacion": random.randint(1, 5),
         })
         
-        # Scores extra (relleno)
-        s["Phish_Susceptibilidad"] = random.uniform(1.0, 5.0)
-        s["Phish_Autoeficacia"] = random.uniform(1.0, 5.0)
-        s["Phish_Awareness"] = random.uniform(1.0, 5.0)
-
+        # -----------------------------------------------------
         # C. INYECTAR DATOS MANUALES
         # -----------------------------------------------------
         r["Demo_Tamano_Org"] = input_tamano
