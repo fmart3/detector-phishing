@@ -19,18 +19,12 @@ from evidently.metric_preset import DataDriftPreset
 # HELPER: SANITIZAR DATOS (Clave para evitar errores de DB)
 # ==========================================================
 def sanitize_dict(d):
-    """
-    Convierte tipos de NumPy (int64, float32) a tipos nativos de Python (int, float).
-    Esto es crucial para que JSON y SQL no fallen.
-    """
     new_d = {}
     for k, v in d.items():
         if isinstance(v, (np.integer, np.int64, np.int32)):
             new_d[k] = int(v)
         elif isinstance(v, (np.floating, np.float64, np.float32)):
             new_d[k] = float(v)
-        elif isinstance(v, dict):
-            new_d[k] = sanitize_dict(v)
         else:
             new_d[k] = v
     return new_d
