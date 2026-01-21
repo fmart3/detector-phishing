@@ -89,20 +89,6 @@ def page_results():
         st.session_state.scores = scores
     else:
         scores = st.session_state.scores
-        
-    # ==========================================
-    # 🛑 BLOQUE DE DEBUG (Muestra los scores en pantalla)
-    # ==========================================
-    with st.expander("🕵️ DEBUG: Ver Scores Calculados", expanded=True):
-        st.write("### 1. ¿Qué llaves llegaron del formulario?")
-        # Mostramos solo las primeras 10 para no saturar, o todas si prefieres
-        st.write(list(responses.keys())[:15]) 
-        
-        st.write("### 2. ¿Qué calculó compute_scores?")
-        st.json(scores) # Esto muestra el diccionario formateado bonito
-
-        st.warning("Si aquí ves ceros, el problema es scoring.py. Si ves números, el problema es la base de datos.")
-    # ==========================================
 
     # ------------------------------------------------------
     # B. PREDICCIÓN (IA)
