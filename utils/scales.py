@@ -9,4 +9,4 @@ LIKERT_5 = {
 def invert_likert(value: int) -> int:
     return 6 - value
 
-INIT_PAGE = 1
+INIT_PAGE = 0
