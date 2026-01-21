@@ -9,34 +9,45 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    Renderiza una página de encuesta estilo Likert moderna y limpia.
-    Usa escala numérica 1-5 para mantener la alineación horizontal perfecta.
+    Renderiza encuesta con distribución horizontal completa (Justified).
     """
 
     # -----------------------------
-    # 0. Estilos CSS Personalizados (Para que se vea "Bonito")
+    # 0. CSS MEJORADO (Distribución Ancha)
     # -----------------------------
     st.markdown("""
         <style>
-        /* Estilo de la tarjeta de la pregunta */
+        /* 1. Tarjeta de la pregunta */
         .question-card {
-            background-color: #262730; /* Fondo oscuro suave (ajusta si usas modo claro) */
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            background-color: #262730; 
+            padding: 25px; /* Un poco más de padding */
+            border-radius: 12px;
+            margin-bottom: 20px;
             border: 1px solid #41444e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        
         .question-text {
             font-size: 18px;
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 10px;
+            margin-bottom: 15px; /* Más espacio entre texto y botones */
         }
-        /* Ajustar los radio buttons para que estén centrados */
-        div.row-widget.stRadio > div {
-            justify-content: center;
-            gap: 2rem; /* Espacio entre los círculos */
+
+        /* 2. MAGIA DE DISTRIBUCIÓN HORIZONTAL */
+        /* Esto afecta al contenedor de los circulitos */
+        div.row-widget.stRadio > div[role="radiogroup"] {
+            justify-content: space-between; /* Distribuye de extremo a extremo */
+            width: 100%;       /* Ocupa todo el ancho disponible */
+            padding: 0 20px;   /* Un pequeño margen interno para que no toquen el borde exacto */
         }
+
+        /* 3. Hacer los números/opciones más grandes y clicables */
+        div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
+            font-size: 18px !important; /* Números más grandes */
+            font-weight: bold;
+        }
+
         /* Leyenda superior */
         .legend-box {
             background-color: #0e1117;
@@ -52,7 +63,7 @@ def render_likert_page(
     """, unsafe_allow_html=True)
 
     # -----------------------------
-    # 1. Inicialización de estado
+    # 1. Inicialización
     # -----------------------------
     if "responses" not in st.session_state:
         st.session_state.responses = {}
@@ -60,80 +71,71 @@ def render_likert_page(
         st.session_state.page = 1
 
     # -----------------------------
-    # 2. Header y Leyenda
+    # 2. Header
     # -----------------------------
     st.title(title)
     st.write(description)
     
-    # LEYENDA VISUAL: Explica la escala una sola vez arriba
     st.markdown("""
     <div class="legend-box">
-        <b>Escala de Respuesta:</b><br>
-        1 = Muy en Desacuerdo &nbsp;|&nbsp; 
-        2 = En Desacuerdo &nbsp;|&nbsp; 
-        3 = Neutro &nbsp;|&nbsp; 
-        4 = De Acuerdo &nbsp;|&nbsp; 
-        5 = Muy de Acuerdo
+        <b>Escala:</b> &nbsp; 
+        1 (Muy en Desacuerdo) &nbsp; ↔ &nbsp; 
+        5 (Muy de Acuerdo)
     </div>
     """, unsafe_allow_html=True)
 
     unanswered = []
-    
-    # Opciones numéricas limpias (garantizan una sola fila)
     options_numeric = [1, 2, 3, 4, 5]
-    
-    # Mapeo inverso para guardar el valor correcto en tu lógica
-    # Asumimos que LIKERT_5 tiene las claves como texto y valores como números, 
-    # o si LIKERT_5 ya mapea Texto -> Numero, usamos los números directamente.
     
     # -----------------------------
     # 3. Renderizado de Preguntas
     # -----------------------------
-    
     for i, q in enumerate(questions):
-        # Contenedor visual (Tarjeta)
         with st.container():
+            # Abrimos la tarjeta visual
             st.markdown(f"""
             <div class="question-card">
                 <div class="question-text">{i+1}. {q['text']}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Recuperar respuesta previa
-            saved_val = st.session_state.responses.get(q["code"])
+            """, unsafe_allow_html=True) # Nota: No cerramos el div aquí para envolver el radio (truco visual) o cerramos y el radio queda dentro visualmente por el fondo.
             
-            # Lógica de inversión si la pregunta es reversa
+            # Corrección: El st.radio no se puede meter DENTRO del div HTML de arriba fácilmente.
+            # Mejor estrategia: Cerramos el div del texto, pero visualmente parecerá parte de lo mismo si el fondo es igual.
+            # Pero para que quede PERFECTO, el st.radio queda fuera del HTML puro. 
+            # El CSS global de arriba ajustará el st.radio.
+            
+            st.markdown("</div>", unsafe_allow_html=True) 
+
+            # Lógica de valor
+            saved_val = st.session_state.responses.get(q["code"])
             display_val = saved_val
             if saved_val is not None and q.get("reverse", False):
                 display_val = invert_likert(saved_val)
 
-            # Radio Button Numérico (Horizontal y limpio)
-            # Usamos label_visibility="collapsed" para que no repita el texto
+            # RADIO BUTTON
             selection = st.radio(
-                label=q['text'], 
+                label=q['text'], # Hidden by label_visibility
                 options=options_numeric,
                 index=options_numeric.index(display_val) if display_val in options_numeric else None,
                 horizontal=True,
                 label_visibility="collapsed",
-                key=f"{q['code']}_ui",
-                help="1: Muy en desacuerdo ... 5: Muy de acuerdo"
+                key=f"{q['code']}_ui"
             )
 
-            # Guardado de respuesta
             if selection is None:
                 unanswered.append(q["code"])
             else:
-                # Calculamos el valor real a guardar
                 final_value = selection
                 if q.get("reverse", False):
                     final_value = invert_likert(selection)
-                
                 st.session_state.responses[q["code"]] = final_value
+            
+            # Espaciador sutil
+            st.write("") 
 
     st.divider()
 
     # -----------------------------
-    # 4. Navegación
+    # 4. Botones
     # -----------------------------
     col1, col2, col3 = st.columns([1, 3, 1])
 
@@ -142,7 +144,6 @@ def render_likert_page(
             st.button("⬅️ Atrás", on_click=lambda: st.session_state.update(page=prev_page), use_container_width=True)
 
     with col3:
-        # El botón se deshabilita si faltan respuestas
         btn_disabled = len(unanswered) > 0
         btn_text = f"Faltan {len(unanswered)}" if btn_disabled else "Siguiente ➡️"
         
