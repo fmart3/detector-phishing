@@ -1,139 +1,128 @@
 # /utils/databricks.py
 
 import requests
+import pandas as pd
 import streamlit as st
 
 # =====================================================
 # Configuración
 # =====================================================
 
-DATABRICKS_ENDPOINT = "phishing-endpoint"
+# Asegúrate de que este nombre coincida con tu Endpoint en Databricks
+DATABRICKS_ENDPOINT = "phishing-endpoint" 
+
+def get_config():
+    """Recupera configuración sin usar st.stop() para no romper hilos"""
+    try:
+        token = st.secrets["DATABRICKS_TOKEN"]
+        
+        # Lógica para obtener el host
+        host = None
+        for key in ["DATABRICKS_HOST", "DATABRICKS_WORKSPACE_URL", "DATABRICKS_INSTANCE"]:
+            if key in st.secrets:
+                host = st.secrets[key].rstrip("/")
+                break
+        
+        if not host or not token:
+            raise ValueError("Faltan credenciales en secrets.toml")
+            
+        return token, host
+    except Exception as e:
+        print(f"⚠️ Error de configuración: {e}")
+        return None, None
+
+def get_endpoint_url(host):
+    return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
 
 # =====================================================
-# Helpers
+# Features (SOLO LAS 6 NECESARIAS)
 # =====================================================
 
-def get_headers():
-    if "DATABRICKS_TOKEN" not in st.secrets:
-        st.error("❌ Falta DATABRICKS_TOKEN en Streamlit Secrets")
-        st.stop()
-
-    return {
-        "Authorization": f"Bearer {st.secrets['DATABRICKS_TOKEN']}",
-        "Content-Type": "application/json"
-    }
-
-def get_databricks_host():
-    for key in [
-        "DATABRICKS_HOST",
-        "DATABRICKS_WORKSPACE_URL",
-        "DATABRICKS_INSTANCE"
-    ]:
-        if key in st.secrets:
-            host = st.secrets[key].rstrip("/")
-            if not host.startswith("http"):
-                st.error(f"❌ {key} debe comenzar con https://")
-                st.stop()
-            return host
-
-    st.error("❌ No se encontró el HOST de Databricks")
-    st.stop()
-
-def get_endpoint_url():
-    return f"{get_databricks_host()}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
-
-# =====================================================
-# Features
-# =====================================================
-
-def prepare_features(scores: dict, responses: dict) -> dict:
+def prepare_features(scores: dict, responses: dict):
     """
-    Prepara el payload JSON.
-    NOTA: Envía TODAS las variables para satisfacer el esquema del modelo antiguo
-    hasta que el endpoint se actualice a la versión de solo 6 variables.
+    Crea un DataFrame exacto con las 6 columnas que el modelo LITE espera.
     """
     
-    # 1. Recuperar valores clave y validar
-    role_raw = responses.get("Demo_Rol_Trabajo")
-    hours_raw = responses.get("Demo_Horas")
-    size_raw = responses.get("Demo_Tamano_Org")
+    # 1. Recuperar valores (con valores por defecto seguros)
+    # Convertimos a int/float explícitamente para asegurar tipos
+    try:
+        data = {
+            "Demo_Rol_Trabajo": [int(responses.get("Demo_Rol_Trabajo", 1))],
+            "Demo_Horas": [int(responses.get("Demo_Horas", 1))],
+            "Demo_Tamano_Org": [int(responses.get("Demo_Tamano_Org", 1))],
+            
+            "Fatiga_Global_Score": [float(scores.get("Fatiga_Global_Score", 0.0))],
+            "Big5_Apertura": [float(scores.get("Big5_Apertura", 0.0))],
+            "Phish_Riesgo_Percibido": [float(scores.get("Phish_Riesgo_Percibido", 0.0))]
+        }
+    except Exception as e:
+        # Si algo falla en la conversión, lanzamos error para verlo en logs
+        raise ValueError(f"Error procesando tipos de datos: {e}")
 
-    if role_raw is None: role_raw = 1
-    if hours_raw is None: hours_raw = 1
-    if size_raw is None: size_raw = 1
-
-    # 2. Construcción del diccionario (Mapeo completo)
-    features = {
-        # --- Las 6 Variables del Modelo Nuevo (Prioridad) ---
-        "Demo_Tamano_Org": int(size_raw),
-        "Demo_Rol_Trabajo": int(role_raw),
-        "Big5_Apertura": float(scores.get("Big5_Apertura", 0.0)),
-        "Demo_Horas": int(hours_raw),
-        "Phish_Riesgo_Percibido": float(scores.get("Phish_Riesgo_Percibido", 0.0)),
-        "Fatiga_Global_Score": float(scores.get("Fatiga_Global_Score", 0.0)),
-
-        # --- Variables Extras (Requeridas por el Modelo Antiguo) ---
-        # Demográficos (Integers / Longs)
-        "Demo_Pais": int(responses.get("Demo_Pais", 1)),
-        "Demo_Tipo_Organizacion": int(responses.get("Demo_Tipo_Organizacion", 1)),
-        "Demo_Industria": int(responses.get("Demo_Industria", 1)),
-        "Demo_Genero": int(responses.get("Demo_Genero", 1)),
-        "Demo_Generacion_Edad": int(responses.get("Demo_Generacion_Edad", 1)),
-        "Demo_Nivel_Educacion": int(responses.get("Demo_Nivel_Educacion", 1)),
-
-        # Scores Psicológicos (Doubles / Floats)
-        "Phish_Susceptibilidad": float(scores.get("Phish_Susceptibilidad", 0.0)),
-        "Phish_Autoeficacia": float(scores.get("Phish_Autoeficacia", 0.0)),
-        "Phish_Awareness": float(scores.get("Phish_Awareness", 0.0))
-    }
-
-    return features
+    # 2. Crear DataFrame
+    df = pd.DataFrame(data)
+    
+    # Ordenamos columnas alfabéticamente o según lista fija si es necesario.
+    # Con dataframe_split, el orden se envía explícitamente, así que es seguro.
+    return df
 
 # =====================================================
 # Predicción
 # =====================================================
 
-def predict(features: dict) -> dict:
-    url = get_endpoint_url()
-    headers = get_headers()
+def predict(feature_df):
+    """
+    Envía el DataFrame al endpoint.
+    Retorna un diccionario seguro siempre, incluso si falla.
+    """
+    token, host = get_config()
+    
+    if not token or not host:
+        return {"prediction": 0, "probability": 0.0}
 
-    # Formato 'dataframe_records'
+    url = get_endpoint_url(host)
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    # Usamos 'split' porque es el estándar nativo de MLflow/Pandas
+    # Genera: { "columns": ["A", "B"], "data": [[1, 2]] }
     payload = {
-        "dataframe_records": [features]
+        "dataframe_split": feature_df.to_dict(orient="split")
     }
 
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
-    except requests.exceptions.RequestException as e:
-        st.error(f"❌ Error de conexión con Databricks: {e}")
-        st.stop()
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        
+        # Si la respuesta no es exitosa, imprimimos el error pero no matamos la app
+        if response.status_code != 200:
+            print(f"❌ Error API Databricks ({response.status_code}): {response.text}")
+            return {"prediction": 0, "probability": 0.0}
 
-    if response.status_code != 200:
-        st.error(f"❌ Error del Modelo (Status {response.status_code})")
-        # Si ves un error aquí de 'missing inputs', es que Databricks 
-        # no ha actualizado el endpoint a la versión nueva.
-        st.code(response.text)
-        st.stop()
+        result = response.json()
+        
+        # Parseo robusto de la respuesta
+        # Databricks puede devolver listas o dicts dependiendo de la versión
+        predictions = result.get("predictions", [])
+        
+        if len(predictions) > 0:
+            first_pred = predictions[0]
+            
+            # Caso 1: Devuelve objeto completo {'prediction': 1, 'probability': 0.8}
+            if isinstance(first_pred, dict):
+                return {
+                    "prediction": int(first_pred.get("prediction", 0)),
+                    "probability": float(first_pred.get("probability", 0.0))
+                }
+            # Caso 2: Devuelve solo el valor [0] o [1] (Modelos viejos)
+            else:
+                return {"prediction": int(first_pred), "probability": 0.0}
+                
+        return {"prediction": 0, "probability": 0.0}
 
-    result = response.json()
-    
-    if "predictions" in result:
-        prediction_row = result["predictions"][0]
-
-        if isinstance(prediction_row, dict):
-            pred_class = int(prediction_row.get("prediction", 0))
-            probability = prediction_row.get("probability") 
-            if probability is not None:
-                probability = float(probability)
-        else:
-            pred_class = int(prediction_row)
-            probability = None
-    else:
-        st.error("Formato de respuesta desconocido")
-        st.write(result)
-        st.stop()
-
-    return {
-        "prediction": pred_class,
-        "probability": probability
-    }
+    except Exception as e:
+        print(f"❌ Excepción conectando a Databricks: {e}")
+        # Retorno seguro (Falso negativo es mejor que crash)
+        return {"prediction": 0, "probability": 0.0}
