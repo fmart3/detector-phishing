@@ -2,19 +2,14 @@
 
 {
   "dataframe_split": {
-    "columns": [ "Demo_Pais", "Demo_Tipo_Organizacion", "Demo_Industria", "Demo_Rol_Trabajo", "Demo_Genero", "Fatiga_Global_Score", "Phish_Susceptibilidad", "Big5_Apertura", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", "Phish_Awareness", "Demo_Horas", "Demo_Generacion_Edad", "Demo_Nivel_Educacion", "Demo_Tamano_Org" ],
-    "data": [[ 
-      1, 2, 4, 
-      2,   
-      1, 
-      1.2, 
-      1, 
+    "columns": [ "Demo_Rol_Trabajo", "Fatiga_Global_Score", "Big5_Apertura", "Phish_Riesgo_Percibido", "Demo_Horas", "Demo_Tamano_Org" ],
+    "data": [[
+      2,
+      1.2,
       3.0, 
-      4.8, 
-      4.3, 5, 
-      1,   
-      4, 1, 
-      5    
+      4.8,   
+      1, 
+      2    
     ]]
   }
 }
@@ -23,18 +18,13 @@
 
 {
   "dataframe_split": {
-    "columns": [ "Demo_Pais", "Demo_Tipo_Organizacion", "Demo_Industria", "Demo_Rol_Trabajo", "Demo_Genero", "Fatiga_Global_Score", "Phish_Susceptibilidad", "Big5_Apertura", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", "Phish_Awareness", "Demo_Horas", "Demo_Generacion_Edad", "Demo_Nivel_Educacion", "Demo_Tamano_Org" ],
+    "columns": [ "Demo_Rol_Trabajo", "Fatiga_Global_Score", "Big5_Apertura", "Phish_Riesgo_Percibido", "Demo_Horas", "Demo_Tamano_Org" ],
     "data": [[ 
-      1, 2, 4, 
       1,   
-      1, 
-      4.9, 
-      1, 
+      4.9,
       4.5, 
-      1.5, 
-      2.0, 2, 
-      5,   
-      4, 1, 
+      2.0,
+      5,
       1    
     ]]
   }
@@ -44,18 +34,13 @@
 
 {
   "dataframe_split": {
-    "columns": [ "Demo_Pais", "Demo_Tipo_Organizacion", "Demo_Industria", "Demo_Rol_Trabajo", "Demo_Genero", "Fatiga_Global_Score", "Phish_Susceptibilidad", "Big5_Apertura", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", "Phish_Awareness", "Demo_Horas", "Demo_Generacion_Edad", "Demo_Nivel_Educacion", "Demo_Tamano_Org" ],
-    "data": [[ 
-      1, 2, 4, 
-      3,   
-      1, 
-      2.5, 
-      1, 
+    "columns": [ "Demo_Rol_Trabajo", "Fatiga_Global_Score", "Big5_Apertura", "Phish_Riesgo_Percibido", "Demo_Horas", "Demo_Tamano_Org" ],
+    "data": [[
+      3,
+      2.5,
       4.9, 
-      2.5, 
-      4.0, 4, 
+      2.5,  
       3,   
-      4, 1, 
       7    
     ]]
   }
@@ -65,19 +50,14 @@
 
 {
   "dataframe_split": {
-    "columns": [ "Demo_Pais", "Demo_Tipo_Organizacion", "Demo_Industria", "Demo_Rol_Trabajo", "Demo_Genero", "Fatiga_Global_Score", "Phish_Susceptibilidad", "Big5_Apertura", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", "Phish_Awareness", "Demo_Horas", "Demo_Generacion_Edad", "Demo_Nivel_Educacion", "Demo_Tamano_Org" ],
+    "columns": [ "Demo_Rol_Trabajo", "Fatiga_Global_Score", "Big5_Apertura", "Phish_Riesgo_Percibido", "Demo_Horas", "Demo_Tamano_Org" ],
     "data": [[ 
-      1, 1, 1, 
       1,   
-      1, 
-      1.0, 
-      1, 
+      1.0,
       1.0, 
       1.0, 
-      1.0, 1, 
-      1,   
-      1, 1, 
-      1    
+      1.0, 
+      1  
     ]]
   }
 }
@@ -86,18 +66,13 @@
 
 {
   "dataframe_split": {
-    "columns": [ "Demo_Pais", "Demo_Tipo_Organizacion", "Demo_Industria", "Demo_Rol_Trabajo", "Demo_Genero", "Fatiga_Global_Score", "Phish_Susceptibilidad", "Big5_Apertura", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", "Phish_Awareness", "Demo_Horas", "Demo_Generacion_Edad", "Demo_Nivel_Educacion", "Demo_Tamano_Org" ],
+    "columns": [ "Demo_Rol_Trabajo", "Fatiga_Global_Score", "Big5_Apertura", "Phish_Riesgo_Percibido", "Demo_Horas", "Demo_Tamano_Org" ],
     "data": [[ 
-      1, 2, 4, 
-      4,   
-      1, 
-      5.0, 
-      1, 
-      5.0, 
-      5.0, 
-      5.0, 5, 
-      5,   
-      4, 1, 
+      5,
+      5.0,
+      5.0,
+      5.0,
+      5,
       7    
     ]]
   }
