@@ -1,7 +1,6 @@
 import streamlit as st
 import threading
 from utils.databricks import predict
-from utils.style import load_css
 from utils.scales import INIT_PAGE
 
 # =========================
@@ -49,8 +48,6 @@ st.markdown("""
         showSidebarNavigation = false
     </style>
 """, unsafe_allow_html=True)
-
-load_css() # <--- Carga los estilos
 
 st.title("🎣 Detector de Susceptibilidad a Phishing")
 st.caption("Basado en personalidad, actitudes y fatiga digital")
