@@ -72,16 +72,6 @@ def page_results():
             st.session_state.page = INIT_PAGE
             st.rerun()
         return
-    
-    # --- DEBUGGER DE LLAVES ---
-    if "responses" in st.session_state and st.session_state["responses"]:
-        st.error("🛑 PARA: MIRA ESTAS LLAVES")
-        keys_list = list(st.session_state["responses"].keys())
-        # Filtramos solo las que parecen preguntas (cortas)
-        short_keys = [k for k in keys_list if len(str(k)) < 6]
-        st.write("Tus respuestas tienen estos nombres:", short_keys)
-        st.stop() # Esto detendrá la app para que puedas leerlo
-    # ---------------------------
 
     # Calcular Scores si no existen
     if st.session_state.get("scores") is None:
