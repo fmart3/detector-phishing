@@ -149,7 +149,7 @@ if st.sidebar.button("Ir al Dashboard"):
     
     # A. Recuperamos la contraseña real desde los secrets
     # Usamos .get() para evitar que la app explote si se te olvida poner el secreto
-    admin_secret = st.secrets.get("general", {}).get("DASHBOARD_PASS")
+    admin_secret = st.secrets.get("admin", {}).get("DASHBOARD_PASS")
 
     if not admin_secret:
         st.sidebar.error("⚠️ Error: No se configuró la contraseña en secrets.toml")
