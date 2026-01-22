@@ -35,46 +35,48 @@ def render_likert_page(
 
         /* 2. FORZAR LA ESTRUCTURA DEL RADIO BUTTON */
         
-        /* A. El contenedor principal ocupa todo el ancho */
+        /* Contenedor general */
         div.row-widget.stRadio {
             width: 100% !important;
-            display: flex;
-            justify-content: center;
         }
 
-        /* B. El grupo de opciones (La "Grilla") */
+        /* Radiogroup en GRID */
         div.row-widget.stRadio > div[role="radiogroup"] {
             display: grid !important;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important; /* 5 columnas idénticas */
+            grid-template-columns: repeat(5, 1fr) !important;
             width: 100% !important;
-            justify-items: center !important; /* Centra el contenido dentro de cada columna */
-            gap: 0 !important;
-            border: none !important;
+            align-items: stretch !important;
         }
 
-        /* C. Cada Opción Individual (Label = Círculo + Texto) */
+        /* Cada alternativa ocupa toda su columna */
         div.row-widget.stRadio > div[role="radiogroup"] > label {
             width: 100% !important;
-            margin: 0 !important;   /* Elimina márgenes nativos que empujan cosas */
-            padding: 0 !important;
+            min-width: 0 !important;
             display: flex !important;
-            flex-direction: column !important; /* Texto arriba/abajo del círculo */
+            flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
-            cursor: pointer;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        /* D. El Texto del Número (1, 2, 3...) */
+        /* Texto (1–5) */
         div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
-            font-size: 20px !important; 
-            font-weight: bold;
-            margin-bottom: 8px !important; /* Espacio entre número y círculo */
-            line-height: 1 !important;
+            text-align: center !important;
+            font-size: 20px !important;
+            font-weight: 600;
+            margin-bottom: 6px !important;
         }
 
-        /* E. Ajuste fino al círculo (Radio input) */
-        div.row-widget.stRadio div[role="radiogroup"] label div:first-child {
-            margin-top: 0px !important;
+        /* El círculo (input radio) */
+        div.row-widget.stRadio input[type="radio"] {
+            margin: 0 auto !important;
+        }
+
+        /* El wrapper interno del input */
+        div.row-widget.stRadio label > div:first-child {
+            display: flex !important;
+            justify-content: center !important;
         }
 
         /* 3. Leyenda superior explicativa */
