@@ -55,7 +55,7 @@ def page_dashboard():
     st.subheader("📊 Riesgo por Rol")
     
     if 'Demo_Rol_Trabajo' in df.columns:
-        rol_map = {1: "Admin", 2: "Técnico", 3: "Manager", 4: "Ejecutivo"}
+        rol_map = {1: "Liderazgo", 2: "Supervisión", 3: "Administrativo", 4: "Otro"}
         # Convertimos a numérico por seguridad y mapeamos
         df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
         
