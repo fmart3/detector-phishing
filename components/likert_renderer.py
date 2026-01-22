@@ -9,12 +9,12 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    Renderiza encuesta con distribución horizontal TOTAL (Full Justified).
-    Usa 'flex: 1' para obligar a cada opción a ocupar el 20% del ancho.
+    Renderiza encuesta usando CSS GRID para forzar la distribución exacta.
+    Divide el ancho en 5 columnas iguales (1fr cada una).
     """
 
     # -----------------------------
-    # 0. CSS AGRESIVO (Distribución Forzada)
+    # 0. CSS GRID (La solución definitiva)
     # -----------------------------
     st.markdown("""
         <style>
@@ -25,7 +25,6 @@ def render_likert_page(
             border-radius: 12px;
             margin-bottom: 25px;
             border: 1px solid #41444e;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .question-text {
@@ -35,62 +34,56 @@ def render_likert_page(
             margin-bottom: 15px;
         }
 
-        /* 2. FORZAR ANCHO TOTAL EN LOS RADIO BUTTONS */
+        /* 2. FORZAR GRID EN LOS RADIO BUTTONS */
         
-        /* Contenedor principal del widget */
-        div.row-widget.stRadio {
-            width: 100% !important;
-            padding-bottom: 5px;
-        }
-
-        /* El grupo flex que contiene los botones */
+        /* El contenedor principal de las opciones se convierte en una GRILLA de 5 columnas */
         div.row-widget.stRadio > div[role="radiogroup"] {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            width: 100% !important;
-            gap: 0 !important; /* Eliminamos gaps nativos para manejarlo nosotros */
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important; /* 5 Columnas Iguales */
+            justify-items: center !important;     /* Centrar horizontalmente en su celda */
+            width: 100% !important;               /* Ocupar todo el ancho disponible */
+            gap: 0 !important;                    /* Sin espacios extraños */
         }
 
-        /* CADA OPCIÓN INDIVIDUAL (El item 1, 2, 3...) */
+        /* Cada opción individual (Círculo + Número) */
         div.row-widget.stRadio > div[role="radiogroup"] > label {
-            flex: 1 !important; /* CLAVE: Cada opción crece para ocupar espacio igual */
+            width: 100% !important;       /* Usa toda su celda de la grilla */
             display: flex !important;
-            flex-direction: column-reverse; /* Pone el número ARRIBA del círculo si quieres, o normal */
-            align-items: center !important; /* Centra el círculo en su 20% de espacio */
+            flex-direction: column !important; /* Número arriba/abajo del círculo */
+            align-items: center !important;    /* Centrado perfecto */
             justify-content: center !important;
-            margin-right: 0px !important; /* Elimina margen derecho de Streamlit */
-            background-color: transparent !important;
-            cursor: pointer;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        /* 3. Estilo del Texto (Los números 1, 2, 3...) */
+        /* El texto del número (1, 2, 3...) */
         div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
             font-size: 20px !important; 
             font-weight: bold;
-            margin-bottom: 5px !important; /* Separación entre número y círculo */
-            text-align: center;
+            margin-bottom: 5px !important; 
         }
 
-        /* 4. Leyenda superior */
+        /* Ocultar el indicador de foco azul feo si aparece */
+        div.row-widget.stRadio > div[role="radiogroup"] > label:focus-within {
+             background-color: transparent !important;
+        }
+
+        /* 3. Leyenda superior */
         .legend-box {
             background-color: #0e1117;
             border: 1px solid #41444e;
-            padding: 15px 20px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 30px;
-            font-size: 14px;
-            color: #bdc2c9;
         }
         
         .legend-scale {
             display: flex;
-            justify-content: space-between; /* Extremo a extremo */
-            margin-top: 5px;
-            font-weight: bold;
-            color: #ffffff;
-            padding: 0 25px; /* Un poco de padding para alinearse visualmente con los centros */
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #bdc2c9;
+            padding: 0 5%; /* Padding para alinear visualmente con la grilla */
         }
         </style>
     """, unsafe_allow_html=True)
@@ -109,18 +102,19 @@ def render_likert_page(
     st.title(title)
     st.write(description)
     
-    # Leyenda alineada visualmente
     st.markdown("""
     <div class="legend-box">
-        <div style="text-align:center; margin-bottom:5px">Selecciona el grado de acuerdo:</div>
+        <div style="text-align:center; font-weight:bold; margin-bottom:10px; color: white;">Escala de Acuerdo</div>
         <div class="legend-scale">
-            <span style="text-align:left">1<br><small style="font-weight:normal; color:#aaa">Muy en<br>desacuerdo</small></span>
-            <span style="text-align:right">5<br><small style="font-weight:normal; color:#aaa">Muy de<br>acuerdo</small></span>
+            <div style="text-align:center; width: 80px;">1<br><span style="font-size:12px">Muy en<br>Desacuerdo</span></div>
+            <div style="text-align:center;">3<br><span style="font-size:12px">Neutro</span></div>
+            <div style="text-align:center; width: 80px;">5<br><span style="font-size:12px">Muy de<br>Acuerdo</span></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     unanswered = []
+    # Usamos números enteros para la lógica, pero labels simples
     options_numeric = [1, 2, 3, 4, 5]
     
     # -----------------------------
@@ -134,16 +128,16 @@ def render_likert_page(
                 <div class="question-text">{i+1}. {q['text']}</div>
             """, unsafe_allow_html=True) 
             
-            # Cerramos el div del texto antes del radio
             st.markdown("</div>", unsafe_allow_html=True) 
 
-            # Lógica de valor
+            # Recuperar valor
             saved_val = st.session_state.responses.get(q["code"])
             display_val = saved_val
             if saved_val is not None and q.get("reverse", False):
                 display_val = invert_likert(saved_val)
 
             # RADIO BUTTON
+            # Nota: options deben ser string o int. Usamos int para que coincida con la grilla.
             selection = st.radio(
                 label=q['text'], 
                 options=options_numeric,
@@ -161,7 +155,6 @@ def render_likert_page(
                     final_value = invert_likert(selection)
                 st.session_state.responses[q["code"]] = final_value
             
-            # Espaciador visual pequeño
             st.markdown("<div style='margin-bottom: 5px'></div>", unsafe_allow_html=True)
 
     st.divider()
