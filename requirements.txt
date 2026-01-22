@@ -8,3 +8,4 @@ databricks
 evidently==0.4.30
 databricks-sql-connector>=3.0.0
 uuid
+altair
