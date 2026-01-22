@@ -35,23 +35,26 @@ def render_likert_page(
 
         /* 2. FORZAR LA ESTRUCTURA DEL RADIO BUTTON */
         
-        /* Contenedor general */
-        div.row-widget.stRadio {
+        /* ================================
+        STREAMLIT RADIO – BASEWEB FIX
+        ================================ */
+
+        /* Contenedor total */
+        div.stRadio {
             width: 100% !important;
         }
 
-        /* Radiogroup en GRID */
-        div.row-widget.stRadio > div[role="radiogroup"] {
+        /* BaseWeb radio group */
+        div.stRadio [data-baseweb="radio"] {
             display: grid !important;
             grid-template-columns: repeat(5, 1fr) !important;
             width: 100% !important;
-            align-items: stretch !important;
+            justify-items: center !important;
         }
 
-        /* Cada alternativa ocupa toda su columna */
-        div.row-widget.stRadio > div[role="radiogroup"] > label {
+        /* Cada opción */
+        div.stRadio [data-baseweb="radio"] > label {
             width: 100% !important;
-            min-width: 0 !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
@@ -60,23 +63,16 @@ def render_likert_page(
             padding: 0 !important;
         }
 
-        /* Texto (1–5) */
-        div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
-            text-align: center !important;
+        /* Número (1–5) */
+        div.stRadio label span {
             font-size: 20px !important;
-            font-weight: 600;
+            font-weight: 600 !important;
             margin-bottom: 6px !important;
         }
 
-        /* El círculo (input radio) */
-        div.row-widget.stRadio input[type="radio"] {
+        /* El círculo */
+        div.stRadio input[type="radio"] {
             margin: 0 auto !important;
-        }
-
-        /* El wrapper interno del input */
-        div.row-widget.stRadio label > div:first-child {
-            display: flex !important;
-            justify-content: center !important;
         }
 
         /* 3. Leyenda superior explicativa */
