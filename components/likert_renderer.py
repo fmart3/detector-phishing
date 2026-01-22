@@ -35,44 +35,46 @@ def render_likert_page(
 
         /* 2. FORZAR LA ESTRUCTURA DEL RADIO BUTTON */
         
-        /* ================================
-        STREAMLIT RADIO – BASEWEB FIX
-        ================================ */
-
-        /* Contenedor total */
-        div.stRadio {
+        /* A. El contenedor principal ocupa todo el ancho */
+        div.row-widget.stRadio {
             width: 100% !important;
+            display: flex;
+            justify-content: center;
         }
 
-        /* BaseWeb radio group */
-        div.stRadio [data-baseweb="radio"] {
+        /* B. El grupo de opciones (La "Grilla") */
+        div.row-widget.stRadio > div[role="radiogroup"] {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important; /* 5 columnas idénticas */
             width: 100% !important;
-            justify-items: center !important;
+            justify-items: center !important; /* Centra el contenido dentro de cada columna */
+            gap: 0 !important;
+            border: none !important;
         }
 
-        /* Cada opción */
-        div.stRadio [data-baseweb="radio"] > label {
+        /* C. Cada Opción Individual (Label = Círculo + Texto) */
+        div.row-widget.stRadio > div[role="radiogroup"] > label {
             width: 100% !important;
+            margin: 0 !important;   /* Elimina márgenes nativos que empujan cosas */
+            padding: 0 !important;
             display: flex !important;
-            flex-direction: column !important;
+            flex-direction: column !important; /* Texto arriba/abajo del círculo */
             align-items: center !important;
             justify-content: center !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            cursor: pointer;
         }
 
-        /* Número (1–5) */
-        div.stRadio label span {
-            font-size: 20px !important;
-            font-weight: 600 !important;
-            margin-bottom: 6px !important;
+        /* D. El Texto del Número (1, 2, 3...) */
+        div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
+            font-size: 20px !important; 
+            font-weight: bold;
+            margin-bottom: 8px !important; /* Espacio entre número y círculo */
+            line-height: 1 !important;
         }
 
-        /* El círculo */
-        div.stRadio input[type="radio"] {
-            margin: 0 auto !important;
+        /* E. Ajuste fino al círculo (Radio input) */
+        div.row-widget.stRadio div[role="radiogroup"] label div:first-child {
+            margin-top: 0px !important;
         }
 
         /* 3. Leyenda superior explicativa */
@@ -130,17 +132,13 @@ def render_likert_page(
     for i, q in enumerate(questions):
         with st.container():
             # Encabezado de la tarjeta
-            st.markdown('<div class="question-card">', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="question-card">
+                <div class="question-text">{i+1}. {q['text']}</div>
+            """, unsafe_allow_html=True)
             
-            st.write("DEBUG:", q["code"], i)
-
-            st.radio(
-                label="",
-                options=options_numeric,
-                horizontal=True,
-                key=f"{q['code']}_ui"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            # Cierre del div de texto para insertar el widget de Streamlit "en medio" visualmente
+            st.markdown("</div>", unsafe_allow_html=True) 
 
             # Recuperar valor previo
             saved_val = st.session_state.responses.get(q["code"])
@@ -150,7 +148,7 @@ def render_likert_page(
 
             # WIDGET
             selection = st.radio(
-                label="", 
+                label=q['text'], 
                 options=options_numeric,
                 index=options_numeric.index(display_val) if display_val in options_numeric else None,
                 horizontal=True,
