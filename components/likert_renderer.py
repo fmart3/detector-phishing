@@ -131,8 +131,12 @@ def render_likert_page(
         with st.container():
             # Encabezado de la tarjeta
             st.markdown('<div class="question-card">', unsafe_allow_html=True)
-            st.markdown(f'<div class="question-text">{q["text"]}</div>', unsafe_allow_html=True)
-            st.radio(...)
+            st.radio(
+                label="",
+                options=options_numeric,
+                horizontal=True,
+                key=f"{q['code']}_ui"
+            )
             st.markdown('</div>', unsafe_allow_html=True)
 
             # Recuperar valor previo
@@ -143,7 +147,7 @@ def render_likert_page(
 
             # WIDGET
             selection = st.radio(
-                label=q['text'], 
+                label="", 
                 options=options_numeric,
                 index=options_numeric.index(display_val) if display_val in options_numeric else None,
                 horizontal=True,
