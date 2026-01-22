@@ -130,13 +130,10 @@ def render_likert_page(
     for i, q in enumerate(questions):
         with st.container():
             # Encabezado de la tarjeta
-            st.markdown(f"""
-            <div class="question-card">
-                <div class="question-text">{i+1}. {q['text']}</div>
-            """, unsafe_allow_html=True)
-            
-            # Cierre del div de texto para insertar el widget de Streamlit "en medio" visualmente
-            st.markdown("</div>", unsafe_allow_html=True) 
+            st.markdown('<div class="question-card">', unsafe_allow_html=True)
+            st.markdown(f'<div class="question-text">{q["text"]}</div>', unsafe_allow_html=True)
+            st.radio(...)
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # Recuperar valor previo
             saved_val = st.session_state.responses.get(q["code"])
