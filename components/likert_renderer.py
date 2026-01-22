@@ -9,90 +9,80 @@ def render_likert_page(
     prev_page: int | None = None
 ):
     """
-    Renderiza encuesta con distribución horizontal forzada usando CSS Grid.
+    Renderiza encuesta en formato VERTICAL (Lista).
+    Es más amigable para lectura y dispositivos móviles.
     """
 
     # -----------------------------
-    # 0. CSS AGRESIVO (Grid Layout)
+    # 0. Estilos CSS (Tarjetas Limpias)
     # -----------------------------
     st.markdown("""
         <style>
-        /* 1. Tarjeta de la pregunta */
+        /* Tarjeta de la pregunta */
         .question-card {
             background-color: #262730; 
             padding: 20px 25px; 
-            border-radius: 12px;
-            margin-bottom: 25px;
+            border-radius: 10px;
+            margin-bottom: 10px; /* Margen inferior pequeño, la opción viene pegada */
             border: 1px solid #41444e;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-bottom: none; /* Unimos visualmente con las opciones */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
         }
         
+        /* Contenedor de las opciones */
+        .options-container {
+            background-color: #262730;
+            border: 1px solid #41444e;
+            border-top: none;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            padding: 0px 25px 20px 25px;
+            margin-bottom: 30px; /* Espacio entre preguntas */
+        }
+
         .question-text {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 600;
             color: #ffffff;
-            margin-bottom: 20px;
         }
 
-        /* 2. FORZAR ANCHO TOTAL EN LOS RADIO BUTTONS */
-        
-        /* Nivel 1: El contenedor del widget */
-        div.row-widget.stRadio {
-            width: 100% !important;
-            padding-bottom: 10px;
-        }
-
-        /* Nivel 2: El grupo de opciones (flex container interno) */
+        /* Ajustes al Radio Button Vertical */
         div.row-widget.stRadio > div[role="radiogroup"] {
-            display: flex !important;
-            justify-content: space-between !important; /* Extremo a extremo */
-            width: 100% !important;
-            gap: 0 !important; /* Sin gaps forzados */
-        }
-
-        /* Nivel 3: Cada opción individual (el círculo + el número) */
-        div.row-widget.stRadio > div[role="radiogroup"] > label {
-            background-color: transparent !important;
-            display: flex !important;
-            flex-direction: column; /* Pone el número debajo del círculo si hay espacio, o al lado */
-            align-items: center !important;
-            justify-content: center !important;
-            width: 15% !important; /* Forzamos un ancho para clic fácil */
-            margin-right: 0px !important;
-        }
-
-        /* 3. Hacer los números más grandes */
-        div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
-            font-size: 20px !important; 
-            font-weight: bold;
-            margin-bottom: 0px !important;
-        }
-
-        /* 4. Leyenda superior */
-        .legend-box {
-            background-color: #0e1117;
-            border: 1px solid #41444e;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 14px;
-            color: #bdc2c9;
+            gap: 10px; /* Espacio entre opciones */
         }
         
-        /* Decoración visual para la leyenda */
-        .legend-scale {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-weight: bold;
-            color: #ffffff;
+        /* Hacer que el texto de las opciones sea más legible */
+        div.row-widget.stRadio label div[data-testid="stMarkdownContainer"] p {
+            font-size: 16px;
         }
         </style>
     """, unsafe_allow_html=True)
 
     # -----------------------------
-    # 1. Inicialización
+    # 1. Configuración de Opciones
+    # -----------------------------
+    # Definimos las etiquetas de texto explícitas para la UI
+    # Asumimos una escala estándar de 5 puntos
+    options_text = [
+        "Muy en desacuerdo",             # Valor 1
+        "En desacuerdo",                 # Valor 2
+        "Ni de acuerdo ni en desacuerdo",# Valor 3
+        "De acuerdo",                    # Valor 4
+        "Muy de acuerdo"                 # Valor 5
+    ]
+    
+    # Mapeo inverso: Texto -> Número (Para guardar en la BD/Lógica)
+    text_to_score = {
+        "Muy en desacuerdo": 1,
+        "En desacuerdo": 2,
+        "Ni de acuerdo ni en desacuerdo": 3,
+        "De acuerdo": 4,
+        "Muy de acuerdo": 5
+    }
+
+    # -----------------------------
+    # 2. Inicialización
     # -----------------------------
     if "responses" not in st.session_state:
         st.session_state.responses = {}
@@ -100,69 +90,75 @@ def render_likert_page(
         st.session_state.page = 1
 
     # -----------------------------
-    # 2. Header
+    # 3. Header
     # -----------------------------
     st.title(title)
     st.write(description)
-    
-    # Leyenda mejorada visualmente
-    st.markdown("""
-    <div class="legend-box">
-        <div>Selecciona el grado de acuerdo:</div>
-        <div class="legend-scale">
-            <span>1<br><small style="font-weight:normal; color:#aaa">Muy en<br>desacuerdo</small></span>
-            <span>5<br><small style="font-weight:normal; color:#aaa">Muy de<br>acuerdo</small></span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.divider()
 
     unanswered = []
-    options_numeric = [1, 2, 3, 4, 5]
     
     # -----------------------------
-    # 3. Renderizado de Preguntas
+    # 4. Renderizado de Preguntas
     # -----------------------------
     for i, q in enumerate(questions):
-        with st.container():
-            # Abrimos la tarjeta visual
-            st.markdown(f"""
-            <div class="question-card">
-                <div class="question-text">{i+1}. {q['text']}</div>
-            """, unsafe_allow_html=True)
+        
+        # --- A. TARJETA VISUAL DE LA PREGUNTA ---
+        st.markdown(f"""
+        <div class="question-card">
+            <div class="question-text">{i+1}. {q['text']}</div>
+        </div>
+        <div class="options-container">
+        """, unsafe_allow_html=True)
+        # Nota: Abrimos un div "options-container" pero lo cerraremos después del radio
+        
+        # --- B. RECUPERAR ESTADO PREVIO ---
+        saved_score = st.session_state.responses.get(q["code"])
+        
+        # Si la pregunta es reversa, el valor guardado ya está invertido (ej: guardó 5, pero el usuario marcó 1)
+        # Para mostrarlo en la UI, debemos "des-invertirlo" para saber qué botón marcó el usuario visualmente.
+        ui_score = saved_score
+        if saved_score is not None and q.get("reverse", False):
+            ui_score = invert_likert(saved_score)
+
+        # Convertir el Score numérico (1-5) al Texto de la opción
+        # Si ui_score es 1 -> index 0 ("Muy en desacuerdo")
+        current_selection_index = None
+        if ui_score is not None and 1 <= ui_score <= 5:
+            current_selection_index = ui_score - 1
+
+        # --- C. WIDGET DE SELECCIÓN VERTICAL ---
+        selection_text = st.radio(
+            label=q['text'], # Invisible por label_visibility
+            options=options_text,
+            index=current_selection_index,
+            key=f"{q['code']}_ui",
+            label_visibility="collapsed" # Ocultamos el label repetido
+        )
+
+        # Cerraremos el contenedor visual
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # --- D. GUARDAR RESPUESTA ---
+        if selection_text is None:
+            # Esto pasa la primera vez si index es None
+            unanswered.append(q["code"])
+        else:
+            # 1. Convertir texto a número
+            raw_score = text_to_score[selection_text]
             
-            st.markdown("</div>", unsafe_allow_html=True) 
-
-            # Lógica de valor
-            saved_val = st.session_state.responses.get(q["code"])
-            display_val = saved_val
-            if saved_val is not None and q.get("reverse", False):
-                display_val = invert_likert(saved_val)
-
-            # RADIO BUTTON
-            selection = st.radio(
-                label=q['text'], 
-                options=options_numeric,
-                index=options_numeric.index(display_val) if display_val in options_numeric else None,
-                horizontal=True,
-                label_visibility="collapsed",
-                key=f"{q['code']}_ui"
-            )
-
-            if selection is None:
-                unanswered.append(q["code"])
-            else:
-                final_value = selection
-                if q.get("reverse", False):
-                    final_value = invert_likert(selection)
-                st.session_state.responses[q["code"]] = final_value
+            # 2. Aplicar lógica de inversión si es necesario
+            final_score = raw_score
+            if q.get("reverse", False):
+                final_score = invert_likert(raw_score)
             
-            # Espacio visual extra
-            st.markdown("<div style='margin-bottom: 10px'></div>", unsafe_allow_html=True)
+            # 3. Guardar
+            st.session_state.responses[q["code"]] = final_score
 
     st.divider()
 
     # -----------------------------
-    # 4. Botones
+    # 5. Navegación
     # -----------------------------
     col1, col2, col3 = st.columns([1, 3, 1])
 
