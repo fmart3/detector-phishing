@@ -1,5 +1,6 @@
 import streamlit as st
 import threading
+import hmac
 from utils.databricks import predict
 from utils.scales import INIT_PAGE
 
@@ -140,11 +141,25 @@ else:
 st.sidebar.divider()
 st.sidebar.markdown("### 🔧 Zona Admin")
 
-# Un input de contraseña simple para no exponer los datos a cualquiera
+# 1. Input de contraseña
 password = st.sidebar.text_input("Contraseña de acceso", type="password")
 
+# 2. Botón de validación
 if st.sidebar.button("Ir al Dashboard"):
-    if password == "admin123":  # ⚠️ Cambia esto por una contraseña segura o usa secrets
+    
+    # A. Recuperamos la contraseña real desde los secrets
+    # Usamos .get() para evitar que la app explote si se te olvida poner el secreto
+    admin_secret = st.secrets.get("general", {}).get("DASHBOARD_PASS", None)
+
+    if not admin_secret:
+        st.sidebar.error("⚠️ Error: No se configuró la contraseña en secrets.toml")
+    
+    # B. Comparación Segura (Evita ataques de tiempo)
+    # En lugar de (password == admin_secret), usamos hmac
+    elif hmac.compare_digest(password, admin_secret):
+        st.sidebar.success("Acceso concedido. Redirigiendo...")
         st.switch_page("pages/dashboard.py")
+        
+    # C. Contraseña Incorrecta
     else:
         st.sidebar.error("❌ Contraseña incorrecta")

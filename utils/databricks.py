@@ -3,20 +3,18 @@
 import requests
 import pandas as pd
 import streamlit as st
+from databricks import sql  # <--- NUEVA IMPORTACIÓN (pip install databricks-sql-connector)
 
 # =====================================================
 # Configuración
 # =====================================================
 
-# Asegúrate de que este nombre coincida con tu Endpoint en Databricks
 DATABRICKS_ENDPOINT = "phishing-endpoint" 
 
 def get_config():
-    """Recupera configuración sin usar st.stop() para no romper hilos"""
+    """Recupera configuración básica"""
     try:
         token = st.secrets["DATABRICKS_TOKEN"]
-        
-        # Lógica para obtener el host
         host = None
         for key in ["DATABRICKS_HOST", "DATABRICKS_WORKSPACE_URL", "DATABRICKS_INSTANCE"]:
             if key in st.secrets:
@@ -35,94 +33,92 @@ def get_endpoint_url(host):
     return f"{host}/serving-endpoints/{DATABRICKS_ENDPOINT}/invocations"
 
 # =====================================================
-# Features (SOLO LAS 6 NECESARIAS)
+# 🧠 PARTE 1: INFERENCIA (Para el modelo)
 # =====================================================
+# ... (Mantén aquí tus funciones prepare_features y predict tal cual las tienes) ...
 
 def prepare_features(scores: dict, responses: dict):
-    """
-    Crea un DataFrame exacto con las 6 columnas que el modelo LITE espera.
-    """
-    
-    # 1. Recuperar valores (con valores por defecto seguros)
-    # Convertimos a int/float explícitamente para asegurar tipos
+    # ... (Tu código actual de prepare_features) ...
     try:
         data = {
             "Demo_Rol_Trabajo": [int(responses.get("Demo_Rol_Trabajo", 1))],
             "Demo_Horas": [int(responses.get("Demo_Horas", 1))],
             "Demo_Tamano_Org": [int(responses.get("Demo_Tamano_Org", 1))],
-            
             "Fatiga_Global_Score": [float(scores.get("Fatiga_Global_Score", 0.0))],
             "Big5_Apertura": [float(scores.get("Big5_Apertura", 0.0))],
             "Phish_Riesgo_Percibido": [float(scores.get("Phish_Riesgo_Percibido", 0.0))]
         }
     except Exception as e:
-        # Si algo falla en la conversión, lanzamos error para verlo en logs
         raise ValueError(f"Error procesando tipos de datos: {e}")
-
-    # 2. Crear DataFrame
-    df = pd.DataFrame(data)
-    
-    # Ordenamos columnas alfabéticamente o según lista fija si es necesario.
-    # Con dataframe_split, el orden se envía explícitamente, así que es seguro.
-    return df
-
-# =====================================================
-# Predicción
-# =====================================================
+    return pd.DataFrame(data)
 
 def predict(feature_df):
-    """
-    Envía el DataFrame al endpoint.
-    Retorna un diccionario seguro siempre, incluso si falla.
-    """
+    # ... (Tu código actual de predict, está perfecto) ...
     token, host = get_config()
+    if not token or not host: return {"prediction": 0, "probability": 0.0}
     
-    if not token or not host:
-        return {"prediction": 0, "probability": 0.0}
-
     url = get_endpoint_url(host)
-    
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    # Usamos 'split' porque es el estándar nativo de MLflow/Pandas
-    # Genera: { "columns": ["A", "B"], "data": [[1, 2]] }
-    payload = {
-        "dataframe_split": feature_df.to_dict(orient="split")
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"dataframe_split": feature_df.to_dict(orient="split")}
 
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=10)
-        
-        # Si la respuesta no es exitosa, imprimimos el error pero no matamos la app
         if response.status_code != 200:
-            print(f"❌ Error API Databricks ({response.status_code}): {response.text}")
+            print(f"❌ Error API: {response.text}")
             return {"prediction": 0, "probability": 0.0}
-
+        
         result = response.json()
-        
-        # Parseo robusto de la respuesta
-        # Databricks puede devolver listas o dicts dependiendo de la versión
         predictions = result.get("predictions", [])
-        
         if len(predictions) > 0:
-            first_pred = predictions[0]
-            
-            # Caso 1: Devuelve objeto completo {'prediction': 1, 'probability': 0.8}
-            if isinstance(first_pred, dict):
-                return {
-                    "prediction": int(first_pred.get("prediction", 0)),
-                    "probability": float(first_pred.get("probability", 0.0))
-                }
-            # Caso 2: Devuelve solo el valor [0] o [1] (Modelos viejos)
+            first = predictions[0]
+            if isinstance(first, dict):
+                return {"prediction": int(first.get("prediction", 0)), "probability": float(first.get("probability", 0.0))}
             else:
-                return {"prediction": int(first_pred), "probability": 0.0}
-                
+                return {"prediction": int(first), "probability": 0.0}
+        return {"prediction": 0, "probability": 0.0}
+    except Exception as e:
+        print(f"❌ Excepción: {e}")
         return {"prediction": 0, "probability": 0.0}
 
+
+# =====================================================
+# 📊 PARTE 2: ANALÍTICA (Para el Dashboard)
+# =====================================================
+
+@st.cache_data(ttl=600, show_spinner=False)  # <--- ¡LA CLAVE! Cachea por 10 minutos
+def run_sql_query(query: str):
+    """
+    Ejecuta SQL en Databricks Warehouse y devuelve un DataFrame.
+    Usa caché para no saturar la conexión en cada recarga.
+    """
+    
+    # Verificamos el HTTP PATH (necesario solo para SQL, no para el modelo)
+    if "DATABRICKS_HTTP_PATH" not in st.secrets:
+        st.error("❌ Falta 'DATABRICKS_HTTP_PATH' en secrets.toml para el Dashboard.")
+        return pd.DataFrame()
+
+    token, host = get_config() # Reusamos tu función de config
+    
+    if not token or not host:
+        return pd.DataFrame()
+
+    try:
+        # Limpiamos el host para el conector SQL (no le gusta el https://)
+        server_hostname = host.replace("https://", "").replace("http://", "")
+
+        with sql.connect(
+            server_hostname=server_hostname,
+            http_path=st.secrets["DATABRICKS_HTTP_PATH"],
+            access_token=token
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                result = cursor.fetchall()
+                if result:
+                    columns = [desc[0] for desc in cursor.description]
+                    return pd.DataFrame(result, columns=columns)
+                return pd.DataFrame()
+                
     except Exception as e:
-        print(f"❌ Excepción conectando a Databricks: {e}")
-        # Retorno seguro (Falso negativo es mejor que crash)
-        return {"prediction": 0, "probability": 0.0}
+        st.error(f"Error conectando a Databricks SQL: {e}")
+        return pd.DataFrame()
