@@ -131,6 +131,9 @@ def render_likert_page(
         with st.container():
             # Encabezado de la tarjeta
             st.markdown('<div class="question-card">', unsafe_allow_html=True)
+            
+            st.write("DEBUG:", q["code"], i)
+
             st.radio(
                 label="",
                 options=options_numeric,
