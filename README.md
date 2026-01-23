@@ -1,10 +1,16 @@
 # 🛡️ Phishing Susceptibility Detection System
 
-Sistema de detección de susceptibilidad a phishing basado en **factores humanos**, entrenado con **Gradient Boosting**, desplegado en **Databricks Model Serving** e integrado con **Streamlit** y **Evidently AI** para monitoreo y análisis de drift.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/)
+
+🚀 **Demo en vivo:** [https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/](https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/)
+
+Sistema de detección de susceptibilidad a phishing basado en **factores humanos**, entrenado con **Regresión Logística**, desplegado en **Databricks Model Serving**. La aplicación gestiona la ingesta de encuestas, almacenamiento centralizado en **Databricks SQL** y visualización de métricas en tiempo real mediante un **Dashboard integrado en Streamlit**.
 
 ---
 
 ## 📐 Arquitectura General
+
+El flujo de datos conecta el entrenamiento en Colab con el despliegue productivo y el almacenamiento persistente en Databricks.
 
 ```mermaid
 graph TD
@@ -12,10 +18,12 @@ graph TD
     B -->|Registro| C{Databricks Unity Catalog}
     C -->|Despliegue| D[Databricks Model Serving]
     D -->|REST API| E[Streamlit App]
-    E -->|Predicción Real-Time| F((Usuario Final))
-    E -->|Logging & Drift| G[Evidently AI]
+    F((Usuario Final)) -->|Responde Encuesta| E
+    E -->|Predicción de Riesgo| F
+    E -->|Insertar Respuesta| G[(Databricks SQL)]
+    G -->|Lectura de Datos| E
+    E -->|Dashboard Visual| F
 ```
----
 
 ## 🔁 Flujo de Actualización del Modelo (CRÍTICO)
 
