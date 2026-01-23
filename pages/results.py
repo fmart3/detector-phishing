@@ -3,6 +3,7 @@ import os
 import time
 import threading
 import numpy as np
+import pandas as pd
 
 # Imports de tus utilidades
 from utils.scoring import compute_scores
@@ -27,8 +28,6 @@ def sanitize_dict(d):
         return None
     else:
         return d
-
-import pandas as pd # Necesario para el pd.isna de arriba
 
 # ==========================================================
 # 2. FUNCIÓN WORKER (Segundo Plano)
