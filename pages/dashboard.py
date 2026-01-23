@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from utils.databricks import run_sql_query 
 
+from demographics import COUNTRIES, ORG_TYPE, INDUSTRY, EMPLOYEES, ROLE, GENERATION, HOURS
+
 def page_dashboard():
     st.title("🛡️ Dashboard de Ciberseguridad")
     
@@ -113,10 +115,10 @@ def page_dashboard():
     st.markdown("Identificación de segmentos vulnerables para priorizar capacitación.")
 
     # --- MAPEOS (Ajusta estos diccionarios a tu encuesta real) ---
-    map_rol = {1: "Liderazgo", 2: "TI/Técnico", 3: "Admin", 4: "Ventas", 5: "Operaciones"}
-    map_ind = {1: "Finanzas", 2: "Salud", 3: "Tecnología", 4: "Retail", 5: "Gobierno"}
-    map_tam = {1: "Pequeña (<50)", 2: "Mediana (50-200)", 3: "Grande (>200)"}
-    map_hor = {1: "< 2 horas", 2: "2-4 horas", 3: "4-8 horas", 4: "> 8 horas"}
+    map_rol = ROLE
+    map_ind = INDUSTRY
+    map_tam = EMPLOYEES
+    map_hor = HOURS
 
     # Aplicamos mapeos si las columnas existen
     if 'Demo_Rol_Trabajo' in df.columns:
