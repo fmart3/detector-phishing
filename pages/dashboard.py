@@ -131,87 +131,127 @@ def page_dashboard():
         st.dataframe(resumen, hide_index=True, use_container_width=True)
         
     # ---------------------------------------------------------
-    # 5. CAPA DE RIESGO
+    # 5. CAPA DE RIESGO OPERACIONAL (COMPLETA)
     # ---------------------------------------------------------
     st.header("🎯 Riesgo Operacional")
     st.markdown("Identificación de segmentos vulnerables para priorizar capacitación.")
 
-    # --- MAPEOS (Ajusta estos diccionarios a tu encuesta real) ---
-    map_rol = {
-        1: "Liderazgo",
-        2: "Supervisión",
-        3: "Administrativo",
-        4: "Otro"
+    # 1. DEFINICIÓN DE MAPEOS (Invertidos: ID -> Texto)
+    # -------------------------------------------------
+    map_pais = {
+        1: "Chile", 2: "Colombia", 3: "Honduras", 4: "México", 5: "Panamá"
     }
+
+    map_org_type = {
+        1: "Pública", 2: "Privada", 3: "Sin fines de lucro", 4: "Otra"
+    }
+
     map_ind = {
-        1: "Agricultura",
-        2: "Bancos/Financiera",
-        3: "Seguros",
-        4: "TI",
-        5: "Publi., Market., Coms.",
-        6: "Transporte",
-        7: "Salud Privada",
-        8: "AFP",
-        9: "Sector Público",
-        10: "Energia",
-        11: "Mineria",
-        12: "Oil & Gas",
-        13: "Retail",
-        14: "Educación",
-        15: "Serv. Prof. y/o Consul.",
-        16: "Construcción",
-        17: "Manufactura",
-        18: "Otra"
+        1: "Agricultura", 2: "Bancos/Financiera", 3: "Seguros", 
+        4: "Tecnología/Telco", 5: "Publicidad/Marketing", 6: "Transporte", 
+        7: "Salud (Clínicas/Isapres)", 8: "AFP", 9: "Sector Público", 
+        10: "Energía", 11: "Minería", 12: "Oil & Gas", 13: "Retail", 
+        14: "Educación", 15: "Consultoría", 16: "Construcción", 
+        17: "Manufactura", 18: "Otras"
     }
+
     map_tam = {
-        1: "< 100 Emp",
-        2: "100-500 Emp",
-        3: "500-1.000 Emp",
-        4: "1.000-3.000 Emp",
-        5: "3.000-10.000 Emp",
-        6: "10.000-50.000 Emp",
-        7: "> 50.000 Emp"
+        1: "≤ 100", 2: "100-500", 3: "500-1k", 
+        4: "1k-3k", 5: "3k-10k", 6: "10k-50k", 7: "> 50k"
     }
+
+    map_rol = {
+        1: "Liderazgo", 2: "Supervisión", 
+        3: "Administrativo/Analista", 4: "Otro"
+    }
+
+    map_gen = {
+        1: "Tradicionalistas", 2: "Baby Boomers", 3: "Gen X", 
+        4: "Millennials", 5: "Gen Z"
+    }
+
+    map_genero = {
+        1: "Masculino", 2: "Femenino", 3: "No Binario"
+    }
+
+    map_edu = {
+        1: "Básica", 2: "Universitaria", 3: "Diplomado", 
+        4: "Magíster/MBA", 5: "Doctorado"
+    }
+
     map_hor = {
-        1: "< 2 horas",
-        2: "2-5 horas",
-        3: "5-8 horas",
-        4: "8-10 horas",
-        5: "> 10 horas"
+        1: "< 2 horas", 2: "2-5 horas", 3: "5-8 horas", 
+        4: "8-10 horas", 5: "> 10 horas"
     }
-    # Aplicamos mapeos si las columnas existen
-    if 'Demo_Rol_Trabajo' in df.columns:
-        df['Rol_Label'] = df['Demo_Rol_Trabajo'].map(map_rol).fillna("Sin respuesta")
-    if 'Demo_Industria' in df.columns:
-        df['Ind_Label'] = df['Demo_Industria'].map(map_ind).fillna("Sin respuesta")
-    if 'Demo_Tamano_Org' in df.columns:
-        df['Org_Label'] = df['Demo_Tamano_Org'].map(map_tam).fillna("Sin respuesta")
-    if 'Demo_Horas' in df.columns:
-        df['Horas_Label'] = df['Demo_Horas'].map(map_hor).fillna("Sin respuesta")
 
-    # --- PESTAÑAS DE ANÁLISIS ---
-    tab1, tab2, tab3, tab4 = st.tabs(["🏭 Industria", "⏰ Horas PC", "🏢 Tamaño Org", "👤 Rol"])
+    # 2. PROCESAMIENTO DE COLUMNAS
+    # -------------------------------------------------
+    # Mapeamos las columnas de la BD a etiquetas legibles
+    # NOTA: Asegúrate de que los nombres 'Demo_XXX' coincidan con tu base de datos real
+    
+    mappings = [
+        ('Demo_Pais', 'Pais_Label', map_pais),
+        ('Demo_Tipo_Org', 'TipoOrg_Label', map_org_type),
+        ('Demo_Industria', 'Ind_Label', map_ind),
+        ('Demo_Tamano_Org', 'Tam_Label', map_tam),
+        ('Demo_Rol_Trabajo', 'Rol_Label', map_rol),
+        ('Demo_Generacion', 'Gen_Label', map_gen),
+        ('Demo_Genero', 'Genero_Label', map_genero),
+        ('Demo_Educacion', 'Edu_Label', map_edu),
+        ('Demo_Horas', 'Horas_Label', map_hor),
+    ]
 
-    def plot_risk_by(col_label, tab_obj, color="#FF4B4B"):
-        """Función auxiliar para graficar rápido"""
+    for col_db, col_label, mapa in mappings:
+        if col_db in df.columns:
+            df[col_label] = df[col_db].map(mapa).fillna("Sin respuesta")
+
+    # 3. VISUALIZACIÓN EN PESTAÑAS
+    # -------------------------------------------------
+    # Creamos tabs para las 9 categorías
+    tabs = st.tabs([
+        "🌎 País", "🏭 Industria", "🏢 Tipo Org", "👥 Tamaño", 
+        "👤 Rol", "🎂 Generación", "⚥ Género", "🎓 Educación", "⏰ Horas"
+    ])
+
+    # Lista de columnas label correspondientes a cada tab
+    tab_cols = [
+        'Pais_Label', 'Ind_Label', 'TipoOrg_Label', 'Tam_Label', 
+        'Rol_Label', 'Gen_Label', 'Genero_Label', 'Edu_Label', 'Horas_Label'
+    ]
+    
+    # Colores para variar un poco (Visualmente atractivo)
+    colors = [
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", 
+        "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22"
+    ]
+
+    def plot_risk_by(col_label, tab_obj, color_hex):
+        """Genera el gráfico de riesgo promedio por categoría"""
         if col_label in df.columns:
-            # Agrupar, sacar promedio, ordenar
-            data = df[df[col_label] != "Sin respuesta"]
-            data = df.groupby(col_label)[['probability']].mean().sort_values('probability', ascending=False)
-            with tab_obj:
-                st.bar_chart(data, color=color)
-                # Insight automático
-                top_seg = data.index[0]
-                top_val = data.iloc[0,0]
-                st.caption(f"📍 El segmento más riesgoso es **{top_seg}** con {top_val:.1%} de probabilidad.")
-        else:
-            tab_obj.warning(f"Falta columna para {col_label}")
+            # 1. Filtramos los "Sin respuesta" para no ensuciar el gráfico
+            data_clean = df[df[col_label] != "Sin respuesta"]
+            
+            if data_clean.empty:
+                tab_obj.info("No hay datos suficientes para graficar esta categoría.")
+                return
 
-    # Generamos los gráficos en cada tab
-    plot_risk_by('Ind_Label', tab1, "#1f77b4")   # Azul
-    plot_risk_by('Horas_Label', tab2, "#ff7f0e") # Naranja
-    plot_risk_by('Org_Label', tab3, "#2ca02c")   # Verde
-    plot_risk_by('Rol_Label', tab4, "#d62728")   # Rojo
+            # 2. Agrupamos
+            chart_data = data_clean.groupby(col_label)[['probability']].mean().sort_values('probability', ascending=False)
+            
+            with tab_obj:
+                st.bar_chart(chart_data, color=color_hex)
+                
+                # 3. Insight Automático
+                if not chart_data.empty:
+                    top_seg = chart_data.index[0]
+                    top_val = chart_data.iloc[0,0]
+                    st.caption(f"📍 El segmento más vulnerable es **{top_seg}** ({top_val:.1%} prob).")
+        else:
+            tab_obj.warning(f"⚠️ Falta la columna '{col_label}' en la base de datos.")
+
+    # Bucle para generar todos los gráficos automáticamente
+    for i, tab in enumerate(tabs):
+        plot_risk_by(tab_cols[i], tab, colors[i])
 
     st.divider()
     
