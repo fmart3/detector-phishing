@@ -191,13 +191,13 @@ def page_dashboard():
     
     mappings = [
         ('Demo_Pais', 'Pais_Label', map_pais),
-        ('Demo_Tipo_Org', 'TipoOrg_Label', map_org_type),
+        ('Demo_Tipo_Organizacion', 'TipoOrg_Label', map_org_type),
         ('Demo_Industria', 'Ind_Label', map_ind),
         ('Demo_Tamano_Org', 'Tam_Label', map_tam),
         ('Demo_Rol_Trabajo', 'Rol_Label', map_rol),
-        ('Demo_Generacion', 'Gen_Label', map_gen),
+        ('Demo_Generacion_Edad', 'Gen_Label', map_gen),
         ('Demo_Genero', 'Genero_Label', map_genero),
-        ('Demo_Educacion', 'Edu_Label', map_edu),
+        ('Demo_Nivel_Educacion', 'Edu_Label', map_edu),
         ('Demo_Horas', 'Horas_Label', map_hor),
     ]
 
