@@ -311,54 +311,128 @@ def page_dashboard():
             )
             
     st.divider()
-    # =======================================================
-    # ⚠️ 8. CAPA ALERTAS DEL MODELO (Diagnóstico Automático)
-    # =======================================================
+    # ==========================================
+    # ⚠️ 8. MONITOR DE SALUD DEL MODELO (AUDITORÍA ESTADÍSTICA)
+    # ==========================================
+    st.header("⚙️ Auditoría Técnica del Modelo")
+    st.markdown("Diagnóstico estadístico para validar la confiabilidad de las predicciones.")
+
+    # 1. PREPARACIÓN DE DATOS ESTADÍSTICOS
+    # ------------------------------------------------------
+    stats = df['probability'].describe()
     
-    st.header("⚙️ Monitor de Salud del Modelo")
-    st.markdown("Auditoría automática para detectar anomalías o sesgos en las predicciones.")
+    # Calculamos métricas adicionales
+    skewness = df['probability'].skew() # Sesgo: ¿Hacia dónde se inclina la curva?
+    kurtosis = df['probability'].kurt() # Curtosis: ¿Qué tan "picuda" es la curva?
+    iqr = stats['75%'] - stats['25%']   # Rango Intercuartil (donde está el 50% central de la gente)
 
-    # Definimos umbrales de alerta
-    alerts_found = False
+    # 2. TABLA DE JUSTIFICACIÓN (Valores vs Esperados)
+    # ------------------------------------------------------
+    st.subheader("📋 Indicadores de Calidad")
     
-    # 1. Alerta de "Modelo Congelado" (Poca varianza)
-    # Si la desviación estándar es muy baja, el modelo está devolviendo casi lo mismo para todos.
-    std_dev = df['probability'].std()
-    if std_dev < 0.05:
-        st.error(f"🚨 **FALLO DE VARIANZA:** La desviación estándar es crítica ({std_dev:.3f}). El modelo está 'congelado' y no diferencia entre usuarios.")
-        alerts_found = True
+    # Definimos las reglas de validación
+    validations = [
+        {
+            "Métrica": "Cobertura (N)",
+            "Valor": f"{int(stats['count'])}",
+            "Esperado": "> 30 muestras",
+            "Estado": "✅ Óptimo" if stats['count'] > 30 else "⚠️ Insuficiente",
+            "Justificación": "Necesitamos suficientes datos para que la estadística sea significativa."
+        },
+        {
+            "Métrica": "Varianza (Std Dev)",
+            "Valor": f"{stats['std']:.3f}",
+            "Esperado": "> 0.100",
+            "Estado": "✅ Buena Diferenciación" if stats['std'] > 0.1 else "🔴 Modelo Congelado",
+            "Justificación": "Indica si el modelo distingue entre usuarios seguros y vulnerables."
+        },
+        {
+            "Métrica": "Rango Dinámico",
+            "Valor": f"{stats['min']:.2f} - {stats['max']:.2f}",
+            "Esperado": "0.0 a 1.0",
+            "Estado": "✅ Completo" if (stats['max'] - stats['min']) > 0.5 else "⚠️ Rango Corto",
+            "Justificación": "El modelo debe ser capaz de detectar tanto casos muy seguros como muy graves."
+        },
+        {
+            "Métrica": "Sesgo (Skewness)",
+            "Valor": f"{skewness:.2f}",
+            "Esperado": "Entre -1 y 1",
+            "Estado": "✅ Equilibrado" if -1 < skewness < 1 else "⚠️ Sesgado",
+            "Justificación": "Valores lejanos a 0 indican que el modelo tiende a exagerar hacia un lado."
+        }
+    ]
+    
+    # Renderizamos la tabla visualmente
+    st.dataframe(
+        pd.DataFrame(validations), 
+        use_container_width=True, 
+        hide_index=True,
+        column_config={
+            "Estado": st.column_config.TextColumn("Diagnóstico")
+        }
+    )
 
-    # 2. Alerta de "Sesgo Pesimista" (Todo es riesgo alto)
-    # Si la probabilidad MÍNIMA es mayor al 50%, significa que nadie es considerado seguro.
-    min_prob = df['probability'].min()
-    if min_prob > 0.5:
-        st.error(f"🚨 **SESGO ALTO RIESGO:** La probabilidad mínima es {min_prob:.1%}. El modelo no está detectando NINGÚN usuario seguro.")
-        alerts_found = True
+    # 3. VISUALIZACIÓN AVANZADA (BOX PLOT + HISTOGRAMA)
+    # ------------------------------------------------------
+    col_viz1, col_viz2 = st.columns(2)
 
-    # 3. Alerta de "Sesgo Optimista" (Todo es riesgo bajo)
-    # Si la probabilidad MÁXIMA es menor al 50%, el modelo dice que nadie es peligroso.
-    max_prob = df['probability'].max()
-    if max_prob < 0.5:
-        st.error(f"🚨 **SESGO BAJO RIESGO:** La probabilidad máxima es {max_prob:.1%}. El modelo no está detectando NINGÚN usuario vulnerable.")
-        alerts_found = True
+    with col_viz1:
+        st.markdown("##### 📦 Dispersión (Box Plot)")
+        st.caption("Muestra la mediana y detecta valores atípicos (puntos fuera de los bigotes).")
+        
+        # Usamos Altair (nativo en Streamlit) para un BoxPlot profesional
+        import altair as alt
+        
+        chart_box = alt.Chart(df).mark_boxplot(extent='min-max', size=50).encode(
+            x=alt.X('probability', title='Probabilidad de Riesgo'),
+            color=alt.value("#FF4B4B") # Color rojo corporativo
+        ).properties(height=200)
+        
+        st.altair_chart(chart_box, use_container_width=True)
+        
+        # Explicación del BoxPlot para directivos
+        st.info(f"""
+        **Lectura Rápida:**
+        El 50% de tus empleados tiene un riesgo entre **{stats['25%']:.0%}** y **{stats['75%']:.0%}**.
+        La línea central (**{stats['50%']:.0%}**) es la mediana real de la empresa.
+        """)
 
-    # 4. Alerta de "Agresividad" (% de Altos muy elevado)
-    # Si más del 80% de la gente es "Riesgo Alto", el modelo podría ser demasiado sensible.
-    pct_high_risk = (df['probability'] > 0.7).mean()
-    if pct_high_risk > 0.8:
-        st.warning(f"⚠️ **ALERTA DE SENSIBILIDAD:** El {pct_high_risk:.1%} de los usuarios son clasificados como Riesgo Alto (>70%). El modelo podría estar siendo demasiado agresivo.")
-        alerts_found = True
+    with col_viz2:
+        st.markdown("##### 📊 Frecuencia (Histograma)")
+        st.caption("¿Cómo se agrupan los usuarios?")
+        
+        # Histograma con Altair para que coincida el estilo
+        chart_hist = alt.Chart(df).mark_bar().encode(
+            x=alt.X('probability', bin=alt.Bin(maxbins=20), title='Rango de Riesgo'),
+            y=alt.Y('count()', title='Cantidad de Usuarios'),
+            color=alt.condition(
+                alt.datum.probability > 0.7,  # Si es mayor a 0.7
+                alt.value('red'),             # Pintar rojo
+                alt.value('steelblue')        # Si no, azul
+            )
+        ).properties(height=200)
+        
+        st.altair_chart(chart_hist, use_container_width=True)
+        
+        # Conclusión automática
+        if skewness > 1:
+            concl = "La mayoría son seguros, pero hay una cola de usuarios muy peligrosos."
+        elif skewness < -1:
+            concl = "La mayoría son riesgosos, pocos se salvan."
+        else:
+            concl = "La distribución es normal (Campana de Gauss)."
+            
+        st.info(f"**Interpretación:** {concl}")
 
-    # 5. Alerta de Datos Nulos
-    # Si detectamos que se rellenaron muchos ceros en la limpieza inicial
-    nulos_detectados = df[df['probability'] == 0].shape[0]
-    if nulos_detectados > (len(df) * 0.1) and min_prob == 0:
-        st.warning(f"⚠️ **CALIDAD DE DATOS:** Se detectaron {nulos_detectados} registros con probabilidad 0.0 (posibles errores de guardado o nulos).")
-        alerts_found = True
-
-    # ✅ MENSAJE DE ÉXITO (Si no hay alertas)
-    if not alerts_found:
-        st.success("✅ **SISTEMA SALUDABLE:** El modelo opera dentro de los parámetros estadísticos normales. Distribución de riesgo orgánica.")
+    # 4. VEREDICTO FINAL AUTOMÁTICO
+    # ------------------------------------------------------
+    # Si pasa las pruebas críticas (Varianza y Rango)
+    if stats['std'] > 0.05 and (stats['max'] - stats['min']) > 0.3:
+        st.success("🏁 **VEREDICTO:** El modelo es estadísticamente SALUDABLE y apto para toma de decisiones.")
+    else:
+        st.error("🏁 **VEREDICTO:** El modelo presenta anomalías estadísticas. Revisar datos de entrenamiento.")
+        
+    st.divider()
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
