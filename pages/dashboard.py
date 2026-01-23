@@ -214,7 +214,13 @@ def page_dashboard():
         use_container_width=True,
         hide_index=True,
         column_config={
-            "prediction": st.column_config.TextColumn("Clasificación (0/1)"),
+            "probability": st.column_config.ProgressColumn(
+                "Nivel de Riesgo",
+                help="Probabilidad de caer en phishing",
+                format="%.2f",
+                min_value=0,
+                max_value=1,
+            ),
             "Rol_Label": "Rol",
             "Ind_Label": "Industria",
             "Horas_Label": "Tiempo en Pantalla"
