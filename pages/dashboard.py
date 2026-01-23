@@ -172,6 +172,7 @@ def page_dashboard():
         """Función auxiliar para graficar rápido"""
         if col_label in df.columns:
             # Agrupar, sacar promedio, ordenar
+            data = df[df[col_label] != "Sin respuesta"]
             data = df.groupby(col_label)[['probability']].mean().sort_values('probability', ascending=False)
             with tab_obj:
                 st.bar_chart(data, color=color)
