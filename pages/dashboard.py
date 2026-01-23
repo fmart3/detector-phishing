@@ -457,8 +457,8 @@ def page_dashboard():
         # Explicación del BoxPlot para directivos
         st.info(f"""
         **Lectura Rápida:**
-        El 50% de tus empleados tiene un riesgo entre **{stats['25%']:.0%}** y **{stats['75%']:.0%}**.
-        La línea central (**{stats['50%']:.0%}**) es la mediana real de la empresa.
+        El 50% de los empleados tienen un riesgo entre **{stats['25%']:.0%}** y **{stats['75%']:.0%}**.
+        La línea central (**{stats['50%']:.0%}**) es la mediana real.
         """)
 
     with col_viz2:
