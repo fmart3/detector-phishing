@@ -345,7 +345,7 @@ def page_dashboard():
                 # Asumimos que la columna de "Alto Riesgo" es la que tiene el icono rojo o empieza con A
                 col_alto = [c for c in comp_t.columns if "Alto" in c][0]
                 col_bajo = [c for c in comp_t.columns if "Bajo" in c][0]
-                comp_t['Diferencia'] = abs(comp_t[col_alto] - comp_t[col_bajo])
+                comp_t['Diferencia'] = (comp_t[col_alto] - comp_t[col_bajo]).abs()
                 comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
                 
                 # Insight Automático
