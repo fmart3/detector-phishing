@@ -114,9 +114,9 @@ def page_dashboard():
 
     # --- MAPEOS (Ajusta estos diccionarios a tu encuesta real) ---
     map_rol = {
-        1: "Liderazgo (Director, Gerencia, SubGerencia, otros)",
-        2: "Supervisión y Control (Supervisor, Jefatura)",
-        3: "Administrativo, Analista, Ingeniero",
+        1: "Liderazgo",
+        2: "Supervisión",
+        3: "Administrativo",
         4: "Otra"
     }
     map_ind = {
