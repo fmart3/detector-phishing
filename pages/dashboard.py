@@ -5,8 +5,6 @@ import pandas as pd
 import numpy as np
 from utils.databricks import run_sql_query 
 
-from demographics import COUNTRIES, ORG_TYPE, INDUSTRY, EMPLOYEES, ROLE, GENERATION
-
 def page_dashboard():
     st.title("🛡️ Dashboard de Ciberseguridad")
     
