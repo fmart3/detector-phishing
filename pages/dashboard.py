@@ -22,9 +22,9 @@ def page_dashboard():
         st.stop()
 
     # Muestra las columnas que REALMENTE existen (Solo visible para ti, el admin)
-    with st.expander("🕵️ Debug: Ver columnas detectadas"):
-        st.write(list(df.columns))
-        st.write(df.head(2))
+    # with st.expander("🕵️ Debug: Ver columnas detectadas"):
+    #     st.write(list(df.columns))
+    #     st.write(df.head(2))
 
     # ---------------------------------------------------------
     # 2. VALIDACIÓN DE DATOS
@@ -62,7 +62,7 @@ def page_dashboard():
         df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
         
         df_chart = df.groupby("Rol_Nombre")[['probability']].mean().reset_index()
-        st.bar_chart(df_chart, x="Rol de Trabajo", y="Probabilidad de Riesgo", color="#FF4B4B")
+        st.bar_chart(df_chart, x="Rol_Nombre", y="probability", color="#FF4B4B")
     else:
         st.warning("No se encontró la columna 'Demo_Rol_Trabajo'.")
 
