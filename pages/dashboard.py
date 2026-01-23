@@ -229,6 +229,8 @@ def page_dashboard():
         }
     )
     
+    st.divider()
+    
     # ==========================================
     # 🧬 7. CAPA INTERPRETABILIDAD (Alto vs Bajo)
     # ==========================================
@@ -253,69 +255,60 @@ def page_dashboard():
         "Fatiga_Global_Score"
     ]
     
-    # Filtramos solo las que realmente existan en el DF para no dar error
     features_reales = [c for c in features_psicologicas if c in df.columns]
 
     if len(features_reales) == 0:
-        st.warning("⚠️ No se encontraron columnas de Psicología/Fatiga (ej. Big5, Fatiga). Revisa la lista 'features_psicologicas' en el código.")
+        st.warning("⚠️ No se encontraron columnas de comportamiento. Revisa la lista 'features_psicologicas'.")
     
     else:
-        # 2. CREAR GRUPOS (Alto vs Bajo)
-        # ------------------------------------------------------
-        # Definimos el corte en 50% (0.5)
-        df['Grupo_Analisis'] = df['probability'].apply(lambda x: '🔴 Alto Riesgo (>50%)' if x > 0.5 else '🟢 Bajo Riesgo (<50%)')
+        # 2. CREAR GRUPOS
+        df['Grupo_Analisis'] = df['probability'].apply(lambda x: '🔴 Alto Riesgo' if x > 0.5 else '🟢 Bajo Riesgo')
         
-        # Validamos que existan ambos grupos para poder comparar
         if len(df['Grupo_Analisis'].unique()) < 2:
-            st.info("ℹ️ Todos los usuarios están en el mismo grupo de riesgo. Necesitamos variedad para comparar.")
+            st.info("ℹ️ Necesitamos usuarios de alto y bajo riesgo para comparar.")
         else:
-            # 3. CÁLCULO DE PROMEDIOS
-            # ------------------------------------------------------
-            # Agrupamos y sacamos la media de las columnas psicológicas
+            # 3. CÁLCULO
             comparativa = df.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
             
-            # Transponemos la tabla para que sea más fácil de graficar (Filas = Features)
+            # Transponer para gráfico
             comp_t = comparativa.set_index('Grupo_Analisis').transpose()
-            comp_t.columns = ['Bajo Riesgo', 'Alto Riesgo'] if comp_t.columns[0].startswith('🟢') else ['Alto Riesgo', 'Bajo Riesgo']
+            # Ajuste de columnas dinámico
+            cols_ordenadas = sorted(comp_t.columns.tolist()) # Para asegurar orden consistente
+            comp_t = comp_t[cols_ordenadas]
             
-            # Calculamos la diferencia porcentual para ordenar el gráfico
-            # (Cuánto más alto es el valor en el grupo de riesgo comparado con el seguro)
-            # Evitamos división por cero sumando un pequeño epsilon
-            comp_t['Diferencia'] = comp_t['Alto Riesgo'] - comp_t['Bajo Riesgo']
-            
-            # Ordenamos por la diferencia más grande (Lo que más impacta)
-            comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
-
-            # 4. VISUALIZACIÓN
-            # ------------------------------------------------------
-            c_izq, c_der = st.columns([2, 1])
-
-            with c_izq:
-                st.subheader("Comparativa de Perfiles")
-                st.caption("Valores promedio de cada factor según el grupo de riesgo.")
+            # Calcular Diferencia (Si hay 2 columnas)
+            if len(comp_t.columns) == 2:
+                # Asumimos que la columna de "Alto Riesgo" es la que tiene el icono rojo o empieza con A
+                col_alto = [c for c in comp_t.columns if "Alto" in c][0]
+                col_bajo = [c for c in comp_t.columns if "Bajo" in c][0]
+                comp_t['Diferencia'] = comp_t[col_alto] - comp_t[col_bajo]
+                comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
                 
-                # Graficamos Alto vs Bajo lado a lado
-                st.bar_chart(comp_t[['Alto Riesgo', 'Bajo Riesgo']], use_container_width=True)
-            
-            with c_der:
-                st.subheader("💡 Insights")
-                
-                # Encontramos el factor más diferenciador
+                # Insight Automático
                 top_factor = comp_t.index[0]
                 diff_val = comp_t.iloc[0]['Diferencia']
-                
-                st.markdown(f"""
-                El factor que más distingue a los usuarios de alto riesgo es **{top_factor}**.
-                
-                En promedio, el grupo vulnerable tiene un puntaje **{diff_val:+.2f} puntos** mayor en esta escala que el grupo seguro.
-                """)
-                
-                st.dataframe(
-                    comp_t.style.background_gradient(cmap="Reds", subset=['Alto Riesgo'])
-                                .background_gradient(cmap="Greens", subset=['Bajo Riesgo'])
-                                .format("{:.2f}"),
-                    use_container_width=True
-                )
+                insight_text = f"El factor más determinante es **{top_factor}** ({diff_val:+.2f} puntos de diferencia)."
+            else:
+                insight_text = "Se muestran los valores promedio por grupo."
+
+            # 4. VISUALIZACIÓN (NUEVO LAYOUT VERTICAL)
+            # ------------------------------------------------------
+            
+            # A. Insight Texto
+            st.info(f"💡 **Hallazgo Clave:** {insight_text}")
+
+            # B. Gráfico (Ancho completo)
+            st.subheader("📊 Comparativa Visual")
+            st.bar_chart(comp_t[[c for c in comp_t.columns if c != 'Diferencia']], use_container_width=True)
+
+            # C. Tabla de Datos (Abajo y Ancha)
+            st.subheader("📋 Detalle de Datos")
+            st.dataframe(
+                comp_t.style.background_gradient(cmap="Reds", subset=[col_alto] if 'col_alto' in locals() else None)
+                            .background_gradient(cmap="Greens", subset=[col_bajo] if 'col_bajo' in locals() else None)
+                            .format("{:.2f}"),
+                use_container_width=True  # <--- ESTO HACE QUE OCUPE TODO EL ANCHO
+            )
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
