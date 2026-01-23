@@ -68,11 +68,11 @@ def page_dashboard():
     st.divider()
 
     # ---------------------------------------------------------
-    # 4. SALUD DEL MODELO
+    # 4. SALUD DEL MODELO (Lógica consistente con BD)
     # ---------------------------------------------------------
     st.subheader("🧠 Salud del Modelo (Estadísticas)")
     
-    # A. Métricas Técnicas
+    # A. Métricas Técnicas (Se mantiene igual)
     min_prob = df['probability'].min()
     max_prob = df['probability'].max()
     std_dev  = df['probability'].std()
@@ -81,42 +81,53 @@ def page_dashboard():
     m1.metric("Probabilidad Mínima", f"{min_prob:.2%}")
     m2.metric("Probabilidad Máxima", f"{max_prob:.2%}")
     
-    # Lógica de color para la desviación
-    # Si es muy baja (<0.01), el modelo podría estar devolviendo siempre lo mismo
     st_color = "inverse" if std_dev < 0.01 else "normal"
     m3.metric("Desviación Estándar", f"{std_dev:.3f}", delta_color=st_color)
 
-    # B. Clasificación y Distribución
+    # B. Clasificación y Distribución (CORREGIDO: Usando risk_level de la BD)
     st.markdown("##### Distribución de Niveles de Riesgo")
-    
-    # Función local para clasificar
-    def clasificar_riesgo(prob):
-        if prob < 0.30: return "🟢 Bajo"
-        elif prob < 0.70: return "🟡 Medio"
-        else: return "🔴 Alto"
 
-    df['Nivel_Calculado'] = df['probability'].apply(clasificar_riesgo)
+    # Verificamos si existe la columna en la BD
+    col_riesgo_db = 'risk_level' # Asegúrate que este sea el nombre exacto en tu tabla
+    
+    if col_riesgo_db in df.columns:
+        # Llenamos nulos por seguridad
+        df[col_riesgo_db] = df[col_riesgo_db].fillna("Sin Clasificar")
+
+        # (Opcional) Diccionario para agregar emojis a lo que viene de la BD
+        # Ajusta las claves (Low/Bajo) según lo que realmente guardes en App.py
+        emoji_map = {
+            "Low": "🟢 Low",   "Bajo": "🟢 Bajo",
+            "Medium": "🟡 Medium", "Medio": "🟡 Medio",
+            "High": "🔴 High",  "Alto": "🔴 Alto"
+        }
+        
+        # Creamos columna visual mapeando el valor de la BD
+        # Si el valor no está en el mapa, muestra el texto original tal cual
+        df['Nivel_Display'] = df[col_riesgo_db].map(lambda x: emoji_map.get(x, x))
+    else:
+        st.error(f"⚠️ No se encontró la columna '{col_riesgo_db}' en la base de datos.")
+        df['Nivel_Display'] = "Error de Datos"
 
     c_chart, c_data = st.columns([2, 1])
 
     with c_chart:
-        # Histograma simple usando Numpy para los bins
-        # Crea rangos de 10% en 10% (0.0 a 1.0)
+        # El histograma usa 'probability' (matemática pura), eso está bien
         hist_values, _ = np.histogram(df['probability'], bins=10, range=(0,1))
-        # Creamos un DF para el gráfico de barras
         hist_df = pd.DataFrame({
             "Usuarios": hist_values,
             "Rango": [f"{i*10}%-{(i+1)*10}%" for i in range(10)]
         }).set_index("Rango")
         
         st.bar_chart(hist_df)
-        st.caption("Histograma: ¿Cómo se agrupan las probabilidades?")
+        st.caption("Histograma: Distribución matemática de probabilidades")
 
     with c_data:
-        # Tabla resumen
-        resumen = df['Nivel_Calculado'].value_counts().reset_index()
-        resumen.columns = ['Nivel', 'Total']
+        # Tabla resumen: AHORA CUENTA LO QUE HAY EN LA BD (Consistencia Total)
+        resumen = df['Nivel_Display'].value_counts().reset_index()
+        resumen.columns = ['Nivel (BD)', 'Total']
         resumen['%'] = (resumen['Total'] / len(df) * 100).map('{:.1f}%'.format)
+        
         st.dataframe(resumen, hide_index=True, use_container_width=True)
         
     # ---------------------------------------------------------
