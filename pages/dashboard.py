@@ -245,7 +245,7 @@ def page_dashboard():
                 if not chart_data.empty:
                     top_seg = chart_data.index[0]
                     top_val = chart_data.iloc[0,0]
-                    st.caption(f"📍 El segmento más vulnerable es **{top_seg}** ({top_val:.1%} prob).")
+                    st.caption(f"📍 El segmento más vulnerable es **{top_seg}** ({top_val:.1%} probabilidad en promedio).")
         else:
             tab_obj.warning(f"⚠️ Falta la columna '{col_label}' en la base de datos.")
 

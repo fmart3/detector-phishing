@@ -19,9 +19,9 @@ def wake_up_model():
         # Enviamos datos basura solo para activar el servidor
         # No nos importa el resultado, solo que el servidor arranque
         dummy_data = {
-            "Fatiga_Global_Score": 0, "Phish_Susceptibilidad": 0,
-            "Big5_Apertura": 0, "Phish_Riesgo_Percibido": 0,
-            "Demo_Rol_Trabajo": 0, "Demo_Horas": 0
+            "Fatiga_Global_Score": 1, "Demo_Tamano_Org": 1,
+            "Big5_Apertura": 1, "Phish_Riesgo_Percibido": 1,
+            "Demo_Rol_Trabajo": 1, "Demo_Horas": 1
             # ... asegúrate de incluir las columnas mínimas que pide tu modelo
         }
         print("⏰ Enviando señal de despertador a Databricks...")
