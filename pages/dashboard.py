@@ -6,6 +6,19 @@ import numpy as np
 from utils.databricks import run_sql_query 
 
 def page_dashboard():
+    # Configuración de la página (Opcional, pero recomendado para iniciar colapsado)
+    st.set_page_config(page_title="Dashboard", layout="wide", initial_sidebar_state="collapsed")
+    
+    # ---------------------------------------------------------
+    # 🪄 TRUCO CSS: OCULTAR LA NAVEGACIÓN LATERAL
+    # ---------------------------------------------------------
+    no_sidebar_style = """
+        <style>
+            [data-testid="stSidebarNav"] {display: none;}
+        </style>
+    """
+    st.markdown(no_sidebar_style, unsafe_allow_html=True)
+
     st.title("🛡️ Dashboard de Ciberseguridad")
     
     # ---------------------------------------------------------
