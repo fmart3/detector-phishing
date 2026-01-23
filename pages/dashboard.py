@@ -228,6 +228,94 @@ def page_dashboard():
             "Horas_Label": "Tiempo en Pantalla"
         }
     )
+    
+    # ==========================================
+    # 🧬 7. CAPA INTERPRETABILIDAD (Alto vs Bajo)
+    # ==========================================
+    st.header("🧬 Análisis de Comportamiento (Interpretabilidad)")
+    st.markdown("¿Qué diferencia psicológicamente a los usuarios vulnerables de los seguros?")
+
+    # 1. DEFINIR LAS COLUMNAS A ANALIZAR
+    # ------------------------------------------------------
+    # ⚠️ IMPORTANTE: Ajusta esta lista con los nombres EXACTOS de tus columnas en Databricks.
+    # He puesto los nombres comunes, pero verifica si se llaman "Big5_Openness" o "Apertura", etc.
+    features_psicologicas = [
+        "Big5_Extraversion",
+        "Big5_Amabilidad",
+        "Big5_Responsabilidad",
+        "Big5_Neuroticismo",
+        "Big5_Apertura",
+        "Phish_Actitud_Riesgo",
+        "Phish_Awareness",
+        "Phish_Riesgo_Percibido",
+        "Phish_Autoeficacia",
+        "Phish_Susceptibilidad",
+        "Fatiga_Global_Score"
+    ]
+    
+    # Filtramos solo las que realmente existan en el DF para no dar error
+    features_reales = [c for c in features_psicologicas if c in df.columns]
+
+    if len(features_reales) == 0:
+        st.warning("⚠️ No se encontraron columnas de Psicología/Fatiga (ej. Big5, Fatiga). Revisa la lista 'features_psicologicas' en el código.")
+    
+    else:
+        # 2. CREAR GRUPOS (Alto vs Bajo)
+        # ------------------------------------------------------
+        # Definimos el corte en 50% (0.5)
+        df['Grupo_Analisis'] = df['probability'].apply(lambda x: '🔴 Alto Riesgo (>50%)' if x > 0.5 else '🟢 Bajo Riesgo (<50%)')
+        
+        # Validamos que existan ambos grupos para poder comparar
+        if len(df['Grupo_Analisis'].unique()) < 2:
+            st.info("ℹ️ Todos los usuarios están en el mismo grupo de riesgo. Necesitamos variedad para comparar.")
+        else:
+            # 3. CÁLCULO DE PROMEDIOS
+            # ------------------------------------------------------
+            # Agrupamos y sacamos la media de las columnas psicológicas
+            comparativa = df.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
+            
+            # Transponemos la tabla para que sea más fácil de graficar (Filas = Features)
+            comp_t = comparativa.set_index('Grupo_Analisis').transpose()
+            comp_t.columns = ['Bajo Riesgo', 'Alto Riesgo'] if comp_t.columns[0].startswith('🟢') else ['Alto Riesgo', 'Bajo Riesgo']
+            
+            # Calculamos la diferencia porcentual para ordenar el gráfico
+            # (Cuánto más alto es el valor en el grupo de riesgo comparado con el seguro)
+            # Evitamos división por cero sumando un pequeño epsilon
+            comp_t['Diferencia'] = comp_t['Alto Riesgo'] - comp_t['Bajo Riesgo']
+            
+            # Ordenamos por la diferencia más grande (Lo que más impacta)
+            comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
+
+            # 4. VISUALIZACIÓN
+            # ------------------------------------------------------
+            c_izq, c_der = st.columns([2, 1])
+
+            with c_izq:
+                st.subheader("Comparativa de Perfiles")
+                st.caption("Valores promedio de cada factor según el grupo de riesgo.")
+                
+                # Graficamos Alto vs Bajo lado a lado
+                st.bar_chart(comp_t[['Alto Riesgo', 'Bajo Riesgo']], use_container_width=True)
+            
+            with c_der:
+                st.subheader("💡 Insights")
+                
+                # Encontramos el factor más diferenciador
+                top_factor = comp_t.index[0]
+                diff_val = comp_t.iloc[0]['Diferencia']
+                
+                st.markdown(f"""
+                El factor que más distingue a los usuarios de alto riesgo es **{top_factor}**.
+                
+                En promedio, el grupo vulnerable tiene un puntaje **{diff_val:+.2f} puntos** mayor en esta escala que el grupo seguro.
+                """)
+                
+                st.dataframe(
+                    comp_t.style.background_gradient(cmap="Reds", subset=['Alto Riesgo'])
+                                .background_gradient(cmap="Greens", subset=['Bajo Riesgo'])
+                                .format("{:.2f}"),
+                    use_container_width=True
+                )
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
