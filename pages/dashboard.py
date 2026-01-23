@@ -97,9 +97,9 @@ def page_dashboard():
         # (Opcional) Diccionario para agregar emojis a lo que viene de la BD
         # Ajusta las claves (Low/Bajo) según lo que realmente guardes en App.py
         emoji_map = {
-            "Low": "🟢 Low",   "Bajo": "🟢 Bajo",
-            "Medium": "🟡 Medium", "Medio": "🟡 Medio",
-            "High": "🔴 High",  "Alto": "🔴 Alto"
+            "BAJO": "🟢 Bajo",
+            "MEDIO": "🟡 Medio",
+            "ALTO": "🔴 Alto"
         }
         
         # Creamos columna visual mapeando el valor de la BD
