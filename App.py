@@ -97,7 +97,7 @@ from pages.pages_likert import (
 
 from pages.demographics import page_demographics
 from pages.results import page_results
-from pages.appAlt import page_app_alt, page_app_alt1
+from pages.appAlt import (page_app_alt, page_app_alt1)
 
 # =========================
 # Enrutador de páginas
