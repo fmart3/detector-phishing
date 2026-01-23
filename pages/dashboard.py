@@ -30,8 +30,7 @@ def page_dashboard():
     # ---------------------------------------------------------
     # 2. VALIDACIÓN DE DATOS
     # ---------------------------------------------------------
-    # Verificamos si tenemos las columnas del modelo. 
-    # Si no existen, creamos datos falsos (ceros) para que el dashboard no explote.
+    # Verificamos si tenemos las columnas del modelo
     
     if 'probability' not in df.columns:
         st.error("⚠️ ALERTA: La columna 'probability' no existe en la base de datos.")
@@ -46,7 +45,7 @@ def page_dashboard():
         df['prediction'] = 0
 
     # ---------------------------------------------------------
-    # 3. KPIs (Ahora seguros)
+    # 3. KPIs
     # ---------------------------------------------------------
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Encuestados", len(df))
@@ -108,21 +107,88 @@ def page_dashboard():
         st.dataframe(resumen, hide_index=True, use_container_width=True)
         
     # ---------------------------------------------------------
-    # 5. RIESGO POR ROL DE TRABAJO
+    # 5. CAPA DE RIESGO
     # ---------------------------------------------------------
-    st.subheader("📊 Riesgo por Rol")
-    
+    st.header("🎯 Riesgo Operacional")
+    st.markdown("Identificación de segmentos vulnerables para priorizar capacitación.")
+
+    # --- MAPEOS (Ajusta estos diccionarios a tu encuesta real) ---
+    map_rol = {1: "Liderazgo", 2: "TI/Técnico", 3: "Admin", 4: "Ventas", 5: "Operaciones"}
+    map_ind = {1: "Finanzas", 2: "Salud", 3: "Tecnología", 4: "Retail", 5: "Gobierno"}
+    map_tam = {1: "Pequeña (<50)", 2: "Mediana (50-200)", 3: "Grande (>200)"}
+    map_hor = {1: "< 2 horas", 2: "2-4 horas", 3: "4-8 horas", 4: "> 8 horas"}
+
+    # Aplicamos mapeos si las columnas existen
     if 'Demo_Rol_Trabajo' in df.columns:
-        rol_map = {1: "Liderazgo", 2: "Supervisión", 3: "Administrativo", 4: "Otro"}
-        # Convertimos a numérico por seguridad y mapeamos
-        df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
-        
-        df_chart = df.groupby("Rol_Nombre")[['probability']].mean().reset_index()
-        st.bar_chart(df_chart, x="Rol_Nombre", y="probability", color="#FF4B4B")
-    else:
-        st.warning("No se encontró la columna 'Demo_Rol_Trabajo'.")
-        
+        df['Rol_Label'] = df['Demo_Rol_Trabajo'].map(map_rol).fillna("Otro")
+    if 'Demo_Industria' in df.columns:
+        df['Ind_Label'] = df['Demo_Industria'].map(map_ind).fillna("Otro")
+    if 'Demo_Tamano_Org' in df.columns:
+        df['Org_Label'] = df['Demo_Tamano_Org'].map(map_tam).fillna("Desc.")
+    if 'Demo_Horas' in df.columns:
+        df['Horas_Label'] = df['Demo_Horas'].map(map_hor).fillna("Desc.")
+
+    # --- PESTAÑAS DE ANÁLISIS ---
+    tab1, tab2, tab3, tab4 = st.tabs(["🏭 Industria", "⏰ Horas PC", "🏢 Tamaño Org", "👤 Rol"])
+
+    def plot_risk_by(col_label, tab_obj, color="#FF4B4B"):
+        """Función auxiliar para graficar rápido"""
+        if col_label in df.columns:
+            # Agrupar, sacar promedio, ordenar
+            data = df.groupby(col_label)[['probability']].mean().sort_values('probability', ascending=False)
+            with tab_obj:
+                st.bar_chart(data, color=color)
+                # Insight automático
+                top_seg = data.index[0]
+                top_val = data.iloc[0,0]
+                st.caption(f"📍 El segmento más riesgoso es **{top_seg}** con {top_val:.1%} de probabilidad.")
+        else:
+            tab_obj.warning(f"Falta columna para {col_label}")
+
+    # Generamos los gráficos en cada tab
+    plot_risk_by('Ind_Label', tab1, "#1f77b4")   # Azul
+    plot_risk_by('Horas_Label', tab2, "#ff7f0e") # Naranja
+    plot_risk_by('Org_Label', tab3, "#2ca02c")   # Verde
+    plot_risk_by('Rol_Label', tab4, "#d62728")   # Rojo
+
     st.divider()
+    
+    # ==========================================
+    # 🚨 6. TOP USUARIOS CRÍTICOS (Anonimizado)
+    # ==========================================
+    st.subheader("🚨 Top 10 Usuarios de Mayor Riesgo")
+    st.markdown("Listado anonimizado para auditoría prioritaria.")
+
+    # Columnas a mostrar (Solo las que aportan valor sin revelar identidad directa)
+    cols_to_show = ['probability', 'prediction']
+    
+    # Agregamos las etiquetas si existen
+    if 'Rol_Label' in df.columns: cols_to_show.insert(0, 'Rol_Label')
+    if 'Ind_Label' in df.columns: cols_to_show.insert(1, 'Ind_Label')
+    if 'Horas_Label' in df.columns: cols_to_show.append('Horas_Label')
+
+    # Filtramos y ordenamos
+    top_risk = df.sort_values(by='probability', ascending=False).head(10)
+    
+    # Mostramos tabla con formato bonito
+    st.dataframe(
+        top_risk[cols_to_show],
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "probability": st.column_config.ProgressColumn(
+                "Nivel de Riesgo",
+                help="Probabilidad de caer en phishing",
+                format="%.2f",
+                min_value=0,
+                max_value=1,
+            ),
+            "prediction": st.column_config.TextColumn("Clasificación (0/1)"),
+            "Rol_Label": "Rol",
+            "Ind_Label": "Industria",
+            "Horas_Label": "Tiempo en Pantalla"
+        }
+    )
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
