@@ -201,10 +201,10 @@ def page_dashboard():
     cols_to_show = ['probability']
     
     # Agregamos las etiquetas si existen
-    if 'Org_Label' in df.columns: cols_to_show.insert(2, 'Org_Label')
-    if 'Rol_Label' in df.columns: cols_to_show.insert(0, 'Rol_Label')
-    if 'Ind_Label' in df.columns: cols_to_show.insert(1, 'Ind_Label')
-    if 'Horas_Label' in df.columns: cols_to_show.append('Horas_Label')
+    if 'Org_Label' in df.columns: cols_to_show.insert(0, 'Org_Label')
+    if 'Rol_Label' in df.columns: cols_to_show.insert(1, 'Rol_Label')
+    if 'Ind_Label' in df.columns: cols_to_show.insert(2, 'Ind_Label')
+    if 'Horas_Label' in df.columns: cols_to_show.insert(3,'Horas_Label')
 
     # Filtramos y ordenamos
     top_risk = df.sort_values(by='probability', ascending=False).head(10)
