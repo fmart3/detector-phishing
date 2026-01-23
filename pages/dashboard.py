@@ -12,7 +12,7 @@ def page_dashboard():
     # 1. DIAGNÓSTICO DE COLUMNAS (Para ver qué tienes realmente)
     # ---------------------------------------------------------
     # Usamos SELECT * para que no falle si falta una columna específica
-    query = "SELECT * FROM phishing.surveys.responses"
+    query = "SELECT * FROM phishing.surveys.responses WHERE timestamp < '2026-01-21T11:56:07';"
     df = run_sql_query(query)
 
     if df.empty:
