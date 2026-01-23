@@ -12,7 +12,7 @@ def page_dashboard():
     # 1. DIAGNÓSTICO DE COLUMNAS (Para ver qué tienes realmente)
     # ---------------------------------------------------------
     # Usamos SELECT * para que no falle si falta una columna específica
-    query = "SELECT * FROM phishing.surveys.responses WHERE timestamp < '2026-01-21T11:56:07';"
+    query = "SELECT * FROM phishing.surveys.responses WHERE timestamp > '2026-01-21T11:56:07';"
     df = run_sql_query(query)
 
     if df.empty:
@@ -117,7 +117,7 @@ def page_dashboard():
         1: "Liderazgo",
         2: "Supervisión",
         3: "Administrativo",
-        4: "Otra"
+        4: "Otro"
     }
     map_ind = {
         1: "Agricultura",
@@ -137,7 +137,7 @@ def page_dashboard():
         15: "Serv. Prof. y/o Consul.",
         16: "Construcción",
         17: "Manufactura",
-        18: "Otras"
+        18: "Otra"
     }
     map_tam = {
         1: "< 100 Emp",
