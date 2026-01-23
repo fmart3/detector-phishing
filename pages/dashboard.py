@@ -309,6 +309,56 @@ def page_dashboard():
                             .format("{:.2f}"),
                 use_container_width=True  # <--- ESTO HACE QUE OCUPE TODO EL ANCHO
             )
+            
+    st.divider()
+    # =======================================================
+    # ⚠️ 8. CAPA ALERTAS DEL MODELO (Diagnóstico Automático)
+    # =======================================================
+    
+    st.header("⚙️ Monitor de Salud del Modelo")
+    st.markdown("Auditoría automática para detectar anomalías o sesgos en las predicciones.")
+
+    # Definimos umbrales de alerta
+    alerts_found = False
+    
+    # 1. Alerta de "Modelo Congelado" (Poca varianza)
+    # Si la desviación estándar es muy baja, el modelo está devolviendo casi lo mismo para todos.
+    std_dev = df['probability'].std()
+    if std_dev < 0.05:
+        st.error(f"🚨 **FALLO DE VARIANZA:** La desviación estándar es crítica ({std_dev:.3f}). El modelo está 'congelado' y no diferencia entre usuarios.")
+        alerts_found = True
+
+    # 2. Alerta de "Sesgo Pesimista" (Todo es riesgo alto)
+    # Si la probabilidad MÍNIMA es mayor al 50%, significa que nadie es considerado seguro.
+    min_prob = df['probability'].min()
+    if min_prob > 0.5:
+        st.error(f"🚨 **SESGO ALTO RIESGO:** La probabilidad mínima es {min_prob:.1%}. El modelo no está detectando NINGÚN usuario seguro.")
+        alerts_found = True
+
+    # 3. Alerta de "Sesgo Optimista" (Todo es riesgo bajo)
+    # Si la probabilidad MÁXIMA es menor al 50%, el modelo dice que nadie es peligroso.
+    max_prob = df['probability'].max()
+    if max_prob < 0.5:
+        st.error(f"🚨 **SESGO BAJO RIESGO:** La probabilidad máxima es {max_prob:.1%}. El modelo no está detectando NINGÚN usuario vulnerable.")
+        alerts_found = True
+
+    # 4. Alerta de "Agresividad" (% de Altos muy elevado)
+    # Si más del 80% de la gente es "Riesgo Alto", el modelo podría ser demasiado sensible.
+    pct_high_risk = (df['probability'] > 0.7).mean()
+    if pct_high_risk > 0.8:
+        st.warning(f"⚠️ **ALERTA DE SENSIBILIDAD:** El {pct_high_risk:.1%} de los usuarios son clasificados como Riesgo Alto (>70%). El modelo podría estar siendo demasiado agresivo.")
+        alerts_found = True
+
+    # 5. Alerta de Datos Nulos
+    # Si detectamos que se rellenaron muchos ceros en la limpieza inicial
+    nulos_detectados = df[df['probability'] == 0].shape[0]
+    if nulos_detectados > (len(df) * 0.1) and min_prob == 0:
+        st.warning(f"⚠️ **CALIDAD DE DATOS:** Se detectaron {nulos_detectados} registros con probabilidad 0.0 (posibles errores de guardado o nulos).")
+        alerts_found = True
+
+    # ✅ MENSAJE DE ÉXITO (Si no hay alertas)
+    if not alerts_found:
+        st.success("✅ **SISTEMA SALUDABLE:** El modelo opera dentro de los parámetros estadísticos normales. Distribución de riesgo orgánica.")
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
