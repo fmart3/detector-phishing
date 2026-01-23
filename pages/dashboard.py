@@ -434,10 +434,23 @@ def page_dashboard():
         
     st.divider()
 
-    # Botón final de recarga
-    if st.button("🔄 Actualizar Dashboard"):
-        run_sql_query.clear()
-        st.rerun()
+    # ==========================================
+    # 9. FINAL DE LA PÁGINA
+    # ==========================================
+    
+    # Creamos dos columnas para los botones (Actualizar | Volver)
+    col_btn1, col_btn2 = st.columns([1, 4]) # La segunda col es más ancha para separar
+    
+    with col_btn1:
+        if st.button("🔄 Actualizar Datos"):
+            run_sql_query.clear()
+            st.rerun()
+            
+    with col_btn2:
+        # ⚠️ IMPORTANTE: Pon el nombre EXACTO de tu archivo principal. 
+        # Si se llama App.py, déjalo así. Si lo renombras, cámbialo aquí.
+        if st.button("⬅️ Volver a la Encuesta"):
+            st.switch_page("App.py")
 
 if __name__ == "__main__":
     page_dashboard()
