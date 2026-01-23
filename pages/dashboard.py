@@ -63,7 +63,7 @@ def page_dashboard():
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Encuestados", len(df))
     col2.metric("Riesgo Promedio", f"{df['probability'].mean():.1%}")
-    col3.metric("Usuarios Críticos", df[df['probability'] > 0.5].shape[0])
+    col3.metric("Usuarios Críticos", df[df['risk_level'] == "ALTO"].shape[0])
 
     st.divider()
 
