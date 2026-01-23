@@ -1,3 +1,5 @@
+#/utils/dashboard.py
+
 import streamlit as st
 import pandas as pd
 from utils.databricks import run_sql_query 
@@ -60,7 +62,7 @@ def page_dashboard():
         df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
         
         df_chart = df.groupby("Rol_Nombre")[['probability']].mean().reset_index()
-        st.bar_chart(df_chart, x="Rol_Nombre", y="probability", color="#FF4B4B")
+        st.bar_chart(df_chart, x="Rol de Trabajo", y="Probabilidad de Riesgo", color="#FF4B4B")
     else:
         st.warning("No se encontró la columna 'Demo_Rol_Trabajo'.")
 
