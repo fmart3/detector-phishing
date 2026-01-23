@@ -156,14 +156,14 @@ def page_dashboard():
         5: "> 10 horas"
     }
     # Aplicamos mapeos si las columnas existen
-    # if 'Demo_Rol_Trabajo' in df.columns:
-    #     df['Rol_Label'] = df['Demo_Rol_Trabajo'].map(map_rol).fillna("Otro")
-    # if 'Demo_Industria' in df.columns:
-    #     df['Ind_Label'] = df['Demo_Industria'].map(map_ind).fillna("Otro")
-    # if 'Demo_Tamano_Org' in df.columns:
-    #     df['Org_Label'] = df['Demo_Tamano_Org'].map(map_tam).fillna("Desc.")
-    # if 'Demo_Horas' in df.columns:
-    #     df['Horas_Label'] = df['Demo_Horas'].map(map_hor).fillna("Desc.")
+    if 'Demo_Rol_Trabajo' in df.columns:
+        df['Rol_Label'] = df['Demo_Rol_Trabajo'].map(map_rol).fillna("Sin respuesta")
+    if 'Demo_Industria' in df.columns:
+        df['Ind_Label'] = df['Demo_Industria'].map(map_ind).fillna("Sin respuesta")
+    if 'Demo_Tamano_Org' in df.columns:
+        df['Org_Label'] = df['Demo_Tamano_Org'].map(map_tam).fillna("Sin respuesta")
+    if 'Demo_Horas' in df.columns:
+        df['Horas_Label'] = df['Demo_Horas'].map(map_hor).fillna("Sin respuesta")
 
     # --- PESTAÑAS DE ANÁLISIS ---
     tab1, tab2, tab3, tab4 = st.tabs(["🏭 Industria", "⏰ Horas PC", "🏢 Tamaño Org", "👤 Rol"])
