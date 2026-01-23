@@ -109,7 +109,7 @@ def page_results():
         msg_type = "success"
     elif probability < 0.40:
         risk_level = "MEDIO"
-        color = "orange"
+        color = "yellow"
         msg_type = "warning"
     else:
         risk_level = "ALTO"

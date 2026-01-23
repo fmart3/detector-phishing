@@ -299,107 +299,105 @@ def page_dashboard():
     # 🧬 7. CAPA INTERPRETABILIDAD (Alto vs Bajo)
     # ==========================================
     st.header("🧬 Análisis de Comportamiento (Interpretabilidad)")
-    st.markdown("Comparativa psicológica entre perfiles de riesgo extremos (Alto vs Bajo).")
+    st.markdown("Comparativa psicológica entre perfiles de riesgo extremos.")
 
-    # 1. DEFINIR LAS COLUMNAS A ANALIZAR
-    # ------------------------------------------------------
-    # Asegúrate de que estos nombres coincidan con tu base de datos
+    # 1. DEFINIR COLUMNAS PSICOLÓGICAS
     features_psicologicas = [
-        "Big5_Extraversion",
-        "Big5_Amabilidad",
-        "Big5_Responsabilidad",
-        "Big5_Neuroticismo",
-        "Big5_Apertura",
-        "Phish_Actitud_Riesgo",
-        "Phish_Awareness",
-        "Phish_Riesgo_Percibido",
-        "Phish_Autoeficacia",
-        "Phish_Susceptibilidad",
-        "Fatiga_Global_Score"
+        "Big5_Extraversion", "Big5_Amabilidad", "Big5_Responsabilidad", 
+        "Big5_Neuroticismo", "Big5_Apertura", "Phish_Actitud_Riesgo", 
+        "Phish_Awareness", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", 
+        "Phish_Susceptibilidad", "Fatiga_Global_Score"
     ]
-    
     features_reales = [c for c in features_psicologicas if c in df.columns]
 
-    if len(features_reales) == 0:
-        st.warning("⚠️ No se encontraron columnas de comportamiento. Revisa la lista 'features_psicologicas'.")
-    
+    if not features_reales:
+        st.warning("⚠️ No se encontraron columnas de comportamiento (Big5, Phish, Fatiga).")
     else:
-        # 2. CREAR GRUPOS BASADOS EN 'risk_level' (BASE DE DATOS)
         # ------------------------------------------------------
-        # Verificamos si existe la columna
+        # 2. ASEGURAR COLUMNA 'risk_level' CON TU LÓGICA EXACTA
+        # ------------------------------------------------------
         if 'risk_level' not in df.columns:
-            st.error("❌ No se encuentra la columna 'risk_level' en la base de datos.")
-        else:
-            # Mapeo para estandarizar nombres y emojis
-            map_risk = {
-                "High": "🔴 Alto Riesgo", "Alto": "🔴 Alto Riesgo",
-                "Medium": "🟡 Medio Riesgo", "Medio": "🟡 Medio Riesgo",
-                "Low": "🟢 Bajo Riesgo", "Bajo": "🟢 Bajo Riesgo"
-            }
-            
-            df['Grupo_Analisis'] = df['risk_level'].map(map_risk)
-            
-            # FILTRO ESTRATÉGICO: Para interpretabilidad, comparamos solo los extremos (Alto vs Bajo)
-            # Esto hace que las diferencias sean más evidentes.
-            df_contrast = df[df['Grupo_Analisis'].isin(["🔴 Alto Riesgo", "🟢 Bajo Riesgo"])]
-            
-            # Validación de seguridad: ¿Tenemos datos de ambos bandos?
-            grupos_disponibles = df_contrast['Grupo_Analisis'].unique()
-
-            if len(grupos_disponibles) < 2:
-                st.info(f"ℹ️ Aún no hay suficiente diversidad de usuarios para comparar (Solo detectamos: {grupos_disponibles}). Se necesitan usuarios de Alto y Bajo riesgo.")
+            if 'probability' in df.columns:
+                # Replicamos TU lógica: <0.33 Bajo, <0.40 Medio, >=0.40 Alto
+                conditions = [
+                    (df['probability'] < 0.33),
+                    (df['probability'] < 0.40),
+                    (df['probability'] >= 0.40)
+                ]
+                # NOTA: Usamos las mismas etiquetas mayúsculas que tu sistema
+                choices = ["BAJO", "MEDIO", "ALTO"]
+                
+                import numpy as np
+                df['risk_level'] = np.select(conditions, choices, default="ALTO")
             else:
-                # 3. CÁLCULO DE PROMEDIOS
-                comparativa = df_contrast.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
-                
-                # Transponer para facilitar el gráfico (Filas: Features, Cols: Grupos)
-                comp_t = comparativa.set_index('Grupo_Analisis').transpose()
-                
-                # 4. CÁLCULO DE DIFERENCIAS E INSIGHT
-                # Identificamos las columnas dinámicamente
-                col_alto = "🔴 Alto Riesgo"
-                col_bajo = "🟢 Bajo Riesgo"
-                
-                # Calculamos la diferencia absoluta para ordenar el gráfico por relevancia
+                st.error("❌ No hay 'risk_level' ni 'probability'.")
+                st.stop()
+
+        # ------------------------------------------------------
+        # 3. MAPEO VISUAL (Aquí estaba el error de mayúsculas)
+        # ------------------------------------------------------
+        map_risk = {
+            "ALTO": "🔴 Alto Riesgo",   # Coincide con tu lógica "ALTO"
+            "MEDIO": "🟡 Medio Riesgo", # Coincide con tu lógica "MEDIO"
+            "BAJO": "🟢 Bajo Riesgo"    # Coincide con tu lógica "BAJO"
+        }
+        
+        # Aseguramos que sea string y mapeamos
+        df['Grupo_Analisis'] = df['risk_level'].astype(str).map(map_risk)
+        
+        # Si por alguna razón el mapa falló (ej: venía "Alto" en vez de "ALTO"), rellenamos
+        df['Grupo_Analisis'] = df['Grupo_Analisis'].fillna("⚪ Desconocido")
+
+        # ------------------------------------------------------
+        # 4. FILTRAR EXTREMOS (ALTO VS BAJO)
+        # ------------------------------------------------------
+        # Buscamos comparar solo los rojos contra los verdes
+        df_contrast = df[df['Grupo_Analisis'].isin(["🔴 Alto Riesgo", "🟢 Bajo Riesgo"])]
+
+        # LÓGICA DE RESPALDO: Si solo hay usuarios de un tipo, mostramos todo
+        if df_contrast['Grupo_Analisis'].nunique() < 2:
+            st.info(f"ℹ️ Mostrando análisis general (No se detectaron usuarios suficientes para contrastar Alto vs Bajo).")
+            # Usamos el dataframe completo si no hay contraste
+            df_contrast = df[df['Grupo_Analisis'] != "⚪ Desconocido"]
+        
+        if df_contrast.empty:
+             st.warning("⚠️ No hay datos válidos para graficar.")
+        else:
+            # 5. CÁLCULO
+            comparativa = df_contrast.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
+            comp_t = comparativa.set_index('Grupo_Analisis').transpose()
+
+            # Definimos nombres de columnas para buscar diferencias
+            col_alto = "🔴 Alto Riesgo"
+            col_bajo = "🟢 Bajo Riesgo"
+            
+            # Solo calculamos diferencias si existen ambas columnas
+            if col_alto in comp_t.columns and col_bajo in comp_t.columns:
                 comp_t['Diferencia'] = (comp_t[col_alto] - comp_t[col_bajo]).abs()
-                comp_t['Delta_Real'] = comp_t[col_alto] - comp_t[col_bajo] # Para saber el signo
-                
-                # Ordenamos de mayor impacto a menor impacto
+                comp_t['Delta'] = comp_t[col_alto] - comp_t[col_bajo]
                 comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
                 
-                # Generamos el texto del insight automático
+                # Insight Automático
                 top_feature = comp_t.index[0]
-                top_delta = comp_t.iloc[0]['Delta_Real']
+                delta_val = comp_t.iloc[0]['Delta']
+                txt_dir = "MAYOR" if delta_val > 0 else "MENOR"
+                st.info(f"💡 **Hallazgo:** El factor más determinante es **{top_feature}**. En usuarios de riesgo ALTO, este puntaje es **{txt_dir}** ({abs(delta_val):.2f} pts) comparado con usuarios de riesgo BAJO.")
                 
-                if top_delta > 0:
-                    direccion = "MAYOR"
-                else:
-                    direccion = "MENOR"
-                
-                insight_text = f"El factor más distintivo es **{top_feature}**. Los usuarios de Alto Riesgo tienen un puntaje significativamente **{direccion}** ({abs(top_delta):.2f} pts) que los seguros."
+                # Ocultamos columnas de cálculo para el gráfico
+                cols_chart = [col_alto, col_bajo]
+            else:
+                # Si falta una columna, graficamos lo que haya
+                cols_chart = comp_t.columns.tolist()
 
-                # 5. VISUALIZACIÓN
-                # ------------------------------------------------------
-                
-                # A. Insight
-                st.info(f"💡 **Hallazgo Clave:** {insight_text}")
+            # 6. VISUALIZACIÓN
+            st.subheader("📊 Comparativa Visual")
+            st.bar_chart(comp_t[cols_chart], use_container_width=True)
 
-                # B. Gráfico de Barras Comparativo
-                st.subheader("📊 Comparativa Visual")
-                # Graficamos solo las columnas de grupos, no la de diferencias
-                st.bar_chart(comp_t[[col_alto, col_bajo]], use_container_width=True)
-
-                # C. Tabla Detallada con Gradiente de Color
-                st.subheader("📋 Detalle de Datos")
-                
-                # Formateamos la tabla para que sea muy legible
-                st.dataframe(
-                    comp_t[[col_alto, col_bajo, 'Diferencia']].style
-                    .background_gradient(cmap="Reds", subset=[col_alto])
-                    .background_gradient(cmap="Greens", subset=[col_bajo])
-                    .format("{:.2f}"),
-                    use_container_width=True
-                )
+            st.subheader("📋 Detalle de Datos")
+            # Formateo condicional seguro
+            style_obj = comp_t.style.format("{:.2f}")
+            if col_alto in comp_t.columns:
+                style_obj = style_obj.background_gradient(cmap="Reds", subset=[col_alto])
             
     st.divider()
     # ==========================================
