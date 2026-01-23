@@ -299,105 +299,80 @@ def page_dashboard():
     # 🧬 7. CAPA INTERPRETABILIDAD (Alto vs Bajo)
     # ==========================================
     st.header("🧬 Análisis de Comportamiento (Interpretabilidad)")
-    st.markdown("Comparativa psicológica entre perfiles de riesgo extremos.")
+    st.markdown("¿Qué diferencia psicológicamente a los usuarios vulnerables de los seguros?")
 
-    # 1. DEFINIR COLUMNAS PSICOLÓGICAS
+    # 1. DEFINIR LAS COLUMNAS A ANALIZAR
+    # ------------------------------------------------------
+    # ⚠️ IMPORTANTE: Ajusta esta lista con los nombres EXACTOS de tus columnas en Databricks.
+    # He puesto los nombres comunes, pero verifica si se llaman "Big5_Openness" o "Apertura", etc.
     features_psicologicas = [
-        "Big5_Extraversion", "Big5_Amabilidad", "Big5_Responsabilidad", 
-        "Big5_Neuroticismo", "Big5_Apertura", "Phish_Actitud_Riesgo", 
-        "Phish_Awareness", "Phish_Riesgo_Percibido", "Phish_Autoeficacia", 
-        "Phish_Susceptibilidad", "Fatiga_Global_Score"
+        "Big5_Extraversion",
+        "Big5_Amabilidad",
+        "Big5_Responsabilidad",
+        "Big5_Neuroticismo",
+        "Big5_Apertura",
+        "Phish_Actitud_Riesgo",
+        "Phish_Awareness",
+        "Phish_Riesgo_Percibido",
+        "Phish_Autoeficacia",
+        "Phish_Susceptibilidad",
+        "Fatiga_Global_Score"
     ]
+    
     features_reales = [c for c in features_psicologicas if c in df.columns]
 
-    if not features_reales:
-        st.warning("⚠️ No se encontraron columnas de comportamiento (Big5, Phish, Fatiga).")
+    if len(features_reales) == 0:
+        st.warning("⚠️ No se encontraron columnas de comportamiento. Revisa la lista 'features_psicologicas'.")
+    
     else:
-        # ------------------------------------------------------
-        # 2. ASEGURAR COLUMNA 'risk_level' CON TU LÓGICA EXACTA
-        # ------------------------------------------------------
-        if 'risk_level' not in df.columns:
-            if 'probability' in df.columns:
-                # Replicamos TU lógica: <0.33 Bajo, <0.40 Medio, >=0.40 Alto
-                conditions = [
-                    (df['probability'] < 0.33),
-                    (df['probability'] < 0.40),
-                    (df['probability'] >= 0.40)
-                ]
-                # NOTA: Usamos las mismas etiquetas mayúsculas que tu sistema
-                choices = ["BAJO", "MEDIO", "ALTO"]
-                
-                import numpy as np
-                df['risk_level'] = np.select(conditions, choices, default="ALTO")
-            else:
-                st.error("❌ No hay 'risk_level' ni 'probability'.")
-                st.stop()
-
-        # ------------------------------------------------------
-        # 3. MAPEO VISUAL (Aquí estaba el error de mayúsculas)
-        # ------------------------------------------------------
-        map_risk = {
-            "ALTO": "🔴 Alto Riesgo",   # Coincide con tu lógica "ALTO"
-            "MEDIO": "🟡 Medio Riesgo", # Coincide con tu lógica "MEDIO"
-            "BAJO": "🟢 Bajo Riesgo"    # Coincide con tu lógica "BAJO"
-        }
+        # 2. CREAR GRUPOS
+        df['Grupo_Analisis'] = df['probability'].apply(lambda x: '🔴 Alto Riesgo' if x > 0.5 else '🟢 Bajo Riesgo')
         
-        # Aseguramos que sea string y mapeamos
-        df['Grupo_Analisis'] = df['risk_level'].astype(str).map(map_risk)
-        
-        # Si por alguna razón el mapa falló (ej: venía "Alto" en vez de "ALTO"), rellenamos
-        df['Grupo_Analisis'] = df['Grupo_Analisis'].fillna("⚪ Desconocido")
-
-        # ------------------------------------------------------
-        # 4. FILTRAR EXTREMOS (ALTO VS BAJO)
-        # ------------------------------------------------------
-        # Buscamos comparar solo los rojos contra los verdes
-        df_contrast = df[df['Grupo_Analisis'].isin(["🔴 Alto Riesgo", "🟢 Bajo Riesgo"])]
-
-        # LÓGICA DE RESPALDO: Si solo hay usuarios de un tipo, mostramos todo
-        if df_contrast['Grupo_Analisis'].nunique() < 2:
-            st.info(f"ℹ️ Mostrando análisis general (No se detectaron usuarios suficientes para contrastar Alto vs Bajo).")
-            # Usamos el dataframe completo si no hay contraste
-            df_contrast = df[df['Grupo_Analisis'] != "⚪ Desconocido"]
-        
-        if df_contrast.empty:
-             st.warning("⚠️ No hay datos válidos para graficar.")
+        if len(df['Grupo_Analisis'].unique()) < 2:
+            st.info("ℹ️ Necesitamos usuarios de alto y bajo riesgo para comparar.")
         else:
-            # 5. CÁLCULO
-            comparativa = df_contrast.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
-            comp_t = comparativa.set_index('Grupo_Analisis').transpose()
-
-            # Definimos nombres de columnas para buscar diferencias
-            col_alto = "🔴 Alto Riesgo"
-            col_bajo = "🟢 Bajo Riesgo"
+            # 3. CÁLCULO
+            comparativa = df.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
             
-            # Solo calculamos diferencias si existen ambas columnas
-            if col_alto in comp_t.columns and col_bajo in comp_t.columns:
+            # Transponer para gráfico
+            comp_t = comparativa.set_index('Grupo_Analisis').transpose()
+            # Ajuste de columnas dinámico
+            cols_ordenadas = sorted(comp_t.columns.tolist()) # Para asegurar orden consistente
+            comp_t = comp_t[cols_ordenadas]
+            
+            # Calcular Diferencia (Si hay 2 columnas)
+            if len(comp_t.columns) == 2:
+                # Asumimos que la columna de "Alto Riesgo" es la que tiene el icono rojo o empieza con A
+                col_alto = [c for c in comp_t.columns if "Alto" in c][0]
+                col_bajo = [c for c in comp_t.columns if "Bajo" in c][0]
                 comp_t['Diferencia'] = (comp_t[col_alto] - comp_t[col_bajo]).abs()
-                comp_t['Delta'] = comp_t[col_alto] - comp_t[col_bajo]
                 comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
                 
                 # Insight Automático
-                top_feature = comp_t.index[0]
-                delta_val = comp_t.iloc[0]['Delta']
-                txt_dir = "MAYOR" if delta_val > 0 else "MENOR"
-                st.info(f"💡 **Hallazgo:** El factor más determinante es **{top_feature}**. En usuarios de riesgo ALTO, este puntaje es **{txt_dir}** ({abs(delta_val):.2f} pts) comparado con usuarios de riesgo BAJO.")
-                
-                # Ocultamos columnas de cálculo para el gráfico
-                cols_chart = [col_alto, col_bajo]
+                top_factor = comp_t.index[0]
+                diff_val = comp_t.iloc[0]['Diferencia']
+                insight_text = f"El factor más determinante es **{top_factor}** ({diff_val:+.2f} puntos de diferencia)."
             else:
-                # Si falta una columna, graficamos lo que haya
-                cols_chart = comp_t.columns.tolist()
+                insight_text = "Se muestran los valores promedio por grupo."
 
-            # 6. VISUALIZACIÓN
+            # 4. VISUALIZACIÓN (NUEVO LAYOUT VERTICAL)
+            # ------------------------------------------------------
+            
+            # A. Insight Texto
+            st.info(f"💡 **Hallazgo Clave:** {insight_text}")
+
+            # B. Gráfico (Ancho completo)
             st.subheader("📊 Comparativa Visual")
-            st.bar_chart(comp_t[cols_chart], use_container_width=True)
+            st.bar_chart(comp_t[[c for c in comp_t.columns if c != 'Diferencia']], use_container_width=True)
 
+            # C. Tabla de Datos (Abajo y Ancha)
             st.subheader("📋 Detalle de Datos")
-            # Formateo condicional seguro
-            style_obj = comp_t.style.format("{:.2f}")
-            if col_alto in comp_t.columns:
-                style_obj = style_obj.background_gradient(cmap="Reds", subset=[col_alto])
+            st.dataframe(
+                comp_t.style.background_gradient(cmap="Reds", subset=[col_alto] if 'col_alto' in locals() else None)
+                            .background_gradient(cmap="Greens", subset=[col_bajo] if 'col_bajo' in locals() else None)
+                            .format("{:.2f}"),
+                use_container_width=True  # <--- ESTO HACE QUE OCUPE TODO EL ANCHO
+            )
             
     st.divider()
     # ==========================================
