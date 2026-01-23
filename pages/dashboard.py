@@ -299,12 +299,11 @@ def page_dashboard():
     # 🧬 7. CAPA INTERPRETABILIDAD (Alto vs Bajo)
     # ==========================================
     st.header("🧬 Análisis de Comportamiento (Interpretabilidad)")
-    st.markdown("¿Qué diferencia psicológicamente a los usuarios vulnerables de los seguros?")
+    st.markdown("Comparativa psicológica entre perfiles de riesgo extremos (Alto vs Bajo).")
 
     # 1. DEFINIR LAS COLUMNAS A ANALIZAR
     # ------------------------------------------------------
-    # ⚠️ IMPORTANTE: Ajusta esta lista con los nombres EXACTOS de tus columnas en Databricks.
-    # He puesto los nombres comunes, pero verifica si se llaman "Big5_Openness" o "Apertura", etc.
+    # Asegúrate de que estos nombres coincidan con tu base de datos
     features_psicologicas = [
         "Big5_Extraversion",
         "Big5_Amabilidad",
@@ -325,54 +324,82 @@ def page_dashboard():
         st.warning("⚠️ No se encontraron columnas de comportamiento. Revisa la lista 'features_psicologicas'.")
     
     else:
-        # 2. CREAR GRUPOS
-        df['Grupo_Analisis'] = df['probability'].apply(lambda x: '🔴 Alto Riesgo' if x > 0.5 else '🟢 Bajo Riesgo')
-        
-        if len(df['Grupo_Analisis'].unique()) < 2:
-            st.info("ℹ️ Necesitamos usuarios de alto y bajo riesgo para comparar.")
+        # 2. CREAR GRUPOS BASADOS EN 'risk_level' (BASE DE DATOS)
+        # ------------------------------------------------------
+        # Verificamos si existe la columna
+        if 'risk_level' not in df.columns:
+            st.error("❌ No se encuentra la columna 'risk_level' en la base de datos.")
         else:
-            # 3. CÁLCULO
-            comparativa = df.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
+            # Mapeo para estandarizar nombres y emojis
+            map_risk = {
+                "High": "🔴 Alto Riesgo", "Alto": "🔴 Alto Riesgo",
+                "Medium": "🟡 Medio Riesgo", "Medio": "🟡 Medio Riesgo",
+                "Low": "🟢 Bajo Riesgo", "Bajo": "🟢 Bajo Riesgo"
+            }
             
-            # Transponer para gráfico
-            comp_t = comparativa.set_index('Grupo_Analisis').transpose()
-            # Ajuste de columnas dinámico
-            cols_ordenadas = sorted(comp_t.columns.tolist()) # Para asegurar orden consistente
-            comp_t = comp_t[cols_ordenadas]
+            df['Grupo_Analisis'] = df['risk_level'].map(map_risk)
             
-            # Calcular Diferencia (Si hay 2 columnas)
-            if len(comp_t.columns) == 2:
-                # Asumimos que la columna de "Alto Riesgo" es la que tiene el icono rojo o empieza con A
-                col_alto = [c for c in comp_t.columns if "Alto" in c][0]
-                col_bajo = [c for c in comp_t.columns if "Bajo" in c][0]
+            # FILTRO ESTRATÉGICO: Para interpretabilidad, comparamos solo los extremos (Alto vs Bajo)
+            # Esto hace que las diferencias sean más evidentes.
+            df_contrast = df[df['Grupo_Analisis'].isin(["🔴 Alto Riesgo", "🟢 Bajo Riesgo"])]
+            
+            # Validación de seguridad: ¿Tenemos datos de ambos bandos?
+            grupos_disponibles = df_contrast['Grupo_Analisis'].unique()
+
+            if len(grupos_disponibles) < 2:
+                st.info(f"ℹ️ Aún no hay suficiente diversidad de usuarios para comparar (Solo detectamos: {grupos_disponibles}). Se necesitan usuarios de Alto y Bajo riesgo.")
+            else:
+                # 3. CÁLCULO DE PROMEDIOS
+                comparativa = df_contrast.groupby('Grupo_Analisis')[features_reales].mean().reset_index()
+                
+                # Transponer para facilitar el gráfico (Filas: Features, Cols: Grupos)
+                comp_t = comparativa.set_index('Grupo_Analisis').transpose()
+                
+                # 4. CÁLCULO DE DIFERENCIAS E INSIGHT
+                # Identificamos las columnas dinámicamente
+                col_alto = "🔴 Alto Riesgo"
+                col_bajo = "🟢 Bajo Riesgo"
+                
+                # Calculamos la diferencia absoluta para ordenar el gráfico por relevancia
                 comp_t['Diferencia'] = (comp_t[col_alto] - comp_t[col_bajo]).abs()
+                comp_t['Delta_Real'] = comp_t[col_alto] - comp_t[col_bajo] # Para saber el signo
+                
+                # Ordenamos de mayor impacto a menor impacto
                 comp_t = comp_t.sort_values(by='Diferencia', ascending=False)
                 
-                # Insight Automático
-                top_factor = comp_t.index[0]
-                diff_val = comp_t.iloc[0]['Diferencia']
-                insight_text = f"El factor más determinante es **{top_factor}** ({diff_val:+.2f} puntos de diferencia)."
-            else:
-                insight_text = "Se muestran los valores promedio por grupo."
+                # Generamos el texto del insight automático
+                top_feature = comp_t.index[0]
+                top_delta = comp_t.iloc[0]['Delta_Real']
+                
+                if top_delta > 0:
+                    direccion = "MAYOR"
+                else:
+                    direccion = "MENOR"
+                
+                insight_text = f"El factor más distintivo es **{top_feature}**. Los usuarios de Alto Riesgo tienen un puntaje significativamente **{direccion}** ({abs(top_delta):.2f} pts) que los seguros."
 
-            # 4. VISUALIZACIÓN (NUEVO LAYOUT VERTICAL)
-            # ------------------------------------------------------
-            
-            # A. Insight Texto
-            st.info(f"💡 **Hallazgo Clave:** {insight_text}")
+                # 5. VISUALIZACIÓN
+                # ------------------------------------------------------
+                
+                # A. Insight
+                st.info(f"💡 **Hallazgo Clave:** {insight_text}")
 
-            # B. Gráfico (Ancho completo)
-            st.subheader("📊 Comparativa Visual")
-            st.bar_chart(comp_t[[c for c in comp_t.columns if c != 'Diferencia']], use_container_width=True)
+                # B. Gráfico de Barras Comparativo
+                st.subheader("📊 Comparativa Visual")
+                # Graficamos solo las columnas de grupos, no la de diferencias
+                st.bar_chart(comp_t[[col_alto, col_bajo]], use_container_width=True)
 
-            # C. Tabla de Datos (Abajo y Ancha)
-            st.subheader("📋 Detalle de Datos")
-            st.dataframe(
-                comp_t.style.background_gradient(cmap="Reds", subset=[col_alto] if 'col_alto' in locals() else None)
-                            .background_gradient(cmap="Greens", subset=[col_bajo] if 'col_bajo' in locals() else None)
-                            .format("{:.2f}"),
-                use_container_width=True  # <--- ESTO HACE QUE OCUPE TODO EL ANCHO
-            )
+                # C. Tabla Detallada con Gradiente de Color
+                st.subheader("📋 Detalle de Datos")
+                
+                # Formateamos la tabla para que sea muy legible
+                st.dataframe(
+                    comp_t[[col_alto, col_bajo, 'Diferencia']].style
+                    .background_gradient(cmap="Reds", subset=[col_alto])
+                    .background_gradient(cmap="Greens", subset=[col_bajo])
+                    .format("{:.2f}"),
+                    use_container_width=True
+                )
             
     st.divider()
     # ==========================================
