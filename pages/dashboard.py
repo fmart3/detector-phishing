@@ -56,24 +56,7 @@ def page_dashboard():
     st.divider()
 
     # ---------------------------------------------------------
-    # 4. GRÁFICO DE RIESGO POR ROL
-    # ---------------------------------------------------------
-    st.subheader("📊 Riesgo por Rol")
-    
-    if 'Demo_Rol_Trabajo' in df.columns:
-        rol_map = {1: "Liderazgo", 2: "Supervisión", 3: "Administrativo", 4: "Otro"}
-        # Convertimos a numérico por seguridad y mapeamos
-        df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
-        
-        df_chart = df.groupby("Rol_Nombre")[['probability']].mean().reset_index()
-        st.bar_chart(df_chart, x="Rol_Nombre", y="probability", color="#FF4B4B")
-    else:
-        st.warning("No se encontró la columna 'Demo_Rol_Trabajo'.")
-        
-    st.divider()
-        
-    # ---------------------------------------------------------
-    # 5. ESTADO DEL MODELO
+    # 4. SALUD DEL MODELO
     # ---------------------------------------------------------
     st.subheader("🧠 Salud del Modelo (Estadísticas)")
     
@@ -123,6 +106,23 @@ def page_dashboard():
         resumen.columns = ['Nivel', 'Total']
         resumen['%'] = (resumen['Total'] / len(df) * 100).map('{:.1f}%'.format)
         st.dataframe(resumen, hide_index=True, use_container_width=True)
+        
+    # ---------------------------------------------------------
+    # 5. RIESGO POR ROL DE TRABAJO
+    # ---------------------------------------------------------
+    st.subheader("📊 Riesgo por Rol")
+    
+    if 'Demo_Rol_Trabajo' in df.columns:
+        rol_map = {1: "Liderazgo", 2: "Supervisión", 3: "Administrativo", 4: "Otro"}
+        # Convertimos a numérico por seguridad y mapeamos
+        df['Rol_Nombre'] = pd.to_numeric(df['Demo_Rol_Trabajo'], errors='coerce').map(rol_map).fillna("Otro")
+        
+        df_chart = df.groupby("Rol_Nombre")[['probability']].mean().reset_index()
+        st.bar_chart(df_chart, x="Rol_Nombre", y="probability", color="#FF4B4B")
+    else:
+        st.warning("No se encontró la columna 'Demo_Rol_Trabajo'.")
+        
+    st.divider()
 
     # Botón final de recarga
     if st.button("🔄 Actualizar Dashboard"):
