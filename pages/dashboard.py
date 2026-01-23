@@ -198,7 +198,7 @@ def page_dashboard():
     st.markdown("Listado anonimizado para auditoría prioritaria.")
 
     # Columnas a mostrar (Solo las que aportan valor sin revelar identidad directa)
-    cols_to_show = ['probability', 'prediction']
+    cols_to_show = ['probability']
     
     # Agregamos las etiquetas si existen
     if 'Rol_Label' in df.columns: cols_to_show.insert(0, 'Rol_Label')
