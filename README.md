@@ -2,8 +2,6 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/)
 
-🚀 **Demo en vivo:** [https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/](https://detector-phishing-dpqxee9wfktq2la72pmjq4.streamlit.app/)
-
 Sistema de detección de susceptibilidad a phishing basado en **factores humanos**, entrenado con **Regresión Logística**, desplegado en **Databricks Model Serving**. La aplicación gestiona la ingesta de encuestas, almacenamiento centralizado en **Databricks SQL** y visualización de métricas en tiempo real mediante un **Dashboard integrado en Streamlit**.
 
 ---
