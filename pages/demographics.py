@@ -118,7 +118,7 @@ def page_demographics():
         education = st.selectbox("Educación", list(EDUCATION.keys()), index=None)
 
     # La pregunta de horas puede ir abajo ocupando todo el ancho
-    hours = st.selectbox("Horas conectado", list(HOURS.keys()), index=None, width=100%)
+    hours = st.selectbox("Horas conectado", list(HOURS.keys()), index=None, width=100)
 
     st.markdown('</div>', unsafe_allow_html=True) # Cierras la Card
 
