@@ -5,6 +5,7 @@ __pycache__/
 # Variables de entorno y secretos (¡CRÍTICO!)
 .env
 .streamlit/secrets.toml
+venv/
 
 # Datos locales (si no quieres subir el CSV de pruebas)
 *.csv
