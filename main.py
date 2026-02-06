@@ -1,35 +1,63 @@
 import uvicorn
+import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
-import os
-import json
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# --- NUEVO: Importar Mongo aquí ---
+from pymongo import MongoClient
 
 # Imports propios
 from utils.scoring import compute_scores
-# Nota: utils.databricks ahora contiene la lógica local que acabamos de escribir
 from utils.databricks import prepare_features, predict_model, load_local_model
 from utils.persistence import save_survey_response
 from utils.analytics import get_dashboard_stats
 
-# --- CONFIGURACIÓN DE INICIO ---
+load_dotenv()
+
+# Variable global para la base de datos (Igual que en FraudRisk)
+db_collection = None
+
+# --- CONFIGURACIÓN DE INICIO (Lifespan) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Cargar el modelo al iniciar la app
-    print("🔄 Iniciando servidor... Intentando cargar modelo local.")
+    global db_collection
+    
+    # 1. Cargar Modelo Local
+    print("🔄 Start-up: Cargando modelo de IA...")
     load_local_model()
+    
+    # 2. Conectar a MongoDB (Solo una vez)
+    mongo_uri = os.getenv("MONGO_URI")
+    if mongo_uri:
+        try:
+            # .strip() elimina espacios en blanco invisibles al copiar/pegar
+            client = MongoClient(mongo_uri.strip()) 
+            db = client["PhishingDetectorDB"]
+            db_collection = db["susceptibilidad"]
+            # Probamos conexión rápida para ver si falla aquí
+            client.admin.command('ping')
+            print("✅ Start-up: Conexión a MongoDB EXITOSA.")
+        except Exception as e:
+            print(f"⚠️ Start-up: Error conectando a MongoDB: {e}")
+    else:
+        print("⚠️ Advertencia: No hay MONGO_URI en .env")
+
     yield
-    print("🛑 Apagando servidor.")
+    print("🛑 Shut-down: Apagando servidor.")
 
 app = FastAPI(lifespan=lifespan)
 
+# ... (Las clases BaseModel SurveyResponses y DashboardAuth siguen igual) ...
 class SurveyResponses(BaseModel):
     responses: dict
 
 class DashboardAuth(BaseModel):
     password: str
 
+# ... (Rutas get /, get /questions.json siguen igual) ...
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     if os.path.exists("index.html"):
@@ -44,31 +72,30 @@ async def get_questions_json():
         return FileResponse(file_path, media_type="application/json")
     return {"error": "Archivo questions.json no encontrado"}
 
+
 # ==========================================
-# RUTA DE PROCESAMIENTO
+# RUTA DE PROCESAMIENTO (MODIFICADA)
 # ==========================================
 @app.post("/submit")
 async def submit_survey(data: SurveyResponses):
     raw_responses = data.responses
-    print(f"📩 1. Recibidas {len(raw_responses)} respuestas.")
+    print(f"📩 Recibidas {len(raw_responses)} respuestas.")
 
     # A. CALCULAR SCORES
     scores = compute_scores(raw_responses)
     
-    # B. PREDECIR CON MODELO LOCAL
-    # Preparamos el DataFrame en lugar del JSON para API
+    # B. PREDECIR
     features_df = prepare_features(scores, raw_responses)
-    
-    # Obtenemos predicción directa del .pkl
     model_output = predict_model(features_df)
     
-    print(f"🤖 Resultado Modelo Local: {model_output}")
-
-    # C. GUARDAR EN MONGODB
-    save_success = save_survey_response(raw_responses, scores, model_output)
+    # C. GUARDAR EN MONGO (Usando la variable global)
+    # ---------------------------------------------------------
+    # Pasamos 'db_collection' que creamos al inicio
+    save_success = save_survey_response(db_collection, raw_responses, scores, model_output)
+    # ---------------------------------------------------------
+    
     status_msg = "Datos guardados." if save_success else "Error guardando DB."
 
-    # D. RESPONDER AL FRONTEND
     final_record = {
         "responses": raw_responses,
         "scores": scores,
@@ -82,10 +109,7 @@ async def submit_survey(data: SurveyResponses):
         "final_record": final_record 
     }
 
-# ==========================================
-# RUTAS DEL DASHBOARD (ADMIN)
-# ==========================================
-
+# ... (El resto del código dashboard sigue igual) ...
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
     stored_pass = os.getenv("DASHBOARD_PASS")
