@@ -5,3 +5,6 @@ __pycache__
 *.pyc
 venv/
 .vscode/
+test_connection.py
+test_scenarios.py
+update_model.py
