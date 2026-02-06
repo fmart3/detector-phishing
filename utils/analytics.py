@@ -1,37 +1,37 @@
 import os
 import pandas as pd
-from databricks import sql
+from pymongo import MongoClient
 from dotenv import load_dotenv
 
 load_dotenv()
 
 def get_dashboard_stats():
     """
-    Conecta a Databricks, descarga datos y calcula estadísticas básicas.
-    Devuelve un diccionario puro (JSON-serializable).
+    Descarga datos desde MongoDB y calcula estadísticas.
     """
-    host = os.getenv("DATABRICKS_HOST").replace("https://", "").replace("http://", "").rstrip("/")
-    http_path = os.getenv("DATABRICKS_HTTP_PATH")
-    token = os.getenv("DATABRICKS_TOKEN")
-
-    query = "SELECT risk_level, probability FROM phishing.surveys.responses"
+    uri = os.getenv("MONGO_URI")
     
     try:
-        with sql.connect(server_hostname=host, http_path=http_path, access_token=token) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                # Convertimos a lista de diccionarios
-                columns = [desc[0] for desc in cursor.description]
-                rows = cursor.fetchall()
-                
-        if not rows:
-            return {"error": "No hay datos"}
+        # 1. Conexión
+        client = MongoClient(uri)
+        db = client["PhishingDetectorDB"]
+        collection = db["susceptibilidad"]
 
-        df = pd.DataFrame(rows, columns=columns)
+        # 2. Obtener solo los campos necesarios (Proyección para optimizar)
+        # Traemos risk_level y probability. _id=0 para no traer el ID.
+        cursor = collection.find({}, {"_id": 0, "risk_level": 1, "probability": 1})
         
-        # --- CÁLCULOS SIMPLES (Pandas) ---
+        # Convertir cursor a lista y luego a DataFrame
+        data = list(cursor)
+        
+        if not data:
+            return {"total_responses": 0, "average_probability": 0, "risk_distribution": {}}
+
+        df = pd.DataFrame(data)
+        
+        # 3. Cálculos (Igual que antes)
         total = len(df)
-        avg_prob = float(df["probability"].mean())
+        avg_prob = float(df["probability"].mean()) if not df.empty else 0.0
         
         # Conteo de riesgo
         risk_counts = df["risk_level"].value_counts().to_dict()
@@ -39,9 +39,9 @@ def get_dashboard_stats():
         return {
             "total_responses": total,
             "average_probability": round(avg_prob, 2),
-            "risk_distribution": risk_counts # ej: {'ALTO': 5, 'MEDIO': 2}
+            "risk_distribution": risk_counts
         }
 
     except Exception as e:
-        print(f"Error Analytics: {e}")
+        print(f"❌ Error Analytics MongoDB: {e}")
         return {"error": str(e)}

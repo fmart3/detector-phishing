@@ -4,14 +4,25 @@ from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 import os
 import json
+from contextlib import asynccontextmanager
 
 # Imports propios
 from utils.scoring import compute_scores
-from utils.databricks import prepare_features, predict_model
-from utils.persistence import insert_response_sql
+# Nota: utils.databricks ahora contiene la lógica local que acabamos de escribir
+from utils.databricks import prepare_features, predict_model, load_local_model
+from utils.persistence import save_survey_response
 from utils.analytics import get_dashboard_stats
 
-app = FastAPI()
+# --- CONFIGURACIÓN DE INICIO ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Cargar el modelo al iniciar la app
+    print("🔄 Iniciando servidor... Intentando cargar modelo local.")
+    load_local_model()
+    yield
+    print("🛑 Apagando servidor.")
+
+app = FastAPI(lifespan=lifespan)
 
 class SurveyResponses(BaseModel):
     responses: dict
@@ -42,30 +53,22 @@ async def submit_survey(data: SurveyResponses):
     print(f"📩 1. Recibidas {len(raw_responses)} respuestas.")
 
     # A. CALCULAR SCORES
-    try:
-        scores = compute_scores(raw_responses)
-        print("✅ 2. Scores calculados.")
-    except Exception as e:
-        print(f"❌ Error en scores: {e}")
-        scores = {}
+    scores = compute_scores(raw_responses)
+    
+    # B. PREDECIR CON MODELO LOCAL
+    # Preparamos el DataFrame en lugar del JSON para API
+    features_df = prepare_features(scores, raw_responses)
+    
+    # Obtenemos predicción directa del .pkl
+    model_output = predict_model(features_df)
+    
+    print(f"🤖 Resultado Modelo Local: {model_output}")
 
-    # B. LLAMAR AL MODELO
-    try:
-        model_payload = prepare_features(scores, raw_responses)
-        model_output = predict_model(model_payload)
-        print(f"✅ 3. Modelo respondió: {model_output['risk_level']}")
-    except Exception as e:
-        print(f"❌ Error llamando al modelo: {e}")
-        model_output = {"probability": -1, "risk_level": "Error Backend"}
-
-    # C. GUARDAR EN BASE DE DATOS (AHORA SÍ)
-    # ---------------------------------------------------------
-    save_success = insert_response_sql(raw_responses, scores, model_output)
-    status_msg = "Datos guardados correctamente." if save_success else "Error guardando en base de datos."
-    # ---------------------------------------------------------
+    # C. GUARDAR EN MONGODB
+    save_success = save_survey_response(raw_responses, scores, model_output)
+    status_msg = "Datos guardados." if save_success else "Error guardando DB."
 
     # D. RESPONDER AL FRONTEND
-    # Construimos el objeto final para que el usuario vea sus resultados
     final_record = {
         "responses": raw_responses,
         "scores": scores,
@@ -78,26 +81,22 @@ async def submit_survey(data: SurveyResponses):
         "message": f"Análisis completado. {status_msg}",
         "final_record": final_record 
     }
+
 # ==========================================
 # RUTAS DEL DASHBOARD (ADMIN)
 # ==========================================
 
-# 1. Verificación de Contraseña (FALTABA ESTA RUTA)
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
-    # Lee la contraseña del archivo .env
     stored_pass = os.getenv("DASHBOARD_PASS")
-    
     if not stored_pass:
         return {"valid": False, "error": "Contraseña no configurada en servidor"}
     
     if data.password == stored_pass:
-        # Redirigimos a la ruta interna del dashboard
         return {"valid": True, "redirect_url": "/dashboard"} 
     else:
         return {"valid": False}
 
-# 2. Servir el HTML del Dashboard
 @app.get("/dashboard", response_class=HTMLResponse)
 async def view_dashboard():
     if os.path.exists("dashboard.html"):
@@ -105,11 +104,10 @@ async def view_dashboard():
             return f.read()
     return "<h1>Error: dashboard.html no encontrado</h1>"
 
-# 3. API para obtener los datos (JSON)
-@app.get("/api/stats")
-async def get_stats():
-    data = get_dashboard_stats()
-    return data
+@app.get("/api/dashboard-stats")
+async def api_dashboard_stats():
+    stats = get_dashboard_stats()
+    return stats
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
