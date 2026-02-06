@@ -1,0 +1,253 @@
+{
+  "options": {
+    "countries": [
+        {"v": 1, "t": "Chile"}, {"v": 2, "t": "Colombia"}, {"v": 3, "t": "Honduras"},
+        {"v": 4, "t": "México"}, {"v": 5, "t": "Panamá"}
+    ],
+    "org_type": [
+        {"v": 1, "t": "Pública"}, {"v": 2, "t": "Privada"},
+        {"v": 3, "t": "Sin fines de lucro"}, {"v": 4, "t": "Otra"}
+    ],
+    "industry": [
+        {"v": 1, "t": "Agricultura"}, {"v": 2, "t": "Bancos o Financiera"}, {"v": 3, "t": "Seguros"},
+        {"v": 4, "t": "Tecnología y/o Telecomunicaciones"}, {"v": 5, "t": "Publicidad / Marketing"},
+        {"v": 6, "t": "Transporte"}, {"v": 7, "t": "Clínicas/Isapres"},
+        {"v": 8, "t": "AFP / Fondos de Pensiones"}, {"v": 9, "t": "Sector Público"},
+        {"v": 10, "t": "Energía"}, {"v": 11, "t": "Minería"}, {"v": 12, "t": "Oil & Gas"},
+        {"v": 13, "t": "Retail"}, {"v": 14, "t": "Educación / Universidades"},
+        {"v": 15, "t": "Servicios Profesionales y/o Consultoria"}, {"v": 16, "t": "Construcción"},
+        {"v": 17, "t": "Manufactura"}, {"v": 18, "t": "Otras"}
+    ],
+    "employees": [
+        {"v": 1, "t": "100 o menos"}, {"v": 2, "t": "Entre 100 y 500"}, {"v": 3, "t": "Entre 500 y 1.000"},
+        {"v": 4, "t": "Entre 1.000 y 3.000"}, {"v": 5, "t": "Entre 3.000 y 10.000"}, {"v": 6, "t": "Entre 10.000 y 50.000"},
+        {"v": 7, "t": "Superior a 50.000"}
+    ],
+    "roles": [
+        {"v": 1, "t": "Liderazgo (Director, Gerencia, SubGerencia, otros)"}, {"v": 2, "t": "Supervisión y Control (Supervisor, Jefatura)"},
+        {"v": 3, "t": "Administrativo, Analista, Ingeniero"}, {"v": 4, "t": "Otro"}
+    ],
+    "generations": [
+        {"v": 1, "t": "Tradicionalistas (1928–1945)"}, {"v": 2, "t": "Baby Boomers (1946–1964)"},
+        {"v": 3, "t": "Generación X (1965–1979)"}, {"v": 4, "t": "Generación Y / Millennials (1980–1995))"}, {"v": 5, "t": "Generación Z (1996–2012)"}
+    ],
+    "gender": [
+        {"v": 1, "t": "Masculino"}, {"v": 2, "t": "Femenino"},
+        {"v": 3, "t": "No Binario"}
+    ],
+    "education": [
+        {"v": 1, "t": "Educación básica / Primaria"}, {"v": 2, "t": "Grado Universitario / Licenciado"},
+        {"v": 3, "t": "Diploma / Postítulo"}, {"v": 4, "t": "Magíster / MBA / MSc"}, {"v": 5, "t": "Doctorado"}
+    ],
+    "hours": [
+        {"v": 1, "t": "Menos de 2 horas"}, {"v": 2, "t": "Entre 2 y 5 horas"},
+        {"v": 3, "t": "Entre 5 y 8 horas"}, {"v": 4, "t": "Entre 8 y 10 horas"},
+        {"v": 5, "t": "Más de 10 horas"}
+    ]
+  },
+  "survey": [
+    {
+        "id": "intro",
+        "title": "Bienvenida",
+        "description": "Este test evaluará diversos factores psicológicos. Tus respuestas son anónimas.",
+        "type": "intro",
+        "questions": []
+    },
+    {
+      "id": "big5_extraversion",
+      "title": "🧠 Personalidad – Extraversión",
+      "type": "likert",
+      "questions": [
+          {"code": "EX01", "text": "Yo me siento cómodo con la gente.", "reverse": false},
+          {"code": "EX02", "text": "Yo hago amigos fácilmente.", "reverse": false},
+          {"code": "EX03", "text": "Yo soy hábil en el manejo de situaciones sociales.", "reverse": false},
+          {"code": "EX04", "text": "Yo soy el alma de la fiesta", "reverse": false},
+          {"code": "EX05", "text": "Yo sé cómo cautivar a la gente.", "reverse": false},
+          {"code": "EX06", "text": "Yo tengo poco que decir.", "reverse": true},
+          {"code": "EX07", "text": "Yo me quedo en un segundo plano.", "reverse": true},
+          {"code": "EX08", "text": "Yo describiría mis experiencias como algo aburridas.", "reverse": true},
+          {"code": "EX09", "text": "A mí no me gusta llamar la atención sobre mí mismo.", "reverse": true},
+          {"code": "EX10", "text": "Yo no hablo mucho.", "reverse": true}
+      ]
+    },
+    {
+      "id": "big5_amabilidad",
+      "title": "🧠 Personalidad – Amabilidad",
+      "type": "likert",
+      "questions": [
+          {"code": "AM01", "text": "Yo Tengo una buena palabra para todos.", "reverse": false},
+          {"code": "AM02", "text": "Yo creo que otros tienen buenas intenciones.", "reverse": false},
+          {"code": "AM03", "text": "Yo respeto a los demás.", "reverse": false},
+          {"code": "AM04", "text": "Yo acepto a las personas tal como son.", "reverse": false},
+          {"code": "AM05", "text": "Yo hago que la gente se sienta a gusto.", "reverse": false},
+          {"code": "AM06", "text": "Yo tengo una lengua puntiaguda.", "reverse": true},
+          {"code": "AM07", "text": "Yo destrozo a otros en pedazos.", "reverse": true},
+          {"code": "AM08", "text": "Yo sospecho que hay motivos ocultos en otros.", "reverse": true},
+          {"code": "AM09", "text": "Yo vuelvo a los demás.", "reverse": true},
+          {"code": "AM10", "text": "Yo insulto a la gente.", "reverse": true}
+      ]
+    },
+    {
+      "id": "big5_responsabilidad",
+      "title": "🧠 Personalidad – Responsabilidad",
+      "type": "likert",
+      "questions": [
+          {"code": "CO01", "text": "Yo siempre estoy preparado.", "reverse": false},
+          {"code": "CO02", "text": "Yo presto atención a los detalles.", "reverse": false},
+          {"code": "CO03", "text": "Yo hago las tareas o actividades de inmediato.", "reverse": false},
+          {"code": "CO04", "text": "Yo llevo a cabo mis planes.", "reverse": false},
+          {"code": "CO05", "text": "Yo hago planes y me atengo a ellos.", "reverse": false},
+          {"code": "CO06", "text": "Yo no pierdo el tiempo.", "reverse": false},
+          {"code": "CO07", "text": "A mi me cuesta ponerme a trabajar.", "reverse": true},
+          {"code": "CO08", "text": "Yo hago el trabajo necesario para salir bien.", "reverse": false},
+          {"code": "CO09", "text": "Yo no veo cosas por debajo", "reverse": true},
+          {"code": "CO10", "text": "Yo no eludo mis deberes", "reverse": false}
+      ]
+    },
+    {
+      "id": "big5_neuroticismo",
+      "title": "🧠 Personalidad – Neuroticismo",
+      "type": "likert",
+      "questions": [
+          {"code": "NE01", "text": "A menudo me siento triste", "reverse": false},
+          {"code": "NE02", "text": "Estoy disgustado conmigo", "reverse": false},
+          {"code": "NE03", "text": "A menudo estoy convertido en basura", "reverse": false},
+          {"code": "NE04", "text": "Yo tengo cambios de humor frecuentemente.", "reverse": false},
+          {"code": "NE05", "text": "Yo entro en pánico fácilmente.", "reverse": false},
+          {"code": "NE06", "text": "Yo rara vez me irrito.", "reverse": true},
+          {"code": "NE07", "text": "Yo rara vez me siento triste", "reverse": true},
+          {"code": "NE08", "text": "Yo me siento cómodo conmigo mismo.", "reverse": true},
+          {"code": "NE09", "text": "A mí las cosas no me molestan fácilmente.", "reverse": true},
+          {"code": "NE10", "text": "Yo estoy muy satisfecho conmigo mismo", "reverse": true}
+      ]
+    },
+    {
+      "id": "big5_apertura",
+      "title": "🧠 Personalidad – Apertura",
+      "type": "likert",
+      "questions": [
+          {"code": "AE01", "text": "Yo creo en la importancia del arte.", "reverse": false},
+          {"code": "AE02", "text": "Yo tengo una imaginación viva.", "reverse": false},
+          {"code": "AE03", "text": "Yo tiendo a votar por candidatos políticos liberales.", "reverse": false},
+          {"code": "AE04", "text": "Yo llevo la conversación a un nivel superior o a un próximo nivel.", "reverse": false},
+          {"code": "AE05", "text": "A mí me gusta escuchar nuevas ideas.", "reverse": false},
+          {"code": "AE06", "text": "A mí no me interesan las ideas abstractas.", "reverse": true},
+          {"code": "AE07", "text": "A mí no me gusta el arte.", "reverse": true},
+          {"code": "AE08", "text": "Yo evito las discusiones filosóficas.", "reverse": true},
+          {"code": "AE09", "text": "A mí no me gusta ir a museos de arte.", "reverse": true},
+          {"code": "AE10", "text": "Yo tiendo a votar por candidatos políticos conservadores.", "reverse": true}
+      ]
+    },
+    {
+      "id": "phish_actitud",
+      "title": "🎣 Phishing – Actitud al Riesgo",
+      "type": "likert",
+      "questions": [
+          {"code": "ER01", "text": "Yo nunca realizaría alas delta o saltaría en bungee", "reverse": true},
+          {"code": "ER02", "text": "Yo nunca haría una inversión de alto riesgo.", "reverse": true},
+          {"code": "ER03", "text": "Yo evito situaciones peligrosas.", "reverse": true},
+          {"code": "ER04", "text": "Yo busco el peligro.", "reverse": false},
+          {"code": "ER05", "text": "Yo estoy dispuesto a probar cualquier cosa al menos una vez", "reverse": false},
+          {"code": "ER06", "text": "Yo hago cosas peligrosas.", "reverse": false},
+          {"code": "ER07", "text": "A mi me gusta ser imprudente.", "reverse": false},
+          {"code": "ER08", "text": "Yo busco la aventura.", "reverse": false},
+          {"code": "ER09", "text": "Yo tomo riesgos.", "reverse": false},
+          {"code": "ER10", "text": "Yo hago locuras.", "reverse": false}
+      ]
+    },
+    {
+      "id": "phish_awareness",
+      "title": "🎣 Phishing – Conocimiento (Awareness)",
+      "type": "likert",
+      "questions": [
+          {"code": "AW01", "text": "En general, soy consciente de la amenazas del Phishing y sus consecuencias negativas.", "reverse": false},
+          {"code": "AW02", "text": "Tengo suficiente conocimiento sobre los riesgos asociados al Phishing", "reverse": false},
+          {"code": "AW03", "text": "Entiendo las preocupaciones con respecto a las amenazas de Phishing y los riesgos que generan", "reverse": false}
+      ]
+    },
+    {
+      "id": "phish_riesgo",
+      "title": "🎣 Phishing – Riesgo Percibido",
+      "type": "likert",
+      "questions": [
+          {"code": "PR01", "text": "Me preocupa recibir correos electrónicos que sean Phishing", "reverse": false},
+          {"code": "PR02", "text": "Me preocupa que un delincuente pueda robar mis credenciales utilizando un correo de phishing", "reverse": false},
+          {"code": "PR03", "text": "Me preocupa que un delincuente puede robar información asociada a mi tarjeta de crédito por medio de un correo de phishing", "reverse": false}
+      ]
+    },
+    {
+      "id": "phish_autoeficacia",
+      "title": "🎣 Phishing – Autoeficacia",
+      "type": "likert",
+      "questions": [
+          {"code": "CP01", "text": "Me siento seguro de mi capacidad para detectar correos electrónicos de phishing.", "reverse": false},
+          {"code": "CP02", "text": "Puedo detectar correos electrónicos de phishing.", "reverse": false},
+          {"code": "CP03", "text": "No creo que pueda detectar un correo electrónico de phishing por mí mismo.", "reverse": true}
+      ]
+    },
+    {
+      "id": "phish_susceptibilidad",
+      "title": "🎣 Phishing – Susceptibilidad",
+      "type": "likert",
+      "questions": [
+          {"code": "SU01", "text": "Yo Estoy en riesgo de ser víctima de ataques de phishing.", "reverse": false},
+          {"code": "SU02", "text": "Es probable que me convierta en una víctima de ataques de phishing.", "reverse": false},
+          {"code": "SU03", "text": "Mis posibilidades de ser víctima de ataques de phishing son grandes.", "reverse": false},
+          {"code": "SU04", "text": "Es extremadamente probable que los correos electrónicos de phishing me engañen", "reverse": false}
+      ]
+    },
+    {
+      "id": "fatiga_emocional",
+      "title": "😴 Fatiga – Agotamiento Emocional",
+      "type": "likert",
+      "questions": [
+          {"code": "FE01", "text": "Me siento emocionalmente agotado por tener que detectar si los emails que recibo son un phishing", "reverse": false},
+          {"code": "FE02", "text": "Estoy cansado de los problemas que genera ser víctima de un phishing", "reverse": false},
+          {"code": "FE03", "text": "Es agotador seguir las reglas para revisar si un email es un phishing", "reverse": false}
+      ]
+    },
+    {
+      "id": "fatiga_cinismo",
+      "title": "😴 Fatiga – Cinismo",
+      "type": "likert",
+      "questions": [
+          {"code": "FC01", "text": "Me he vuelto más cínico sobre si realmente mis esfuerzos en la detección de un phishing contribuyen en algo", "reverse": false},
+          {"code": "FC02", "text": "Me he vuelto menos interesado en los problemas que origina el phishing", "reverse": false},
+          {"code": "FC03", "text": "Me he vuelto menos entusiasta en participar en capacitaciones o charlas de sensibilización de phishing", "reverse": false},
+          {"code": "FC04", "text": "Cada vez más Dudo de la importancia de los ejercicios de simulación de phishing", "reverse": false}
+      ]
+    },
+    {
+      "id": "fatiga_abandono",
+      "title": "😴 Fatiga – Intención de Abandono",
+      "type": "likert",
+      "questions": [
+          {"code": "DS01", "text": "Me gustaría dejar de participar en las capacitaciones de Phishing", "reverse": false},
+          {"code": "DS02", "text": "Me gustaría dejar de participar en ejercicios de simulación de phishing", "reverse": false}
+      ]
+    },
+    {
+        "id": "demographics",
+        "title": "📋 Información Demográfica",
+        "description": "Por favor complete la siguiente información estadística.",
+        "type": "form",
+        "questions": [
+            {"code": "Demo_Pais", "text": "País", "options_id": "countries"},
+            {"code": "Demo_Tipo_Organizacion", "text": "Tipo Organización", "options_id": "org_type"},
+            {"code": "Demo_Industria", "text": "Industria", "options_id": "industry"},
+            {"code": "Demo_Tamano_Org", "text": "Tamaño Empresa", "options_id": "employees"},
+            {"code": "Demo_Rol_Trabajo", "text": "Rol", "options_id": "roles"},
+            {"code": "Demo_Generacion_Edad", "text": "Generación", "options_id": "generations"},
+            {"code": "Demo_Genero", "text": "Género", "options_id": "gender"},
+            {"code": "Demo_Nivel_Educacion", "text": "Educación", "options_id": "education"},
+            {"code": "Demo_Horas", "text": "Promedio horas conectado al día", "options_id": "hours", "fullWidth": true}
+        ]
+    },
+    {
+        "id": "final",
+        "title": "🎉 Encuesta Finalizada",
+        "type": "final",
+        "questions": []
+    }
+  ]
+}

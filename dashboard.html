@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Phishing</title>
+    <style>
+        body { font-family: sans-serif; background: #0e1117; color: rgb(255, 255, 255); padding: 20px; }
+        .card { background: #1e2126; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        h1 { color: #3b82f6; }
+        .metric { font-size: 2rem; font-weight: bold; }
+        .label { color: #94a3b8; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>🛡️ Panel de Control</h1>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Total Encuestas</div>
+            <div class="metric" id="total-val">Cargando...</div>
+        </div>
+        <div class="card">
+            <div class="label">Probabilidad Promedio</div>
+            <div class="metric" id="avg-val">Cargando...</div>
+        </div>
+    </div>
+
+    <div class="card" style="max-width: 600px; margin-top: 20px;">
+        <h3>Distribución de Riesgo</h3>
+        <canvas id="riskChart"></canvas>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+
+                if(data.error) {
+                    alert("Error cargando datos: " + data.error);
+                    return;
+                }
+
+                // 1. Actualizar Textos
+                document.getElementById('total-val').innerText = data.total_responses;
+                document.getElementById('avg-val').innerText = (data.average_probability * 100).toFixed(1) + '%';
+
+                // 2. Dibujar Gráfico
+                const ctx = document.getElementById('riskChart');
+                
+                // Preparar datos para Chart.js
+                const labels = Object.keys(data.risk_distribution);
+                const values = Object.values(data.risk_distribution);
+
+                new Chart(ctx, {
+                    type: 'bar', // Tipo de gráfico: bar, pie, line
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '# Usuarios',
+                            data: values,
+                            backgroundColor: ['#4ade80', '#facc15', '#f87171'], // Verde, Amarillo, Rojo
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+                document.body.innerHTML += "<p style='color:red'>Error de conexión con API</p>";
+            }
+        }
+
+        // Cargar al iniciar
+        loadData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Variables de entorno y secretos (¡CRÍTICO!)
+.env
+.streamlit/secrets.toml
+
+# Datos locales (si no quieres subir el CSV de pruebas)
+*.csv
+surveysql*.csv
+
+# Sistema operativo
+.DS_Store
