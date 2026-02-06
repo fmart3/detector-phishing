@@ -263,136 +263,126 @@
         }
     }
 
-    // --- LÓGICA DE NAVEGACIÓN (Corrección) ---
+    // 2. RENDERIZADO DINÁMICO
+    function renderStep() {
+        // Obtenemos el contenedor con el ID CORRECTO
+        const container = document.getElementById('survey-container');
+        if (!container) return; // Seguridad extra
 
-    function prevSection() {
-        if (currentSectionIndex > 0) {
-            currentSectionIndex--;
-            renderSection(currentSectionIndex);
-        }
-    }
-
-    // Reemplaza tu función renderSection completa por esta:
-    function renderSection(index) {
-        const container = document.getElementById("survey-container");
-        container.innerHTML = ""; // Limpiar anterior
+        container.innerHTML = ''; // Limpiar
         
-        const section = globalData.survey[index];
+        const step = surveyConfig[currentStepIndex];
         
-        // 1. Título y Descripción
-        const title = document.createElement("h2");
-        title.innerText = section.title;
-        container.appendChild(title);
+        // Actualizar barra de progreso
+        const progress = Math.round(((currentStepIndex) / (surveyConfig.length - 1)) * 100);
+        const progressBar = document.getElementById('progress-bar');
+        if(progressBar) progressBar.style.width = progress + '%';
 
-        if (section.description) {
-            const desc = document.createElement("p");
-            desc.className = "section-desc"; // Asegúrate de tener estilo para esto o quita la clase
-            desc.innerText = section.description;
-            container.appendChild(desc);
+        const btnBack = document.getElementById('btn-back');
+        const btnNext = document.getElementById('btn-next');
+
+        // Header del paso
+        let html = `
+            <div class="header-section">
+                <h2>${step.title}</h2>
+                ${step.description ? `<p>${step.description}</p>` : ''}
+            </div>
+        `;
+
+        // CASO A: INTRO
+        if (step.type === 'intro') {
+            html += `<div class="card" style="text-align:center; padding:40px;">
+                        <p style="font-size: 1.2em;">Bienvenido a la evaluación de seguridad.</p>
+                        <p>Presiona "Comenzar" para iniciar.</p>
+                     </div>`;
         }
-
-        // 2. Generar Preguntas
-        section.questions.forEach(q => {
-            const qBlock = document.createElement("div");
-            qBlock.className = "question-block";
+        
+        // CASO B: LIKERT
+        else if (step.type === 'likert') {
+            step.questions.forEach(q => {
+                const savedValue = responses[q.code];
+                html += `
+                <div class="card">
+                    <div class="question-text">${q.text}</div>
+                    <div class="likert-scale">
+                        ${[1, 2, 3, 4, 5].map(val => `
+                            <div class="likert-option">
+                                <input type="radio" 
+                                       name="${q.code}" 
+                                       id="${q.code}_${val}" 
+                                       value="${val}"
+                                       ${savedValue == val ? 'checked' : ''}
+                                       onchange="saveResponse('${q.code}', ${val})">
+                                <label class="likert-label" for="${q.code}_${val}">${val}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="likert-legend">
+                        <span>Muy en desacuerdo</span>
+                        <span>Muy de acuerdo</span>
+                    </div>
+                </div>`;
+            });
+        } 
+        
+        // CASO C: FORMULARIO (Demográficos)
+        else if (step.type === 'form') {
+            html += `<div class="card form-grid">`;
             
-            const label = document.createElement("label");
-            label.innerText = q.text;
-            qBlock.appendChild(label);
-
-            // --- TIPO: ESCALA (1-5) ---
-            if (section.type === "scale") {
-                const optionsDiv = document.createElement("div");
-                optionsDiv.className = "options-container";
+            step.questions.forEach(q => {
+                const savedValue = responses[q.code] || "";
+                const optionsList = surveyOptions[q.options_id] || [];
                 
-                // Generar opciones 1 a 5
-                for (let i = 1; i <= 5; i++) {
-                    const labelOpt = document.createElement("label");
-                    labelOpt.className = "option-item";
-                    
-                    const input = document.createElement("input");
-                    input.type = "radio";
-                    input.name = q.code;
-                    input.value = i;
-                    
-                    // CORRECCIÓN: Restaurar valor si ya fue respondido
-                    if (userResponses[q.code] == i) {
-                        input.checked = true;
-                    }
+                const optionsHtml = optionsList.map(opt => 
+                    `<option value="${opt.v}" ${savedValue == opt.v ? 'selected' : ''}>${opt.t}</option>`
+                ).join('');
 
-                    // Texto de la opción (Muy en desacuerdo -> Muy de acuerdo)
-                    let textSpan = document.createTextNode(i);
-                    
-                    // Agregar Tooltips visuales (opcional, según tu diseño original)
-                    if (i === 1) labelOpt.title = "Muy en desacuerdo";
-                    if (i === 5) labelOpt.title = "Muy de acuerdo";
+                const style = q.fullWidth ? 'grid-column: span 2;' : '';
 
-                    labelOpt.appendChild(input);
-                    labelOpt.appendChild(textSpan);
-                    optionsDiv.appendChild(labelOpt);
-                }
-                qBlock.appendChild(optionsDiv);
-            } 
-            // --- TIPO: FORMULARIO (Selects Demográficos) ---
-            else if (section.type === "form") {
-                const select = document.createElement("select");
-                select.id = q.code;
-                select.className = "form-select"; // Asegúrate de que coincida con tu CSS
-                
-                // Opción por defecto
-                const defOpt = document.createElement("option");
-                defOpt.text = "Seleccione...";
-                defOpt.value = "";
-                select.appendChild(defOpt);
-
-                // Llenar opciones desde globalData.options
-                if (q.options_id && globalData.options[q.options_id]) {
-                    globalData.options[q.options_id].forEach(opt => {
-                        const o = document.createElement("option");
-                        o.value = opt.v;
-                        o.text = opt.t;
-                        select.appendChild(o);
-                    });
-                }
-
-                // CORRECCIÓN: Restaurar valor seleccionado previamente
-                if (userResponses[q.code]) {
-                    select.value = userResponses[q.code];
-                }
-
-                qBlock.appendChild(select);
-            }
-
-            container.appendChild(qBlock);
-        });
-
-        // 3. Botones de Navegación
-        const btnContainer = document.createElement("div");
-        btnContainer.className = "btn-container"; // Clase CSS nueva para flexbox
-
-        // BOTÓN ANTERIOR (Solo si no es la primera sección)
-        if (index > 0) {
-            const prevBtn = document.createElement("button");
-            prevBtn.innerText = "Anterior";
-            prevBtn.className = "btn btn-secondary"; // Estilo gris
-            prevBtn.onclick = prevSection;
-            btnContainer.appendChild(prevBtn);
+                html += `
+                    <div class="form-group" style="${style}">
+                        <label>${q.text}</label>
+                        <select onchange="saveResponse('${q.code}', this.value)" style="width:100%; padding:10px; border-radius:5px;">
+                            <option value="">Seleccione...</option>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            });
+            html += `</div>`;
         }
 
-        // BOTÓN SIGUIENTE / FINALIZAR
-        const nextBtn = document.createElement("button");
-        nextBtn.className = "btn"; // Estilo principal
-        nextBtn.onclick = nextSection;
+        // CASO D: FINAL
+        else if (step.type === 'final') {
+             html += `<div class="card" style="text-align:center; padding:40px;">
+                        <h3>✅ Todo listo</h3>
+                        <p>Tus respuestas están listas para ser analizadas.</p>
+                      </div>`;
+        }
 
-        if (index === globalData.survey.length - 1) {
-            nextBtn.innerText = "Finalizar y Enviar";
-            nextBtn.style.background = "#16a34a"; // Verde para finalizar
+        container.innerHTML += html;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // --- CONFIGURACIÓN DE BOTONES (AQUÍ ESTABA EL ERROR) ---
+        
+        // 1. Configurar Back Button
+        btnBack.disabled = (currentStepIndex === 0);
+        btnBack.style.display = (step.type === 'intro') ? 'none' : 'inline-block';
+        btnBack.onclick = prevStep; // <--- ESTO FALTABA: Asignar la función al click
+
+        // 2. Configurar Next Button
+        btnNext.disabled = false;
+        
+        if (step.type === 'intro') {
+            btnNext.innerText = "Comenzar 🚀";
+            btnNext.onclick = nextStep;
+        } else if (step.type === 'final') {
+            btnNext.innerText = "Enviar Resultados 🏁";
+            btnNext.onclick = submitSurvey;
         } else {
-            nextBtn.innerText = "Siguiente";
+            btnNext.innerText = "Siguiente ➡️";
+            btnNext.onclick = nextStep;
         }
-
-        btnContainer.appendChild(nextBtn);
-        container.appendChild(btnContainer);
     }
 
     // Funciones Auxiliares
