@@ -13,6 +13,7 @@
             --text: #ffffff;
             --text-muted: #94a3b8;
             --success: #4ade80;
+            --danger: #ef4444;
         }
 
         body {
@@ -24,7 +25,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 100px; /* Espacio para la barra de navegación */
         }
 
         header {
@@ -35,7 +36,7 @@
             border-bottom: 1px solid #333;
             margin-bottom: 20px;
         }
-        h1 { margin: 0; font-size: 1.5rem; }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
         .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
 
         /* --- BARRA DE PROGRESO --- */
@@ -51,7 +52,7 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background-color: var(--accent);
+            background-color: var(--success);
             transition: width 0.3s ease;
         }
 
@@ -73,42 +74,54 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header-section h2 { color: var(--accent); margin-bottom: 10px; }
-        .header-section p { color: #ccc; margin-bottom: 25px; }
+        h2 { margin-top: 0; color: #fff; }
+        .section-desc { color: var(--text-muted); margin-bottom: 20px; font-style: italic; }
 
-        /* --- LIKERT --- */
-        .likert-scale {
-            display: flex; justify-content: space-between;
-            background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; gap: 5px; margin-top: 10px;
-        }
-        .likert-option { flex: 1; position: relative; }
-        .likert-option input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
-        .likert-label {
-            display: block; padding: 12px 0; text-align: center;
-            border-radius: 6px; transition: all 0.2s; font-weight: bold;
-            color: var(--text-muted); border: 1px solid transparent;
-        }
-        .likert-option input:hover + .likert-label { background: rgba(255,255,255,0.05); color: white; }
-        .likert-option input:checked + .likert-label {
-            background: var(--primary); color: white;
-            box-shadow: 0 0 10px rgba(25, 68, 133, 0.5); transform: scale(1.05);
-        }
-        .likert-legend { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; padding: 0 5px; }
-        .question-text { font-size: 1.1rem; font-weight: 500; }
+        .question-block { margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .question-block:last-child { border-bottom: none; }
+        .question-block label { display: block; margin-bottom: 10px; font-size: 1.1rem; font-weight: 500; }
 
-        /* --- FORMULARIOS (DEMOGRAFÍA) --- */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        /* --- OPCIONES (Radio Buttons estilo Likert) --- */
+        .options-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .option-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .option-item:hover { background: rgba(255,255,255,0.1); }
+        .option-item input { margin-right: 5px; display: none; } /* Ocultamos el radio nativo */
         
-        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
-        .form-group select {
-            background-color: rgba(0,0,0,0.3); border: 1px solid #444; color: white;
-            font-size: 1rem; appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+        /* Estilo visual para seleccionado */
+        .option-item.selected {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 5px var(--accent);
         }
 
-        /* --- NAV --- */
+        /* --- SELECTS --- */
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            background-color: #2d333b;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        /* --- NAV BAR FIXED --- */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: rgba(14, 17, 23, 0.95); padding: 15px 0;
@@ -120,68 +133,36 @@
             font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s;
         }
         button:active { transform: scale(0.95); }
-        #btn-next { background-color: var(--primary); color: white; }
-        #btn-back { background-color: #333; color: white; }
+        #btn-next { background-color: var(--accent); color: white; }
+        #btn-back { background-color: #333; color: white; border: 1px solid #444; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Botón flotante Dashboard */
         .dash-trigger {
-            position: fixed;
-            top: 20px;
-            left: 20px;
+            position: fixed; top: 20px; left: 20px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #333;
-            color: #666;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            z-index: 1000;
+            border: 1px solid #333; color: #666;
+            padding: 8px 15px; border-radius: 5px;
+            cursor: pointer; font-size: 0.8rem; z-index: 1000;
         }
-        .dash-trigger:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
+        .dash-trigger:hover { background: var(--accent); color: white; }
 
-        /* Modal (Cajita flotante) */
+        /* Modal */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            z-index: 2000; justify-content: center; align-items: center;
         }
         .modal-box {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 300px;
+            background: var(--card-bg); padding: 30px; border-radius: 10px;
+            border: 1px solid #333; text-align: center; width: 300px;
         }
         .modal-box input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            background: #0e1117;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 5px;
-            box-sizing: border-box; /* Importante para que no se salga */
+            width: 100%; padding: 10px; margin: 15px 0;
+            background: #0e1117; border: 1px solid #333; color: white;
+            box-sizing: border-box;
         }
-        .modal-close {
-            position: absolute;
-            top: 15px; right: 15px;
-            color: #666;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
+        .modal-close { position: absolute; top: 15px; right: 15px; cursor: pointer; color: #aaa; }
 
     </style>
 </head>
@@ -193,14 +174,9 @@
         <div class="modal-box" style="position:relative;">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <h3 style="margin-top:0;">Acceso Restringido</h3>
-            <p style="font-size:0.9rem; color:#aaa;">Ingresa la contraseña de administrador</p>
-            
             <input type="password" id="dashPass" placeholder="Contraseña..." onkeypress="handleEnter(event)">
-            
-            <button onclick="verifyPass()" style="width:100%; padding:10px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer;">
-                Entrar
-            </button>
-            <p id="authError" style="color:#ef4444; font-size:0.8rem; margin-top:10px; display:none;">Contraseña incorrecta</p>
+            <button onclick="verifyPass()" style="width:100%; background:var(--accent); color:white;">Entrar</button>
+            <p id="authError" style="color:var(--danger); display:none; margin-top:10px;">Error</p>
         </div>
     </div>
 
@@ -215,297 +191,290 @@
 
     <div class="main-container" id="survey-container">
         <div class="card" style="text-align:center; padding: 40px;">
+            <div class="loader"></div>
             <h3>Cargando encuesta...</h3>
         </div>
     </div>
 
     <div class="nav-bar footer">
-        <button id="btn-back" disabled>⬅️ Atrás</button>
-        <button id="btn-next">Cargando...</button>
+        <button id="btn-back" onclick="prevSection()" disabled>⬅️ Atrás</button>
+        <button id="btn-next" onclick="nextSection()">Siguiente ➡️</button>
     </div>
 
 <script>
-    let currentStepIndex = 0;
+    // ============================================
+    // ESTADO GLOBAL
+    // ============================================
+    let currentSectionIndex = 0;
     let surveyConfig = [];
     let surveyOptions = {}; 
-    const responses = {};
+    const responses = {}; // Aquí se guardan las respuestas: { "EX01": 5, "Demo_Pais": 1 }
 
-    // 1. CARGA DE CONFIGURACIÓN
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
     async function initSurvey() {
         try {
             const res = await fetch('/questions.json');
             if (!res.ok) throw new Error("No se pudo cargar config");
-            const data = await res.json();
             
+            const data = await res.json();
             surveyOptions = data.options; 
             surveyConfig = data.survey;
             
-            renderStep();
+            renderSection(currentSectionIndex);
         } catch (e) {
             document.getElementById('survey-container').innerHTML = 
-                "<h2 style='color:red;text-align:center'>Error cargando encuesta.</h2><p style='text-align:center'>Verifique que el servidor esté corriendo y questions.json exista.</p>";
+                "<h2 style='color:red;text-align:center'>Error de conexión</h2><p style='text-align:center'>Revisa que el servidor Python esté corriendo.</p>";
             console.error(e);
         }
     }
 
-    // 2. RENDERIZADO DINÁMICO
-    function renderStep() {
-        // Obtenemos el contenedor con el ID CORRECTO
-        const container = document.getElementById('survey-container');
-        if (!container) return; // Seguridad extra
-
-        container.innerHTML = ''; // Limpiar
+    // ============================================
+    // RENDERIZADO (DIBUJAR PANTALLA)
+    // ============================================
+    function renderSection(index) {
+        const container = document.getElementById("survey-container");
+        container.innerHTML = ""; // Limpiar contenido anterior
         
-        const step = surveyConfig[currentStepIndex];
+        const section = surveyConfig[index];
         
-        // Actualizar barra de progreso
-        const progress = Math.round(((currentStepIndex) / (surveyConfig.length - 1)) * 100);
-        const progressBar = document.getElementById('progress-bar');
-        if(progressBar) progressBar.style.width = progress + '%';
+        // 1. Tarjeta de Sección
+        const card = document.createElement("div");
+        card.className = "card";
 
-        const btnBack = document.getElementById('btn-back');
-        const btnNext = document.getElementById('btn-next');
+        // Título y Descripción
+        const title = document.createElement("h2");
+        title.innerText = section.title;
+        card.appendChild(title);
 
-        // Header del paso
-        let html = `
-            <div class="header-section">
-                <h2>${step.title}</h2>
-                ${step.description ? `<p>${step.description}</p>` : ''}
-            </div>
-        `;
-
-        // CASO A: INTRO
-        if (step.type === 'intro') {
-            html += `<div class="card" style="text-align:center; padding:40px;">
-                        <p style="font-size: 1.2em;">Bienvenido a la evaluación de seguridad.</p>
-                        <p>Presiona "Comenzar" para iniciar.</p>
-                     </div>`;
+        if (section.description) {
+            const desc = document.createElement("p");
+            desc.className = "section-desc";
+            desc.innerText = section.description;
+            card.appendChild(desc);
         }
-        
-        // CASO B: LIKERT
-        else if (step.type === 'likert') {
-            step.questions.forEach(q => {
-                const savedValue = responses[q.code];
-                html += `
-                <div class="card">
-                    <div class="question-text">${q.text}</div>
-                    <div class="likert-scale">
-                        ${[1, 2, 3, 4, 5].map(val => `
-                            <div class="likert-option">
-                                <input type="radio" 
-                                       name="${q.code}" 
-                                       id="${q.code}_${val}" 
-                                       value="${val}"
-                                       ${savedValue == val ? 'checked' : ''}
-                                       onchange="saveResponse('${q.code}', ${val})">
-                                <label class="likert-label" for="${q.code}_${val}">${val}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="likert-legend">
-                        <span>Muy en desacuerdo</span>
-                        <span>Muy de acuerdo</span>
-                    </div>
-                </div>`;
-            });
-        } 
-        
-        // CASO C: FORMULARIO (Demográficos)
-        else if (step.type === 'form') {
-            html += `<div class="card form-grid">`;
+
+        // 2. Generar Preguntas
+        section.questions.forEach(q => {
+            const qBlock = document.createElement("div");
+            qBlock.className = "question-block";
             
-            step.questions.forEach(q => {
-                const savedValue = responses[q.code] || "";
-                const optionsList = surveyOptions[q.options_id] || [];
+            const label = document.createElement("label");
+            label.innerText = q.text;
+            qBlock.appendChild(label);
+
+            // --- A. TIPO ESCALA (Radio Buttons) ---
+            if (section.type === "scale") {
+                const optionsDiv = document.createElement("div");
+                optionsDiv.className = "options-container";
                 
-                const optionsHtml = optionsList.map(opt => 
-                    `<option value="${opt.v}" ${savedValue == opt.v ? 'selected' : ''}>${opt.t}</option>`
-                ).join('');
+                for (let i = 1; i <= 5; i++) {
+                    const labelOpt = document.createElement("label");
+                    labelOpt.className = "option-item";
+                    labelOpt.innerText = i;
+                    
+                    // Comprobar si ya estaba seleccionado
+                    if (responses[q.code] == i) {
+                        labelOpt.classList.add("selected");
+                    }
 
-                const style = q.fullWidth ? 'grid-column: span 2;' : '';
+                    // Evento Click
+                    labelOpt.onclick = function() {
+                        // Guardar respuesta
+                        saveResponse(q.code, i);
+                        
+                        // Actualizar visual (quitar 'selected' a otros y poner a este)
+                        Array.from(optionsDiv.children).forEach(c => c.classList.remove("selected"));
+                        labelOpt.classList.add("selected");
+                    };
 
-                html += `
-                    <div class="form-group" style="${style}">
-                        <label>${q.text}</label>
-                        <select onchange="saveResponse('${q.code}', this.value)" style="width:100%; padding:10px; border-radius:5px;">
-                            <option value="">Seleccione...</option>
-                            ${optionsHtml}
-                        </select>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-        }
+                    optionsDiv.appendChild(labelOpt);
+                }
+                qBlock.appendChild(optionsDiv);
+            } 
+            // --- B. TIPO FORMULARIO (Selects) ---
+            else if (section.type === "form") {
+                const select = document.createElement("select");
+                select.id = q.code;
+                select.className = "form-select";
+                
+                // Opción default
+                const defOpt = document.createElement("option");
+                defOpt.text = "Seleccione...";
+                defOpt.value = "";
+                select.appendChild(defOpt);
 
-        // CASO D: FINAL
-        else if (step.type === 'final') {
-             html += `<div class="card" style="text-align:center; padding:40px;">
-                        <h3>✅ Todo listo</h3>
-                        <p>Tus respuestas están listas para ser analizadas.</p>
-                      </div>`;
-        }
+                // Llenar opciones
+                if (q.options_id && surveyOptions[q.options_id]) {
+                    surveyOptions[q.options_id].forEach(opt => {
+                        const o = document.createElement("option");
+                        o.value = opt.v;
+                        o.text = opt.t;
+                        select.appendChild(o);
+                    });
+                }
 
-        container.innerHTML += html;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Configurar Botones
-        btnBack.disabled = (currentStepIndex === 0);
-        btnBack.style.display = (step.type === 'intro') ? 'none' : 'inline-block';
-        
-        btnNext.disabled = false; // Asegurar que esté habilitado
-        
-        if (step.type === 'intro') {
-            btnNext.innerText = "Comenzar 🚀";
-            btnNext.onclick = nextStep;
-        } else if (step.type === 'final') {
-            btnNext.innerText = "Enviar Resultados 🏁";
+                // Restaurar valor previo
+                if (responses[q.code]) {
+                    select.value = responses[q.code];
+                }
+
+                // Guardar al cambiar
+                select.onchange = (e) => saveResponse(q.code, e.target.value);
+                
+                qBlock.appendChild(select);
+            }
+
+            card.appendChild(qBlock);
+        });
+
+        container.appendChild(card);
+        updateNavButtons(index);
+        updateProgressBar(index);
+        window.scrollTo(0,0);
+    }
+
+    // ============================================
+    // LOGICA DE NAVEGACIÓN Y GUARDADO
+    // ============================================
+    
+    function saveResponse(code, value) {
+        responses[code] = value;
+    }
+
+    function updateNavButtons(index) {
+        const btnBack = document.getElementById("btn-back");
+        const btnNext = document.getElementById("btn-next");
+
+        // Botón Atrás
+        btnBack.disabled = (index === 0);
+
+        // Botón Siguiente
+        if (index === surveyConfig.length - 1) {
+            btnNext.innerText = "Finalizar y Enviar ✅";
+            btnNext.style.backgroundColor = "var(--success)";
             btnNext.onclick = submitSurvey;
         } else {
             btnNext.innerText = "Siguiente ➡️";
-            btnNext.onclick = nextStep;
+            btnNext.style.backgroundColor = "var(--accent)";
+            btnNext.onclick = nextSection;
         }
     }
 
-    // Funciones Auxiliares
-    window.saveResponse = (code, value) => responses[code] = value;
+    function updateProgressBar(index) {
+        const percent = ((index + 1) / surveyConfig.length) * 100;
+        document.getElementById("progress-bar").style.width = percent + "%";
+    }
 
-    window.nextStep = () => {
-        const step = surveyConfig[currentStepIndex];
-        const missing = step.questions.filter(q => !responses[q.code]);
+    function validateSection() {
+        const section = surveyConfig[currentSectionIndex];
+        const missing = section.questions.filter(q => !responses[q.code] || responses[q.code] === "");
         
-        if (step.type !== 'intro' && step.type !== 'final' && missing.length > 0) {
-            alert(`⚠️ Faltan ${missing.length} preguntas por responder.`);
-            return;
+        if (missing.length > 0) {
+            alert(`⚠️ Por favor responde todas las preguntas antes de continuar.\nFaltan: ${missing.length}`);
+            return false;
         }
-        
-        if (currentStepIndex < surveyConfig.length - 1) {
-            currentStepIndex++;
-            renderStep();
-        }
-    };
+        return true;
+    }
 
-    window.prevStep = () => {
-        if (currentStepIndex > 0) {
-            currentStepIndex--;
-            renderStep();
+    function nextSection() {
+        if (validateSection()) {
+            currentSectionIndex++;
+            renderSection(currentSectionIndex);
         }
-    };
+    }
 
+    function prevSection() {
+        if (currentSectionIndex > 0) {
+            currentSectionIndex--;
+            renderSection(currentSectionIndex);
+        }
+    }
+
+    // ============================================
+    // ENVÍO AL SERVIDOR
+    // ============================================
     async function submitSurvey() {
-        const btnNext = document.getElementById('btn-next');
-        btnNext.innerText = "Analizando con IA...";
-        btnNext.disabled = true;
+        if (!validateSection()) return;
+
+        const container = document.getElementById('survey-container');
+        const nav = document.querySelector('.nav-bar');
         
+        container.innerHTML = `
+            <div class="card" style="text-align:center; padding:50px;">
+                <h2>🤖 Analizando con IA...</h2>
+                <p>Calculando perfil de riesgo y personalidad.</p>
+            </div>`;
+        nav.style.display = 'none'; // Ocultar botones
+
         try {
             const res = await fetch('/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ responses: responses })
             });
-            
-            if (!res.ok) throw new Error("Error en el servidor");
-            
+
+            if (!res.ok) throw new Error("Error del servidor");
+
             const result = await res.json();
+            const data = result.final_record.model_output;
             
-            // Verificamos que venga el registro final
-            const finalData = result.final_record || {};
-            const modelOut = finalData.model_output || { risk_level: 'Desconocido', probability: 0 };
-            
-            // Preparamos el JSON para mostrar en pantalla
-            const jsonDebug = JSON.stringify(finalData, null, 2);
+            // Colores según riesgo
+            let color = "#10b981"; // Bajo (Verde)
+            if (data.risk_level === "ALTO") color = "#ef4444"; // Rojo
+            if (data.risk_level === "MEDIO") color = "#f59e0b"; // Naranja
 
-            // Definir colores
-            let color = "#aaa";
-            let icon = "❓";
-            if(modelOut.risk_level === 'ALTO') { color = "#ef4444"; icon = "🚨"; }
-            if(modelOut.risk_level === 'MEDIO') { color = "#f59e0b"; icon = "⚠️"; }
-            if(modelOut.risk_level === 'BAJO') { color = "#10b981"; icon = "🛡️"; }
+            const prob = (data.probability * 100).toFixed(1);
 
-            const probPct = (modelOut.probability * 100).toFixed(1);
-
-            document.getElementById('survey-container').innerHTML = `
-                <div class="card" style="text-align:center; padding:30px; animation: fadeIn 0.5s;">
-                    <h1 style="margin-bottom:10px;">Análisis Completado</h1>
+            container.innerHTML = `
+                <div class="card" style="text-align:center; padding:40px; animation: fadeIn 0.5s;">
+                    <h1>Resultados del Análisis</h1>
                     
-                    <div style="background: ${color}22; border: 2px solid ${color}; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                        <h2 style="color:${color}; margin:0; font-size: 2.5rem;">${icon} ${modelOut.risk_level}</h2>
-                        <p style="margin:5px 0 0 0; color:white;">Nivel de Riesgo Detectado</p>
-                        <p style="font-size:1rem; color:#ccc; margin-top:5px;">Probabilidad: <strong>${probPct}%</strong></p>
+                    <div style="margin: 30px 0; padding: 20px; border: 2px solid ${color}; border-radius: 10px; background: ${color}22;">
+                        <h2 style="color:${color}; font-size: 2.5rem; margin:0;">${data.risk_level}</h2>
+                        <p>Nivel de Susceptibilidad</p>
                     </div>
 
-                    <div style="text-align:left; background:#111; padding:15px; border-radius:8px; margin-top:20px; border:1px solid #333;">
-                        <p style="color:#aaa; font-size:0.8rem; margin-top:0; font-weight:bold;">🔍 JSON DEPURACIÓN (Backend -> Frontend):</p>
-                        <div style="max-height:300px; overflow-y:auto; color:#3b82f6; font-size:0.75rem; font-family:monospace;">
-                            <pre>${jsonDebug}</pre>
-                        </div>
+                    <p style="font-size:1.2rem;">Probabilidad estimada: <strong>${prob}%</strong></p>
+                    
+                    <div style="margin-top:30px; font-size:0.9rem; color:#888;">
+                        <p>Tus respuestas han sido guardadas de forma segura.</p>
                     </div>
 
-                    <button onclick="location.reload()" style="margin-top:20px; padding:12px 25px; background:#333; color:white; border:none; border-radius:5px; cursor:pointer;">
-                        Nueva Evaluación
-                    </button>
+                    <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Realizar otra encuesta</button>
                 </div>
             `;
-            
-            const footer = document.querySelector('.footer');
-            if(footer) footer.style.display = 'none';
-            
-        } catch (err) {
-            alert("Error: " + err);
-            console.error(err);
-            btnNext.disabled = false;
-            btnNext.innerText = "Reintentar";
+
+        } catch (e) {
+            nav.style.display = 'flex';
+            container.innerHTML = `<h3 style="color:red; text-align:center">Error: ${e.message}</h3>`;
+            console.error(e);
         }
     }
 
-    function openModal() {
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('dashPass').focus();
-    }
-
-    function closeModal() {
-        document.getElementById('authModal').style.display = 'none';
-        document.getElementById('authError').style.display = 'none';
-        document.getElementById('dashPass').value = '';
-    }
-
-    function handleEnter(e) {
-        if(e.key === 'Enter') verifyPass();
-    }
+    // ============================================
+    // MODAL DASHBOARD
+    // ============================================
+    function openModal() { document.getElementById('authModal').style.display = 'flex'; document.getElementById('dashPass').focus(); }
+    function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+    function handleEnter(e) { if(e.key === 'Enter') verifyPass(); }
 
     async function verifyPass() {
         const pass = document.getElementById('dashPass').value;
-        const errorMsg = document.getElementById('authError');
-        
         try {
-            const response = await fetch('/verify-dashboard', {
+            const r = await fetch('/verify-dashboard', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: pass })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: pass})
             });
-            
-            const result = await response.json();
-            
-            if (result.valid) {
-                // Redireccionar al Dashboard (Streamlit)
-                window.location.href = result.redirect_url;
-            } else {
-                errorMsg.style.display = 'block';
-                errorMsg.innerText = "Contraseña incorrecta";
-                // Efecto de vibración
-                document.querySelector('.modal-box').animate([
-                    { transform: 'translateX(0)' },
-                    { transform: 'translateX(-5px)' },
-                    { transform: 'translateX(5px)' },
-                    { transform: 'translateX(0)' }
-                ], { duration: 200 });
-            }
-        } catch (e) {
-            console.error(e);
-            errorMsg.style.display = 'block';
-            errorMsg.innerText = "Error de conexión";
-        }
+            const d = await r.json();
+            if(d.valid) window.location.href = d.redirect_url;
+            else document.getElementById('authError').style.display = 'block';
+        } catch(e) { alert("Error de conexión"); }
     }
 
+    // INICIAR AL CARGAR
     document.addEventListener("DOMContentLoaded", initSurvey);
 </script>
 
