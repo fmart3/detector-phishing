@@ -108,6 +108,45 @@ async def submit_survey(data: SurveyResponses):
         "message": f"Análisis completado. {status_msg}",
         "final_record": final_record 
     }
+    
+# 2. RESTAURA ESTE ENDPOINT QUE FALTA:
+@app.post("/analyze")
+async def analyze_survey(data: SurveyResponses):
+    try:
+        raw_responses = data.responses
+        print(f"📝 Recibidas {len(raw_responses)} respuestas.")
+
+        # A. Calcular Puntajes
+        scores = compute_scores(raw_responses)
+        
+        # B. Preparar Features para IA (Usando probability.py)
+        features_df = prepare_features(scores, raw_responses)
+        
+        # C. Predecir con el Modelo
+        model_output = predict_model(features_df)
+        
+        # D. Guardar en MongoDB (Usando la conexión global db_collection)
+        save_success = save_survey_response(db_collection, raw_responses, scores, model_output)
+        
+        status_msg = "Datos guardados." if save_success else "Error guardando DB."
+
+        # Estructura final para devolver al frontend
+        final_record = {
+            "responses": raw_responses,
+            "scores": scores,
+            "model_output": model_output,
+            "saved_to_db": save_success
+        }
+
+        return {
+            "status": "success", 
+            "message": f"Análisis completado. {status_msg}",
+            "final_record": final_record 
+        }
+
+    except Exception as e:
+        print(f"❌ Error en /analyze: {e}")
+        return {"status": "error", "message": str(e)}
 
 # ... (El resto del código dashboard sigue igual) ...
 @app.post("/verify-dashboard")
