@@ -65,7 +65,7 @@ async def read_root():
             return f.read()
     return "<h1>Error: No se encuentra index.html</h1>"
 
-@app.get("/questions.json")
+@app.get("/static/questions.json")
 async def get_questions_json():
     file_path = "questions.json"
     if os.path.exists(file_path):
