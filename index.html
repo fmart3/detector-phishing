@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Susceptibilidad a Phishing</title>
+    <title>Evaluación de Seguridad | CyberTrust</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0e1117;
-            --card-bg: #1e2126;
-            --primary: #194485;
-            --accent: #3b82f6;
-            --text: #ffffff;
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --accent: #0ea5e9;
+            --text: #f1f5f9;
             --text-muted: #94a3b8;
-            --success: #4ade80;
+            --border: #334155;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text);
             margin: 0;
@@ -27,498 +28,467 @@
             padding-bottom: 80px;
         }
 
+        /* --- HEADER --- */
         header {
             width: 100%;
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
+            padding: 15px 0;
+            background: rgba(11, 17, 32, 0.95);
             text-align: center;
-            border-bottom: 1px solid #333;
-            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
         }
-        h1 { margin: 0; font-size: 1.5rem; }
-        .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
-
-        /* --- BARRA DE PROGRESO --- */
-        .progress-container {
-            width: 95%;
-            max-width: 800px;
-            height: 6px;
-            background-color: #333;
-            border-radius: 3px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background-color: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        /* --- CONTENEDOR PRINCIPAL --- */
-        .main-container {
-            width: 95%;
-            max-width: 800px;
-        }
-
-        /* --- TARJETAS --- */
-        .card {
-            background: linear-gradient(145deg, #1e2025, #26282e);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #363945;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            animation: fadeIn 0.4s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header-section h2 { color: var(--accent); margin-bottom: 10px; }
-        .header-section p { color: #ccc; margin-bottom: 25px; }
-
-        /* --- LIKERT --- */
-        .likert-scale {
-            display: flex; justify-content: space-between;
-            background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; gap: 5px; margin-top: 10px;
-        }
-        .likert-option { flex: 1; position: relative; }
-        .likert-option input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 2; }
-        .likert-label {
-            display: block; padding: 12px 0; text-align: center;
-            border-radius: 6px; transition: all 0.2s; font-weight: bold;
-            color: var(--text-muted); border: 1px solid transparent;
-        }
-        .likert-option input:hover + .likert-label { background: rgba(255,255,255,0.05); color: white; }
-        .likert-option input:checked + .likert-label {
-            background: var(--primary); color: white;
-            box-shadow: 0 0 10px rgba(25, 68, 133, 0.5); transform: scale(1.05);
-        }
-        .likert-legend { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; padding: 0 5px; }
-        .question-text { font-size: 1.1rem; font-weight: 500; }
-
-        /* --- FORMULARIOS (DEMOGRAFÍA) --- */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
         
-        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
-        .form-group select {
-            background-color: rgba(0,0,0,0.3); border: 1px solid #444; color: white;
-            font-size: 1rem; appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+        .brand-badge {
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
         }
 
-        /* --- NAV --- */
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(14, 17, 23, 0.95); padding: 15px 0;
-            display: flex; justify-content: center; gap: 20px;
-            border-top: 1px solid #333; backdrop-filter: blur(5px); z-index: 100;
-        }
-        button {
-            padding: 12px 30px; border-radius: 8px; border: none;
-            font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s;
-        }
-        button:active { transform: scale(0.95); }
-        #btn-next { background-color: var(--primary); color: white; }
-        #btn-back { background-color: #333; color: white; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        h1 { margin: 0; font-size: 1.3rem; font-weight: 600; color: white; }
 
-        /* Botón flotante Dashboard */
-        .dash-trigger {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #333;
-            color: #666;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-        .dash-trigger:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
+        /* --- CONTENEDORES --- */
+        .main-container {
+            width: 90%;
+            max-width: 700px;
+            margin-top: 40px;
+            animation: fadeIn 0.5s ease-out;
         }
 
-        /* Modal (Cajita flotante) */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-box {
+        .card {
             background: var(--card-bg);
             padding: 30px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 300px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .modal-box input {
+
+        /* --- PORTADA --- */
+        #intro-view { text-align: left; }
+        .intro-title {
+            font-size: 1.8rem; font-weight: 700; margin-bottom: 15px;
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .intro-text { line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; font-size: 1rem; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0; }
+        .info-box { background: rgba(59, 130, 246, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .info-box h4 { margin: 0 0 8px 0; color: var(--accent); font-size: 1rem; }
+        .info-box p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+
+        .start-btn {
+            width: 100%; padding: 18px; background: var(--primary); color: white;
+            border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .start-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        /* --- ESTILOS DE PREGUNTAS (CUADRADOS CORREGIDOS) --- */
+        #survey-view { display: none; } 
+
+        .progress-container {
+            width: 100%; height: 4px; background-color: var(--border);
+            position: fixed; top: 0; left: 0; z-index: 101; display: none;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; background-color: var(--accent); transition: width 0.4s ease;
+        }
+
+        .question-text { 
+            font-size: 1.1rem; font-weight: 500; margin-bottom: 20px; 
+            color: white; border-left: 3px solid var(--accent); padding-left: 15px;
+        }
+        
+        /* === CORRECCIÓN VISUAL LIKERT === */
+        .likert-wrapper { margin-bottom: 40px; }
+        
+        .likert-scale {
+            display: flex; 
+            justify-content: space-between; 
+            gap: 12px; /* Espacio entre opciones */
+        }
+        
+        .likert-option { 
+            flex: 1; 
+            position: relative; 
+            /* Esto es vital: crea el contexto de posicionamiento */
+            height: 50px; 
+        }
+        
+        /* INPUT INVISIBLE (EL ÁREA DE CLIC) */
+        .likert-option input { 
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%; 
+            margin: 0; /* CRÍTICO: Elimina márgenes default del navegador */
+            padding: 0;
+            opacity: 0; 
+            cursor: pointer; 
+            z-index: 10; /* Asegura que esté siempre encima */
+        }
+        
+        /* CUADRADO VISUAL */
+        .likert-square {
+            position: absolute; /* Para que coincida exacto con el input */
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            background: #0e1117;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 5px;
-            box-sizing: border-box; /* Importante para que no se salga */
-        }
-        .modal-close {
-            position: absolute;
-            top: 15px; right: 15px;
-            color: #666;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        /* --- AGREGAR ESTO EN EL <style> EXISTENTE --- */
-        .btn-container {
+            height: 100%;
             display: flex;
-            justify-content: space-between; /* Separa los botones a los extremos */
-            gap: 15px;
-            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            z-index: 1; /* Debajo del input */
+            box-sizing: border-box; /* Evita que el borde aumente el tamaño */
         }
-
-        .btn-secondary {
-            background: #64748b; /* Color gris para botón secundario */
+        
+        /* Hover del Input afecta al cuadrado hermano */
+        .likert-option input:hover + .likert-square {
+            border-color: var(--accent);
             color: white;
-        }
-        .btn-secondary:hover {
-            background: #475569;
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px); /* Pequeña elevación */
         }
 
+        /* Seleccionado */
+        .likert-option input:checked + .likert-square {
+            background: var(--primary); 
+            border-color: var(--accent); 
+            color: white; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .likert-legend { 
+            display: flex; justify-content: space-between; 
+            font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; padding: 0 2px;
+        }
+        /* ================================= */
+
+        /* Form Styles */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
+        .form-group select {
+            width: 100%; padding: 14px; background: #0f172a; border: 1px solid var(--border);
+            color: white; border-radius: 8px; font-size: 1rem; outline: none;
+        }
+        .form-group select:focus { border-color: var(--accent); }
+
+        /* Footer Nav */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(11, 17, 32, 0.95); padding: 15px 0;
+            display: flex; justify-content: center; gap: 15px;
+            border-top: 1px solid var(--border); backdrop-filter: blur(10px); z-index: 500;
+            display: none; 
+        }
+        .nav-btn {
+            padding: 12px 25px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+        #btn-next { background: var(--primary); color: white; }
+        #btn-back { background: var(--border); color: white; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Resultados */
+        #resultCard { display: none; text-align: center; padding: 40px; }
+        .dash-trigger {
+            position: fixed; top: 15px; left: 15px; z-index: 2000;
+            background: transparent; border: none; color: #334155; font-size: 1.2rem; cursor: pointer;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <button class="dash-trigger" onclick="openModal()">⚙ Dashboard</button>
+    <button class="dash-trigger" onclick="location.href='/dashboard'">⚙</button>
 
-    <div id="authModal" class="modal-overlay">
-        <div class="modal-box" style="position:relative;">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 style="margin-top:0;">Acceso Restringido</h3>
-            <p style="font-size:0.9rem; color:#aaa;">Ingresa la contraseña de administrador</p>
-            
-            <input type="password" id="dashPass" placeholder="Contraseña..." onkeypress="handleEnter(event)">
-            
-            <button onclick="verifyPass()" style="width:100%; padding:10px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer;">
-                Entrar
-            </button>
-            <p id="authError" style="color:#ef4444; font-size:0.8rem; margin-top:10px; display:none;">Contraseña incorrecta</p>
-        </div>
-    </div>
-
-    <header>
-        <h1>🎣 Detector de Phishing</h1>
-        <div class="subtitle">Evaluación de Perfil de Riesgo</div>
-    </header>
-
-    <div class="progress-container">
+    <div class="progress-container" id="progressBarContainer">
         <div id="progress-bar" class="progress-bar"></div>
     </div>
 
-    <div class="main-container" id="survey-container">
-        <div class="card" style="text-align:center; padding: 40px;">
-            <h3>Cargando encuesta...</h3>
+    <header>
+        <span class="brand-badge">CyberTrust Security</span>
+        <h1>Evaluación de Riesgo Humano</h1>
+    </header>
+
+    <div class="main-container" id="intro-view">
+        <div class="card">
+            <h2 class="intro-title">Bienvenido/a</h2>
+            
+            <p class="intro-text">
+                En <strong>CyberTrust</strong>, la seguridad comienza con las personas.
+            </p>
+            
+            <p class="intro-text">
+                Esta evaluación nos ayuda a entender y fortalecer nuestra cultura de ciberseguridad. Tus respuestas son confidenciales y nos permiten diseñar mejores estrategias de protección.
+            </p>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <h4>🛡️ Prevención</h4>
+                    <p>Detectamos riesgos antes de que se conviertan en incidentes.</p>
+                </div>
+                <div class="info-box">
+                    <h4>⏱️ Rápido</h4>
+                    <p>Solo tomará unos <strong>5 minutos</strong> de tu tiempo.</p>
+                </div>
+                <div class="info-box">
+                    <h4>🔒 Privado</h4>
+                    <p>Tus datos son tratados con estricta confidencialidad.</p>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startSurvey()">Comenzar Evaluación</button>
         </div>
     </div>
 
-    <div class="nav-bar footer">
-        <button id="btn-back" disabled>⬅️ Atrás</button>
-        <button id="btn-next">Cargando...</button>
+    <div class="main-container" id="survey-view">
+        <div class="card" id="survey-content">
+            <h3 style="text-align:center; color: var(--text-muted);">Cargando...</h3>
+        </div>
+    </div>
+
+    <div class="main-container" id="resultCard">
+        <div class="card">
+            <h2 style="margin-top:0">Evaluación Completada</h2>
+            <p style="color: var(--text-muted);">Tu perfil de riesgo actual:</p>
+            
+            <h1 id="resultTitle" style="font-size: 3rem; margin: 20px 0;">--</h1>
+            <p id="resultSubtitle" style="color: white; font-weight: bold;"></p>
+
+            <div id="resultExplanation" style="background: rgba(255,255,255,0.05); text-align: left; padding: 25px; border-radius: 12px; margin-top: 25px; color: #e2e8f0; line-height: 1.6; border: 1px solid var(--border);">
+            </div>
+
+            <button class="nav-btn" onclick="location.reload()" style="margin-top: 30px; background: #334155; color: white; width: 100%;">Finalizar</button>
+        </div>
+    </div>
+
+    <div class="nav-bar" id="survey-nav">
+        <button class="nav-btn" id="btn-back" disabled>Atrás</button>
+        <button class="nav-btn" id="btn-next">Siguiente</button>
     </div>
 
 <script>
+    function startSurvey() {
+        document.getElementById('intro-view').style.display = 'none';
+        document.getElementById('survey-view').style.display = 'block';
+        document.getElementById('survey-nav').style.display = 'flex';
+        document.getElementById('progressBarContainer').style.display = 'block';
+        initSurvey();
+    }
+
     let currentStepIndex = 0;
     let surveyConfig = [];
-    let surveyOptions = {}; 
+    let globalOptions = {};
     const responses = {};
 
-    // 1. CARGA DE CONFIGURACIÓN
     async function initSurvey() {
         try {
-            const res = await fetch('/questions.json');
-            if (!res.ok) throw new Error("No se pudo cargar config");
-            const data = await res.json();
-            
-            surveyOptions = data.options; 
-            surveyConfig = data.survey;
-            
-            renderStep();
+            const res = await fetch('/static/questions.json');
+            if (res.ok) {
+                const data = await res.json();
+                surveyConfig = data.survey;
+                globalOptions = data.options;
+                renderStep();
+            } else {
+                throw new Error("Error al cargar questions.json");
+            }
         } catch (e) {
-            document.getElementById('survey-container').innerHTML = 
-                "<h2 style='color:red;text-align:center'>Error cargando encuesta.</h2><p style='text-align:center'>Verifique que el servidor esté corriendo y questions.json exista.</p>";
             console.error(e);
+            document.getElementById('survey-content').innerHTML = `<p style='text-align:center; color:red'>Error de carga. Recarga la página.</p>`;
         }
     }
 
-    // 2. RENDERIZADO DINÁMICO
     function renderStep() {
-        // Obtenemos el contenedor con el ID CORRECTO
-        const container = document.getElementById('survey-container');
-        if (!container) return; // Seguridad extra
-
-        container.innerHTML = ''; // Limpiar
-        
+        const container = document.getElementById('survey-content');
         const step = surveyConfig[currentStepIndex];
         
-        // Actualizar barra de progreso
-        const progress = Math.round(((currentStepIndex) / (surveyConfig.length - 1)) * 100);
-        const progressBar = document.getElementById('progress-bar');
-        if(progressBar) progressBar.style.width = progress + '%';
+        const progress = Math.round(((currentStepIndex) / (surveyConfig.length)) * 100);
+        document.getElementById('progress-bar').style.width = progress + '%';
 
-        const btnBack = document.getElementById('btn-back');
-        const btnNext = document.getElementById('btn-next');
+        let html = '';
 
-        // Header del paso
-        let html = `
-            <div class="header-section">
-                <h2>${step.title}</h2>
-                ${step.description ? `<p>${step.description}</p>` : ''}
-            </div>
-        `;
-
-        // CASO A: INTRO
         if (step.type === 'intro') {
-            html += `<div class="card" style="text-align:center; padding:40px;">
-                        <p style="font-size: 1.2em;">Bienvenido a la evaluación de seguridad.</p>
-                        <p>Presiona "Comenzar" para iniciar.</p>
-                     </div>`;
+            currentStepIndex++;
+            renderStep();
+            return;
         }
-        
-        // CASO B: LIKERT
-        else if (step.type === 'likert') {
+
+        if(step.title) {
+            html += `<h2 style="color:var(--accent); margin-top:0; margin-bottom: 20px;">${step.title}</h2>`;
+            if(step.description) html += `<p style="color:var(--text-muted); margin-bottom: 30px;">${step.description}</p>`;
+        }
+
+        // --- LIKERT SQUARES ---
+        if (step.type === 'likert') {
             step.questions.forEach(q => {
-                const savedValue = responses[q.code];
+                const val = responses[q.code];
                 html += `
-                <div class="card">
-                    <div class="question-text">${q.text}</div>
-                    <div class="likert-scale">
-                        ${[1, 2, 3, 4, 5].map(val => `
-                            <div class="likert-option">
-                                <input type="radio" 
-                                       name="${q.code}" 
-                                       id="${q.code}_${val}" 
-                                       value="${val}"
-                                       ${savedValue == val ? 'checked' : ''}
-                                       onchange="saveResponse('${q.code}', ${val})">
-                                <label class="likert-label" for="${q.code}_${val}">${val}</label>
-                            </div>
-                        `).join('')}
+                    <div class="likert-wrapper">
+                        <div class="question-text">${q.text}</div>
+                        <div class="likert-scale">
+                            ${[1,2,3,4,5].map(n => `
+                                <div class="likert-option">
+                                    <input type="radio" 
+                                           name="${q.code}" 
+                                           id="${q.code}_${n}"
+                                           value="${n}" 
+                                           ${val == n ? 'checked' : ''} 
+                                           onchange="saveResp('${q.code}', ${n})">
+                                    
+                                    <div class="likert-square">
+                                        ${n}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="likert-legend">
+                            <span>Totalmente en Desacuerdo</span>
+                            <span>Totalmente de Acuerdo</span>
+                        </div>
                     </div>
-                    <div class="likert-legend">
-                        <span>Muy en desacuerdo</span>
-                        <span>Muy de acuerdo</span>
-                    </div>
-                </div>`;
+                `;
             });
-        } 
-        
-        // CASO C: FORMULARIO (Demográficos)
-        else if (step.type === 'form') {
-            html += `<div class="card form-grid">`;
-            
-            step.questions.forEach(q => {
-                const savedValue = responses[q.code] || "";
-                const optionsList = surveyOptions[q.options_id] || [];
-                
-                const optionsHtml = optionsList.map(opt => 
-                    `<option value="${opt.v}" ${savedValue == opt.v ? 'selected' : ''}>${opt.t}</option>`
-                ).join('');
+        }
 
-                const style = q.fullWidth ? 'grid-column: span 2;' : '';
+        // --- FORMULARIO ---
+        else if (step.type === 'form') {
+            step.questions.forEach(q => {
+                const val = responses[q.code] || "";
+                
+                let optionsList = [];
+                if (q.options_id && globalOptions[q.options_id]) {
+                    optionsList = globalOptions[q.options_id];
+                } else if (q.options) {
+                    optionsList = q.options.map(o => ({v: o, t: o}));
+                }
 
                 html += `
-                    <div class="form-group" style="${style}">
+                    <div class="form-group">
                         <label>${q.text}</label>
-                        <select onchange="saveResponse('${q.code}', this.value)" style="width:100%; padding:10px; border-radius:5px;">
-                            <option value="">Seleccione...</option>
-                            ${optionsHtml}
+                        <select onchange="saveResp('${q.code}', this.value)">
+                            <option value="">Seleccione una opción...</option>
+                            ${optionsList.map(opt => `
+                                <option value="${opt.v}" ${val == opt.v ? 'selected' : ''}>${opt.t}</option>
+                            `).join('')}
                         </select>
                     </div>
                 `;
             });
-            html += `</div>`;
         }
 
-        // CASO D: FINAL
-        else if (step.type === 'final') {
-             html += `<div class="card" style="text-align:center; padding:40px;">
-                        <h3>✅ Todo listo</h3>
-                        <p>Tus respuestas están listas para ser analizadas.</p>
-                      </div>`;
-        }
+        container.innerHTML = html;
+        window.scrollTo(0,0);
+        updateButtons();
+    }
 
-        container.innerHTML += html;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    function updateButtons() {
+        const btnBack = document.getElementById('btn-back');
+        const btnNext = document.getElementById('btn-next');
         
-        // --- CONFIGURACIÓN DE BOTONES (AQUÍ ESTABA EL ERROR) ---
-        
-        // 1. Configurar Back Button
         btnBack.disabled = (currentStepIndex === 0);
-        btnBack.style.display = (step.type === 'intro') ? 'none' : 'inline-block';
-        btnBack.onclick = prevStep; // <--- ESTO FALTABA: Asignar la función al click
+        btnBack.onclick = () => { currentStepIndex--; renderStep(); };
 
-        // 2. Configurar Next Button
-        btnNext.disabled = false;
-        
-        if (step.type === 'intro') {
-            btnNext.innerText = "Comenzar 🚀";
-            btnNext.onclick = nextStep;
-        } else if (step.type === 'final') {
-            btnNext.innerText = "Enviar Resultados 🏁";
+        if (currentStepIndex === surveyConfig.length - 1) {
+            btnNext.innerText = "Enviar Evaluación";
             btnNext.onclick = submitSurvey;
+            btnNext.style.background = "#10b981";
         } else {
-            btnNext.innerText = "Siguiente ➡️";
-            btnNext.onclick = nextStep;
+            btnNext.innerText = "Siguiente";
+            btnNext.onclick = validateAndNext;
+            btnNext.style.background = "";
         }
     }
 
-    // Funciones Auxiliares
-    window.saveResponse = (code, value) => responses[code] = value;
+    window.saveResp = (code, val) => { 
+        responses[code] = isNaN(val) ? val : Number(val); 
+    };
 
-    window.nextStep = () => {
+    function validateAndNext() {
         const step = surveyConfig[currentStepIndex];
-        const missing = step.questions.filter(q => !responses[q.code]);
-        
-        if (step.type !== 'intro' && step.type !== 'final' && missing.length > 0) {
-            alert(`⚠️ Faltan ${missing.length} preguntas por responder.`);
-            return;
+        if(step.questions) {
+            const missing = step.questions.some(q => !responses[q.code]);
+            if(missing) { 
+                alert("Por favor responde todas las preguntas."); 
+                return; 
+            }
         }
-        
-        if (currentStepIndex < surveyConfig.length - 1) {
-            currentStepIndex++;
-            renderStep();
-        }
-    };
-
-    window.prevStep = () => {
-        if (currentStepIndex > 0) {
-            currentStepIndex--;
-            renderStep();
-        }
-    };
+        currentStepIndex++;
+        renderStep();
+    }
 
     async function submitSurvey() {
-        const btnNext = document.getElementById('btn-next');
-        btnNext.innerText = "Analizando con IA...";
-        btnNext.disabled = true;
-        
+        const btn = document.getElementById('btn-next');
+        btn.innerText = "Procesando...";
+        btn.disabled = true;
+
         try {
-            const res = await fetch('/submit', {
+            const res = await fetch('/analyze', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ responses: responses })
+                body: JSON.stringify(responses)
             });
-            
-            if (!res.ok) throw new Error("Error en el servidor");
-            
+
             const result = await res.json();
             
-            // Verificamos que venga el registro final
-            const finalData = result.final_record || {};
-            const modelOut = finalData.model_output || { risk_level: 'Desconocido', probability: 0 };
-            
-            // Preparamos el JSON para mostrar en pantalla
-            const jsonDebug = JSON.stringify(finalData, null, 2);
-
-            // Definir colores
-            let color = "#aaa";
-            let icon = "❓";
-            if(modelOut.risk_level === 'ALTO') { color = "#ef4444"; icon = "🚨"; }
-            if(modelOut.risk_level === 'MEDIO') { color = "#f59e0b"; icon = "⚠️"; }
-            if(modelOut.risk_level === 'BAJO') { color = "#10b981"; icon = "🛡️"; }
-
-            const probPct = (modelOut.probability * 100).toFixed(1);
-
-            document.getElementById('survey-container').innerHTML = `
-                <div class="card" style="text-align:center; padding:30px; animation: fadeIn 0.5s;">
-                    <h1 style="margin-bottom:10px;">Análisis Completado</h1>
-                    
-                    <div style="background: ${color}22; border: 2px solid ${color}; padding: 20px; border-radius: 12px; margin: 20px 0;">
-                        <h2 style="color:${color}; margin:0; font-size: 2.5rem;">${icon} ${modelOut.risk_level}</h2>
-                        <p style="margin:5px 0 0 0; color:white;">Nivel de Riesgo Detectado</p>
-                        <p style="font-size:1rem; color:#ccc; margin-top:5px;">Probabilidad: <strong>${probPct}%</strong></p>
-                    </div>
-
-                    <button onclick="location.reload()" style="margin-top:20px; padding:12px 25px; background:#333; color:white; border:none; border-radius:5px; cursor:pointer;">
-                        Nueva Evaluación
-                    </button>
-                </div>
-            `;
-            
-            const footer = document.querySelector('.footer');
-            if(footer) footer.style.display = 'none';
-            
-        } catch (err) {
-            alert("Error: " + err);
-            console.error(err);
-            btnNext.disabled = false;
-            btnNext.innerText = "Reintentar";
-        }
-    }
-
-    function openModal() {
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('dashPass').focus();
-    }
-
-    function closeModal() {
-        document.getElementById('authModal').style.display = 'none';
-        document.getElementById('authError').style.display = 'none';
-        document.getElementById('dashPass').value = '';
-    }
-
-    function handleEnter(e) {
-        if(e.key === 'Enter') verifyPass();
-    }
-
-    async function verifyPass() {
-        const pass = document.getElementById('dashPass').value;
-        const errorMsg = document.getElementById('authError');
-        
-        try {
-            const response = await fetch('/verify-dashboard', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: pass })
-            });
-            
-            const result = await response.json();
-            
-            if (result.valid) {
-                // Redireccionar al Dashboard (Streamlit)
-                window.location.href = result.redirect_url;
+            if(result.status === 'success' || result.final_record) {
+                document.getElementById('survey-view').style.display = 'none';
+                document.getElementById('survey-nav').style.display = 'none';
+                showResultCard(result.final_record.model_output);
             } else {
-                errorMsg.style.display = 'block';
-                errorMsg.innerText = "Contraseña incorrecta";
-                // Efecto de vibración
-                document.querySelector('.modal-box').animate([
-                    { transform: 'translateX(0)' },
-                    { transform: 'translateX(-5px)' },
-                    { transform: 'translateX(5px)' },
-                    { transform: 'translateX(0)' }
-                ], { duration: 200 });
+                alert("Error: " + (result.message || "Error desconocido"));
+                btn.innerText = "Reintentar";
+                btn.disabled = false;
             }
+
         } catch (e) {
             console.error(e);
-            errorMsg.style.display = 'block';
-            errorMsg.innerText = "Error de conexión";
+            alert("Error de conexión.");
+            btn.innerText = "Enviar Evaluación";
+            btn.disabled = false;
         }
     }
 
-    document.addEventListener("DOMContentLoaded", initSurvey);
+    function showResultCard(output) {
+        const card = document.getElementById('resultCard');
+        const title = document.getElementById('resultTitle');
+        const sub = document.getElementById('resultSubtitle');
+        const exp = document.getElementById('resultExplanation');
+
+        card.style.display = 'block';
+
+        const risk = output.risk_level || "BAJO";
+        let color = "#4ade80"; 
+        let textInfo = "Tu cultura de seguridad es fuerte.";
+        
+        if(risk === 'MEDIO') { 
+            color = "#facc15"; 
+            textInfo = "Buen nivel, pero cuidado con el exceso de confianza.";
+        }
+        if(risk === 'ALTO') { 
+            color = "#ef4444"; 
+            textInfo = "Riesgo detectado. Te sugerimos revisar las guías de seguridad.";
+        }
+
+        title.innerText = risk;
+        title.style.color = color;
+        sub.innerText = `Nivel de Riesgo`;
+        exp.innerHTML = textInfo;
+        exp.style.borderLeft = `4px solid ${color}`;
+    }
 </script>
 
 </body>
