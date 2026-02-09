@@ -439,7 +439,7 @@
             const res = await fetch('/analyze', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ responses: surveyData })
+                body: JSON.stringify({ responses: responses })
             });
 
             const result = await res.json();
