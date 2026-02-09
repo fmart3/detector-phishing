@@ -7,6 +7,7 @@ WORKDIR /app
 # Install system dependencies (gcc is good for pandas/scikit build)
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better caching)
@@ -29,4 +30,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import requests; response = requests.get('http://localhost:8000/'); exit(0) if response.status_code == 200 else exit(1)"
 
 # Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
