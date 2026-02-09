@@ -132,7 +132,7 @@ async def analyze_survey(data: SurveyResponses):
 
         # Estructura final para devolver al frontend
         final_record = {
-            "responses": raw_responses,
+            #"responses": raw_responses,
             "scores": scores,
             "model_output": model_output,
             "saved_to_db": save_success
