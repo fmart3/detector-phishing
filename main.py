@@ -11,7 +11,7 @@ from pymongo import MongoClient
 
 # Imports propios
 from utils.scoring import compute_scores
-from utils.databricks import prepare_features, predict_model, load_local_model
+from utils.probability import prepare_features, predict_model, load_local_model
 from utils.persistence import save_survey_response
 from utils.analytics import get_dashboard_stats
 
