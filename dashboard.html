@@ -272,7 +272,7 @@
                             <td>${row.timestamp || '--'}</td>
                             <td>${(row.probability * 100).toFixed(1)}%</td>
                             <td><span class="badge ${badgeClass}">${row.risk_level}</span></td>
-                            <td>${row.Fatiga_General ? row.Fatiga_General.toFixed(2) : '-'}</td>
+                            <td>${row.Fatiga_Global_Score ? row.Fatiga_Global_Score.toFixed(2) : '-'}</td>
                             <td>${row.Phish_Susceptibilidad ? row.Phish_Susceptibilidad.toFixed(2) : '-'}</td>
                         </tr>
                     `;
