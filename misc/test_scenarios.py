@@ -59,10 +59,10 @@ def run_scenarios():
         # CASO 1: El usuario "Ideal" (Descansado, horas normales, alta percepción de riesgo)
         {
             "Nombre": "Usuario Seguro",
-            "Demo_Tamano_Org": 3,      # Empresa mediana
+            "Demo_Tamano_Org": 1,      # Empresa mediana
             "Demo_Rol_Trabajo": 1,     # Rol estándar
-            "Big5_Apertura": 3.5,      # Apertura media
-            "Demo_Horas": 8.0,         # Jornada normal
+            "Big5_Apertura": 1.0,      # Apertura baja
+            "Demo_Horas": 3,         # Jornada normal
             "Phish_Riesgo_Percibido": 5.0, # Percibe mucho riesgo (Alerta)
             "Fatiga_Global_Score": 1.0 # Nada de fatiga
         },
@@ -70,21 +70,21 @@ def run_scenarios():
         # CASO 2: El usuario "En Riesgo" (Agotado, muchas horas, baja percepción)
         {
             "Nombre": "Usuario Vulnerable",
-            "Demo_Tamano_Org": 3,
-            "Demo_Rol_Trabajo": 1,
-            "Big5_Apertura": 3.5,
-            "Demo_Horas": 12.0,        # Jornada muy larga
+            "Demo_Tamano_Org": 7,
+            "Demo_Rol_Trabajo": 4,
+            "Big5_Apertura": 5.0,
+            "Demo_Horas": 5,        # Jornada muy larga
             "Phish_Riesgo_Percibido": 1.0, # Cree que no hay riesgo (Confiado)
-            "Fatiga_Global_Score": 5.0 # Fatiga máxima
+            "Fatiga_Global_Score": 1.0 # Fatiga máxima
         },
 
         # CASO 3: Probando impacto de Tamaño Organización (Empresa Grande)
         {
             "Nombre": "Empresa Grande",
-            "Demo_Tamano_Org": 5,      # Org muy grande
+            "Demo_Tamano_Org": 7,      # Org muy grande
             "Demo_Rol_Trabajo": 3,
             "Big5_Apertura": 3.0,
-            "Demo_Horas": 9.0,
+            "Demo_Horas": 3,
             "Phish_Riesgo_Percibido": 3.0,
             "Fatiga_Global_Score": 3.0
         },
@@ -93,9 +93,9 @@ def run_scenarios():
         {
             "Nombre": "Alta Apertura",
             "Demo_Tamano_Org": 3,
-            "Demo_Rol_Trabajo": 1,
+            "Demo_Rol_Trabajo": 3,
             "Big5_Apertura": 5.0,      # Máxima apertura (¿Más curioso = más clics?)
-            "Demo_Horas": 8.0,
+            "Demo_Horas": 3,
             "Phish_Riesgo_Percibido": 3.0,
             "Fatiga_Global_Score": 3.0
         }
@@ -153,7 +153,7 @@ def run_fatigue_sensitivity():
         'Demo_Tamano_Org': 3,
         'Demo_Rol_Trabajo': 1,
         'Big5_Apertura': 3.0,
-        'Demo_Horas': 9.0,
+        'Demo_Horas': 3,
         'Phish_Riesgo_Percibido': 3.0,
         'Fatiga_Global_Score': 1.0 # Este valor cambiará
     }
