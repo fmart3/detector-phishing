@@ -2,6 +2,8 @@ import pandas as pd
 import joblib
 import os
 import sys
+import itertools
+from IPython.display import display
 
 # ==============================================================================
 # BLOQUE DE AJUSTE DE RUTAS (AGREGAR ESTO AL INICIO)
@@ -52,94 +54,88 @@ def load_model():
 def run_scenarios():
     model = load_model()
 
-    print("\n--- 🧪 DEFINIENDO ESCENARIOS DE PRUEBA ---")
+    if model is None: return
 
-    # Definimos una lista de diccionarios. Cada uno es un "usuario simulado".
+    print(f"✅ Modelo cargado: {type(model).__name__}")
+    print("\n--- 🧪 EJECUTANDO ESCENARIOS BASADOS EN EVIDENCIA ---")
+
     scenarios_data = [
-        # CASO 1: El usuario "Ideal" (Descansado, horas normales, alta percepción de riesgo)
+        # CASO 1: EL INMUNIZADO (Bajo riesgo en todo)
+        # Org pequeña, pocas horas, PERCIBE EL RIESGO (5.0), poca apertura.
         {
-            "Nombre": "Usuario Seguro",
-            "Demo_Tamano_Org": 1,      # Empresa mediana
-            "Demo_Rol_Trabajo": 1,     # Rol estándar
-            "Big5_Apertura": 1.0,      # Apertura baja
-            "Demo_Horas": 3,         # Jornada normal
-            "Phish_Riesgo_Percibido": 5.0, # Percibe mucho riesgo (Alerta)
-            "Fatiga_Global_Score": 1.0 # Nada de fatiga
+            "Nombre": "🛡️ Usuario Blindado",
+            "Demo_Tamano_Org": 2,       # 100 o menos
+            "Demo_Rol_Trabajo": 1,      # Administrativo
+            "Big5_Apertura": 1.0,       # Poca curiosidad
+            "Demo_Horas": 2,            # 2-5 horas
+            "Phish_Riesgo_Percibido": 5.0, # "¡Tengo mucho miedo de caer!" (Alerta máxima)
+            "Fatiga_Global_Score": 1.0  # Fresco como una lechuga
         },
         
-        # CASO 2: El usuario "En Riesgo" (Agotado, muchas horas, baja percepción)
+        # CASO 2: LA VÍCTIMA PERFECTA (Basado en tu escáner: 99.9% Riesgo)
+        # Org gigante, +10 horas, CONFIADO (Riesgo 1.0), Fatiga Alta, Curioso
         {
-            "Nombre": "Usuario Vulnerable",
-            "Demo_Tamano_Org": 7,
+            "Nombre": "💣 Víctima Perfecta",
+            "Demo_Tamano_Org": 7,       # >50.000
+            "Demo_Rol_Trabajo": 3,      # Rol técnico/específico
+            "Big5_Apertura": 5.0,       # Muy curioso
+            "Demo_Horas": 5,            # >10 horas
+            "Phish_Riesgo_Percibido": 1.0, # "Esto no me va a pasar a mí" (Exceso confianza)
+            "Fatiga_Global_Score": 5.0  # Agotado
+        },
+
+        # CASO 3: EL EMPLEADO PROMEDIO (Riesgo Medio)
+        # Org mediana, horas normales, fatiga media
+        {
+            "Nombre": "😐 Usuario Promedio",
+            "Demo_Tamano_Org": 7,       # 1000-3000
             "Demo_Rol_Trabajo": 4,
-            "Big5_Apertura": 5.0,
-            "Demo_Horas": 5,        # Jornada muy larga
-            "Phish_Riesgo_Percibido": 1.0, # Cree que no hay riesgo (Confiado)
-            "Fatiga_Global_Score": 1.0 # Fatiga máxima
+            "Big5_Apertura": 4.0,
+            "Demo_Horas": 5,            # 5-8 horas
+            "Phish_Riesgo_Percibido": 3.0,
+            "Fatiga_Global_Score": 5.0
         },
 
-        # CASO 3: Probando impacto de Tamaño Organización (Empresa Grande)
+        # CASO 4: EL CURIOSO PELIGROSO
+        # Perfil seguro, pero DEMASIADO curioso (Apertura 5)
         {
-            "Nombre": "Empresa Grande",
-            "Demo_Tamano_Org": 7,      # Org muy grande
-            "Demo_Rol_Trabajo": 3,
-            "Big5_Apertura": 3.0,
-            "Demo_Horas": 3,
-            "Phish_Riesgo_Percibido": 3.0,
-            "Fatiga_Global_Score": 3.0
-        },
-
-        # CASO 4: Probando impacto de Apertura (Muy curioso/abierto)
-        {
-            "Nombre": "Alta Apertura",
-            "Demo_Tamano_Org": 3,
-            "Demo_Rol_Trabajo": 3,
-            "Big5_Apertura": 5.0,      # Máxima apertura (¿Más curioso = más clics?)
-            "Demo_Horas": 3,
-            "Phish_Riesgo_Percibido": 3.0,
-            "Fatiga_Global_Score": 3.0
+            "Nombre": "👀 El Curioso",
+            "Demo_Tamano_Org": 6,
+            "Demo_Rol_Trabajo": 4,
+            "Big5_Apertura": 5.0,       # <--- Factor de riesgo
+            "Demo_Horas": 5,
+            "Phish_Riesgo_Percibido": 5.0, # Alerta, pero...
+            "Fatiga_Global_Score": 5.0
         }
     ]
-
-    # Convertimos a DataFrame
+    
     df_scenarios = pd.DataFrame(scenarios_data)
-
-    # Separamos la columna de nombres para visualización, y dejamos solo los features para el modelo
     X_test = df_scenarios[FEATURES_ORDER]
-    
-    print("\n--- 🤖 EJECUTANDO PREDICCIONES ---")
-    
+
     try:
-        # Predecir probabilidades (nos interesa la clase 1 = Susceptible)
-        # predict_proba devuelve [[prob_clase0, prob_clase1], ...]
         probs = model.predict_proba(X_test)[:, 1]
         
-        # Predecir clase directa (0 o 1)
-        preds = model.predict(X_test)
-        
-        # Unir resultados para mostrar
         results = df_scenarios.copy()
-        results['Probabilidad_Phishing'] = probs
-        results['Prediccion_Clase'] = preds
-        
-        # Formatear probabilidad a porcentaje
-        results['Probabilidad (%)'] = (results['Probabilidad_Phishing'] * 100).round(2).astype(str) + '%'
+        results['Riesgo_Detectado'] = (probs * 100).round(2)
         
         # Mostrar tabla limpia
-        display_cols = ['Nombre', 'Probabilidad (%)', 'Prediccion_Clase'] + FEATURES_ORDER
-        print(results[display_cols].to_string(index=False))
+        display_cols = ['Nombre', 'Riesgo_Detectado'] + FEATURES_ORDER
         
-        print("\n" + "="*60)
-        print("INTERPRETACIÓN RÁPIDA:")
+        print(f"{'NOMBRE':<20} | {'RIESGO':<10} | {'CONCLUSIÓN'}")
+        print("-" * 50)
         for index, row in results.iterrows():
-            riesgo = "🔴 ALTO" if row['Probabilidad_Phishing'] > 0.7 else \
-                     "🟡 MEDIO" if row['Probabilidad_Phishing'] > 0.4 else "🟢 BAJO"
+            p = row['Riesgo_Detectado']
+            if p > 80:
+                conclusion = "🔴 CRÍTICO: ¡Va a caer!"
+            elif p > 40:
+                conclusion = "🟡 ALERTA: Posible víctima"
+            else:
+                conclusion = "🟢 SEGURO: Difícil de engañar"
             
-            print(f"📌 {row['Nombre']}: {riesgo} ({row['Probabilidad (%)']})")
+            print(f"{row['Nombre']:<20} | {p:>6}%   | {conclusion}")
             
     except Exception as e:
-        print(f"❌ Error al predecir: {e}")
-        print("💡 Consejo: Verifica que los nombres de las columnas en 'FEATURES_ORDER' coincidan exactamente con tu entrenamiento.")
+        print(f"❌ Error: {e}")
 
 # --- PRUEBA DE SENSIBILIDAD A LA FATIGA ---
 def run_fatigue_sensitivity():
@@ -150,11 +146,11 @@ def run_fatigue_sensitivity():
     
     # Base: Usuario promedio
     base_user = {
-        'Demo_Tamano_Org': 3,
-        'Demo_Rol_Trabajo': 1,
-        'Big5_Apertura': 3.0,
+        'Demo_Tamano_Org': 7,
+        'Demo_Rol_Trabajo': 3,
+        'Big5_Apertura': 5.0,
         'Demo_Horas': 3,
-        'Phish_Riesgo_Percibido': 3.0,
+        'Phish_Riesgo_Percibido': 5.0,
         'Fatiga_Global_Score': 1.0 # Este valor cambiará
     }
     
@@ -176,3 +172,58 @@ def run_fatigue_sensitivity():
 if __name__ == "__main__":
     run_scenarios()
     run_fatigue_sensitivity()
+
+# # 1. Cargar el modelo
+# model = joblib.load("phishing_model.pkl")
+
+# features = [
+#     'Demo_Tamano_Org', 'Demo_Rol_Trabajo', 'Big5_Apertura',
+#     'Demo_Horas', 'Phish_Riesgo_Percibido', 'Fatiga_Global_Score'
+# ]
+
+# print("--- 🕵️ ESCANER DE VULNERABILIDAD ---")
+# print("Probando combinaciones para encontrar qué dispara la alerta...")
+
+# # 2. Definir los rangos posibles basados en lo que me has confirmado
+# # Usamos pasos lógicos para no explotar la memoria, pero cubriendo los extremos
+# rangos = {
+#     'Demo_Tamano_Org': [1, 4, 7],        # Pequeña, Mediana, Gigante
+#     'Demo_Rol_Trabajo': [1, 2, 3, 4],    # Probamos varios roles
+#     'Big5_Apertura': [1.0, 3.0, 5.0],    # Baja, Media, Alta
+#     'Demo_Horas': [1, 3, 5],             # Pocas, Normal, Muchas (10+)
+#     'Phish_Riesgo_Percibido': [1.0, 3.0, 5.0], # Bajo, Medio, Alto
+#     'Fatiga_Global_Score': [1.0, 3.0, 5.0]     # Baja, Media, Alta
+# }
+
+# # 3. Generar todas las combinaciones posibles (Producto Cartesiano)
+# keys, values = zip(*rangos.items())
+# permutations = [dict(zip(keys, v)) for v in itertools.product(*values)]
+# df_simulado = pd.DataFrame(permutations)
+
+# # Asegurar el orden correcto de columnas
+# df_simulado = df_simulado[features]
+
+# # 4. Predecir masivamente
+# probs = model.predict_proba(df_simulado)[:, 1]
+# df_simulado['Probabilidad_Riesgo'] = probs
+
+# # 5. Mostrar los ganadores (El Top 5 de Riesgo)
+# top_riesgo = df_simulado.sort_values(by='Probabilidad_Riesgo', ascending=False).head(5)
+
+# print(f"\n✅ Se analizaron {len(df_simulado)} perfiles simulados.")
+# print("\n🔥 TOP 5 PERFILES MÁS RIESGOSOS DETECTADOS POR EL MODELO:")
+# print("=" * 80)
+# # Formato bonito
+# display_cols = ['Probabilidad_Riesgo'] + features
+# # Convertir a porcentaje para leer mejor
+# top_riesgo_view = top_riesgo.copy()
+# top_riesgo_view['Probabilidad_Riesgo'] = (top_riesgo_view['Probabilidad_Riesgo'] * 100).round(2).astype(str) + '%'
+
+# try:
+#     display(top_riesgo_view[display_cols])
+# except:
+#     print(top_riesgo_view[display_cols].to_string())
+
+# print("\n💡 CONCLUSIÓN:")
+# print("Mira la columna 'Fatiga' y 'Riesgo Percibido' en el Top 1.")
+# print("Esos son los valores EXACTOS que tu modelo odia.")

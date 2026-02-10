@@ -33,7 +33,7 @@ except ImportError:
 # 🚨 AJUSTA ESTO PARA QUE COINCIDA CON LO QUE PUSISTE EN EL NOTEBOOK
 CATALOGO = "phishing"              # Tu catálogo en Databricks
 ESQUEMA = "default"                # Tu esquema
-NOMBRE_MODELO = "Phishing_Detector_Model" # El nombre que definimos en el notebook
+NOMBRE_MODELO = "phishing_detector_model_gradient_boosting" # El nombre que definimos en el notebook
 FULL_MODEL_NAME = f"{CATALOGO}.{ESQUEMA}.{NOMBRE_MODELO}"
 
 ALIAS = "Champion"                 # La etiqueta del ganador
