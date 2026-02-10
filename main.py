@@ -148,7 +148,6 @@ async def analyze_survey(data: SurveyResponses):
         print(f"❌ Error en /analyze: {e}")
         return {"status": "error", "message": str(e)}
 
-# ... (El resto del código dashboard sigue igual) ...
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
     stored_pass = os.getenv("DASHBOARD_PASS")
@@ -167,8 +166,13 @@ async def view_dashboard():
             return f.read()
     return "<h1>Error: dashboard.html no encontrado</h1>"
 
-@app.get("/api/dashboard-stats")
-async def api_dashboard_stats():
+# ⚠️ ESTA ES LA RUTA QUE ARREGLA EL ERROR 404
+@app.get("/dashboard-data")
+async def dashboard_data():
+    """
+    El frontend llama a '/dashboard-data'. 
+    Esta función busca los datos usando analytics.py
+    """
     stats = get_dashboard_stats()
     return stats
 
