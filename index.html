@@ -305,6 +305,29 @@
         <button class="nav-btn" id="btn-next">Siguiente</button>
     </div>
 
+    <div id="result-overlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center;">
+        
+        <div style="background: #1e293b; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; border: 1px solid #334155; position: relative;">
+            
+            <button onclick="document.getElementById('result-overlay').style.display='none'" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.5rem;">&times;</button>
+
+            <h2 id="res-title" style="margin: 0 0 5px 0; font-size: 2rem; font-weight:bold;">Resultados</h2>
+            <p id="res-sub" style="color: #94a3b8; margin-bottom: 20px;">Análisis completado</p>
+
+            <div style="position: relative; width: 150px; height: 75px; margin: 0 auto 20px auto; overflow: hidden;">
+                <div id="gauge-fill" style="width: 100%; height: 100%; background: #3b82f6; border-radius: 150px 150px 0 0; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s ease-out;"></div>
+                <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 60px; background: #1e293b; border-radius: 120px 120px 0 0;"></div>
+                <div id="gauge-text" style="position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; font-weight: bold; font-size: 1.5rem; color: white;">0%</div>
+            </div>
+
+            <div id="res-exp" style="text-align: left; background: #0f172a; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6; font-size: 0.9rem; margin-bottom: 20px; color: #cbd5e1;">
+                Calculando nivel de riesgo...
+            </div>
+
+            <button onclick="location.reload()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600;">Nueva Evaluación</button>
+        </div>
+    </div>
+
 <script>
     function startSurvey() {
         document.getElementById('intro-view').style.display = 'none';
@@ -428,7 +451,7 @@
 
         if (currentStepIndex === surveyConfig.length - 1) {
             btnNext.innerText = "Enviar Evaluación";
-            btnNext.onclick = submitSurvey;
+            btnNext.onclick = submitSurvey; // Aquí llamamos a submitSurvey
             btnNext.style.background = "#10b981";
         } else {
             btnNext.innerText = "Siguiente";
@@ -488,61 +511,50 @@
 
     // --- VISUALIZACIÓN DE RESULTADOS CON GAUGE ---
     function showResultCard(output) {
-        const card = document.getElementById('resultCard');
-        const title = document.getElementById('resultTitle');
-        const sub = document.getElementById('resultSubtitle');
-        const exp = document.getElementById('resultExplanation');
+        const overlay = document.getElementById('result-overlay');
+        const title = document.getElementById('res-title');
+        const sub = document.getElementById('res-sub');
+        const exp = document.getElementById('res-exp');
         const gaugeFill = document.getElementById('gauge-fill');
-        const gaugeText = document.getElementById('gauge-percent');
+        
+        // CORRECCIÓN CRÍTICA: ID correcto del elemento de texto
+        const gaugeText = document.getElementById('gauge-text'); 
 
-        card.style.display = 'block';
-
-        // 1. Obtener probabilidad y riesgo
-        const prob = output.probability || 0; // Valor entre 0.0 y 1.0
+        overlay.style.display = 'flex'; // Usamos flex para centrar
+        
+        const prob = output.probability || 0; 
         const percent = Math.round(prob * 100);
         const risk = output.risk_level || "BAJO";
         
-        // 2. Definir Colores según Umbrales del sistema (0.4 y 0.7)
-        let color = "#4ade80"; // Verde (Bajo)
+        let color = "#4ade80"; // Verde
         let textInfo = "¡Excelente! Tu perfil indica una fuerte cultura de seguridad.";
         
         if(prob > 0.4) { 
-            color = "#facc15"; // Amarillo (Medio)
-            textInfo = "Tu nivel es aceptable, pero existen factores como la fatiga o el exceso de confianza que elevan tu riesgo.";
+            color = "#facc15"; // Amarillo
+            textInfo = "Tu nivel es aceptable, pero existen factores como la fatiga que elevan tu riesgo.";
         }
         if(prob > 0.7) { 
-            color = "#ef4444"; // Rojo (Alto)
-            textInfo = "<strong>Atención:</strong> Tus respuestas indican una alta vulnerabilidad. Es crítico revisar los protocolos de seguridad.";
+            color = "#ef4444"; // Rojo
+            textInfo = "<strong>Atención:</strong> Tus respuestas indican una alta vulnerabilidad. Es crítico revisar los protocolos.";
         }
 
-        // 3. Actualizar Textos
+        // Actualizar UI
         title.innerText = risk;
         title.style.color = color;
-        sub.innerText = `Nivel de Riesgo Detectado`;
         
         exp.innerHTML = textInfo;
         exp.style.borderLeft = `4px solid ${color}`;
 
-        // 4. ANIMAR EL GAUGE
         gaugeText.innerText = `${percent}%`;
         gaugeFill.style.background = color;
         
-        // Calcular rotación: 0% = -180deg (oculto a la izquierda), 100% = 0deg (lleno)
-        // Pero en nuestra CSS simplificada:
-        // top: 100%, transform-origin: center top.
-        // Rotar 0deg = apuntando abajo (invisible en overflow hidden)
-        // Rotar 180deg = apuntando arriba (relleno completo semicirculo)
-        
-        // Ajuste de lógica de rotación para este diseño específico de gauge:
-        // Vamos a usar un truco: el gauge-fill es un rectángulo que gira.
-        // 0%  -> rotate(0deg)  (oculto a la izquierda/abajo)
-        // 50% -> rotate(90deg) (mitad)
-        // 100%-> rotate(180deg)(completo)
-        
+        // Animación del Gauge (De -180deg a 0deg)
+        // 0%  => -180deg (Vacío)
+        // 100% => 0deg   (Lleno)
         setTimeout(() => {
-            const rotation = (percent / 100) * 180; 
+            const rotation = -180 + ((percent / 100) * 180);
             gaugeFill.style.transform = `rotate(${rotation}deg)`;
-        }, 100); // Pequeño delay para que se vea la animación
+        }, 100);
     }
 </script>
 
