@@ -196,7 +196,10 @@
 
                 // --- TAB 1: RESUMEN ---
                 document.getElementById('kpi-total').innerText = data.total_responses;
-                document.getElementById('kpi-high').innerText = data.risk_counts ? data.risk_counts.ALTO : 0;
+                const highRisk = data.risk_counts ? data.risk_counts.ALTO : 0;
+                const mediumRisk = data.risk_counts ? data.risk_counts.MEDIO : 0;
+                const lowRisk = data.risk_counts ? data.risk_counts.BAJO : 0;
+                document.getElementById('kpi-high').innerText = highRisk;
                 document.getElementById('kpi-avg').innerText = data.avg_risk + "%";
 
                 // Dona
@@ -205,11 +208,7 @@
                     data: {
                         labels: ['Bajo', 'Medio', 'Alto'],
                         datasets: [{
-                            data: [
-                                data.risk_counts.BAJO || 0, 
-                                data.risk_counts.MEDIO || 0, 
-                                data.risk_counts.ALTO || 0
-                            ],
+                            data: [lowRisk, mediumRisk, highRisk], // Usamos las variables seguras
                             backgroundColor: ['#10b981', '#facc15', '#ef4444'],
                             borderWidth: 0
                         }]
