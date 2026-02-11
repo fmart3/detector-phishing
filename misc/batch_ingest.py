@@ -16,6 +16,7 @@ os.chdir(project_root)
 import pandas as pd
 from pymongo import MongoClient
 from dotenv import load_dotenv
+import openpyxl
 import time
 
 from utils.scoring import compute_scores
@@ -42,7 +43,6 @@ COLUMN_MAPPING = {
 
 # 2. LISTA NEGRA: Columnas a ELIMINAR/IGNORAR
 # Estas columnas no se guardarán en MongoDB ni se usarán para cálculos
-COLUMNS_TO_IGNORE = ["NE11", "VPH"]
 
 def run_batch_process():
     print(f"🚀 Iniciando procesamiento masivo...")
@@ -64,8 +64,14 @@ def run_batch_process():
         print(f"❌ Error: No encuentro el archivo {INPUT_FILE}")
         return
     
-    # Leemos CSV
-    df = pd.read_csv(INPUT_FILE)
+    print(f"📖 Leyendo archivo Excel: {INPUT_FILE} ...")
+    try:
+        df = pd.read_excel(INPUT_FILE) # <--- CAMBIO AQUÍ
+    except Exception as e:
+        print(f"❌ Error crítico al leer el Excel. Verifica que tengas 'openpyxl' instalado.")
+        print(f"Detalle: {e}")
+        return
+
     print(f"📂 Dataset cargado: {len(df)} filas.")
 
     success_count = 0
@@ -79,10 +85,6 @@ def run_batch_process():
 
             # --- LIMPIEZA Y FILTRADO ---
             for k, v in raw_data.items():
-                
-                # A. Si la columna está en la lista negra, la saltamos (continue)
-                if k in COLUMNS_TO_IGNORE:
-                    continue
                 
                 # B. Mapeo de nombres (si corresponde)
                 new_key = COLUMN_MAPPING.get(k, k)

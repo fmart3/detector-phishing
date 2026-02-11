@@ -64,7 +64,7 @@ def run_scenarios():
         # Org pequeña, pocas horas, PERCIBE EL RIESGO (5.0), poca apertura.
         {
             "Nombre": "🛡️ Usuario Blindado",
-            "Demo_Tamano_Org": 3,       # 100 o menos
+            "Demo_Tamano_Org": 1,       # 100 o menos
             "Demo_Rol_Trabajo": 1,      # Administrativo
             "Big5_Apertura": 1.0,       # Poca curiosidad
             "Demo_Horas": 2,            # 2-5 horas
@@ -77,7 +77,7 @@ def run_scenarios():
         {
             "Nombre": "💣 Víctima Perfecta",
             "Demo_Tamano_Org": 7,       # >50.000
-            "Demo_Rol_Trabajo": 4,      # Rol técnico/específico
+            "Demo_Rol_Trabajo": 3,      # Rol técnico/específico
             "Big5_Apertura": 5.0,       # Muy curioso
             "Demo_Horas": 5,            # >10 horas
             "Phish_Riesgo_Percibido": 1.0, # "Esto no me va a pasar a mí" (Exceso confianza)
@@ -93,7 +93,7 @@ def run_scenarios():
             "Big5_Apertura": 3.0,
             "Demo_Horas": 3,            # 5-8 horas
             "Phish_Riesgo_Percibido": 4.5,
-            "Fatiga_Global_Score": 2.0
+            "Fatiga_Global_Score": 3.0
         },
 
         # CASO 4: EL CURIOSO PELIGROSO
@@ -103,9 +103,9 @@ def run_scenarios():
             "Demo_Tamano_Org": 4,
             "Demo_Rol_Trabajo": 3,
             "Big5_Apertura": 5.0,       # <--- Factor de riesgo
-            "Demo_Horas": 4,
+            "Demo_Horas": 3,
             "Phish_Riesgo_Percibido": 5.0, # Alerta, pero...
-            "Fatiga_Global_Score": 5.0
+            "Fatiga_Global_Score": 3.0
         }
     ]
     
@@ -146,7 +146,7 @@ def run_fatigue_sensitivity():
     
     # Base: Usuario promedio
     base_user = {
-        'Demo_Tamano_Org': 4,
+        'Demo_Tamano_Org': 3,
         'Demo_Rol_Trabajo': 3,
         'Big5_Apertura': 3.0,
         'Demo_Horas': 3,
