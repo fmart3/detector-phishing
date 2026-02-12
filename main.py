@@ -148,13 +148,18 @@ async def analyze_survey(data: SurveyResponses):
         print(f"❌ Error en /analyze: {e}")
         return {"status": "error", "message": str(e)}
 
+import hashlib
+
+# ... (existing imports)
+
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
-    stored_pass = os.getenv("DASHBOARD_PASS")
-    if not stored_pass:
-        return {"valid": False, "error": "Contraseña no configurada en servidor"}
+    stored_hash = os.getenv("DASHBOARD_PASS")
     
-    if data.password == stored_pass:
+    # Hash input password
+    input_hash = hashlib.sha256(data.password.encode()).hexdigest()
+    
+    if input_hash == stored_hash:
         return {"valid": True, "redirect_url": "/dashboard"} 
     else:
         return {"valid": False}
