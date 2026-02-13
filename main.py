@@ -155,14 +155,22 @@ import hashlib
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
     stored_hash = os.getenv("DASHBOARD_PASS")
+    # Limpiamos el hash guardado por si tiene comillas o espacios en el .env
+    if stored_hash:
+        stored_hash = stored_hash.strip().strip('"').strip("'")
     
-    # Hash input password
-    input_hash = hashlib.sha256(data.password.encode()).hexdigest()
+    # Limpiamos la contraseña ingresada por si el usuario incluyó espacios al copiar/pegar
+    entered_password = data.password.strip()
+    input_hash = hashlib.sha256(entered_password.encode()).hexdigest()
+    
+    # Logging para depuración (solo estado, no la contraseña)
+    print(f"🔐 Intento de login al dashboard: {'EXITOSO' if input_hash == stored_hash else 'FALLIDO'}")
     
     if input_hash == stored_hash:
         return {"valid": True, "redirect_url": "/dashboard"} 
     else:
         return {"valid": False}
+
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def view_dashboard():
