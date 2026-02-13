@@ -148,28 +148,29 @@ async def analyze_survey(data: SurveyResponses):
         print(f"❌ Error en /analyze: {e}")
         return {"status": "error", "message": str(e)}
 
-import hashlib
+
 
 # ... (existing imports)
 
 @app.post("/verify-dashboard")
 async def verify_dashboard(data: DashboardAuth):
-    stored_hash = os.getenv("DASHBOARD_PASS")
-    # Limpiamos el hash guardado por si tiene comillas o espacios en el .env
-    if stored_hash:
-        stored_hash = stored_hash.strip().strip('"').strip("'")
+    stored_password = os.getenv("DASHBOARD_PASS")
+    # Limpiamos el password guardado por si tiene comillas o espacios en el .env
+    if stored_password:
+        stored_password = stored_password.strip().strip('"').strip("'")
     
     # Limpiamos la contraseña ingresada por si el usuario incluyó espacios al copiar/pegar
     entered_password = data.password.strip()
-    input_hash = hashlib.sha256(entered_password.encode()).hexdigest()
     
-    # Logging para depuración (solo estado, no la contraseña)
-    print(f"🔐 Intento de login al dashboard: {'EXITOSO' if input_hash == stored_hash else 'FALLIDO'}")
+    # Registro para depuración
+    is_valid = (entered_password == stored_password)
+    print(f"🔐 Intento de login al dashboard: {'EXITOSO' if is_valid else 'FALLIDO'}")
     
-    if input_hash == stored_hash:
+    if is_valid:
         return {"valid": True, "redirect_url": "/dashboard"} 
     else:
         return {"valid": False}
+
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
